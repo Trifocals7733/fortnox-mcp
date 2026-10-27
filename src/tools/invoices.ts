@@ -40,7 +40,7 @@ import {
 interface FortnoxInvoiceRow {
   ArticleNumber?: string;
   Description?: string;
-  DeliveredQuantity?: number;
+  DeliveredQuantity?: number | string;
   Unit?: string;
   Price?: number;
   Discount?: number;
@@ -359,7 +359,8 @@ Returns:
           rows: (invoice.InvoiceRows || []).map((row) => ({
             article_number: row.ArticleNumber || null,
             description: row.Description || null,
-            quantity: row.DeliveredQuantity || 0,
+            // Fortnox returns DeliveredQuantity as a string ("2"), unlike the other row numbers
+            quantity: Number(row.DeliveredQuantity ?? 0) || 0,
             unit: row.Unit || null,
             price: row.Price || 0,
             discount: row.Discount || 0,
