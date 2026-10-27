@@ -146,6 +146,17 @@ npm run clean          # rm -rf dist
 npm run snapshot:tools # rewrite test/tools-baseline.json from the server
 npm run check:tools    # diff the advertised tool surface, exit 1 on drift
 npm run smoke          # live read-only calls against the real Fortnox account
+npm run company        # list/switch the authorised Fortnox company
+```
+
+`npm run company` keeps one token per company under `~/.fortnox-mcp/` and
+switches which one is active — useful for pointing the server at a test
+company without redoing the OAuth flow:
+
+```bash
+npm run company                  # what is active, what is archived
+npm run company -- save 1888108  # archive the active token
+npm run company -- use 1865351   # make an archive active
 ```
 
 There is no test suite and no linter. `npm run build` plus `npm run check:tools` is what "works" means for the code; `npm run smoke` is what "works" means against a real account — it drives a dozen read-only tools over an in-memory MCP client and exits 1 on any failure. The 51-tool `tools/list` output is frozen in `test/tools-baseline.json` so a refactor that drops a tool, an argument or a description shows up as a diff. Neither needs a Fortnox token except `smoke`.
