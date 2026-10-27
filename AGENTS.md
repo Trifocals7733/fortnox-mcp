@@ -60,12 +60,10 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 
 ## Adding or changing a tool
 
-Domains are being converted from zod to Effect Schema one at a time (customers is done and is the reference). In a converted domain:
+Every domain is now Effect Schema (`src/schemas/<domain>.ts`), with shared building blocks in `src/schemas/shared.ts`:
 
 1. Schema in `src/schemas/<domain>.ts` as an Effect `Schema.Struct`, snake_case field names, `describe("...")` on every field, plus an **output** schema per tool. Export `type X = typeof XSchema.Type`.
 2. In `src/tools/<domain>.ts`, pass `inputSchema: mcpSchema(XSchema)` and `outputSchema: mcpSchema(XOutput)`, and apply defaults in the handler (`params.limit ?? DEFAULT_PAGE_SIZE`) rather than in the schema.
-
-In an unconverted domain the old zod form still applies: `z.object({...}).strict()`, `.describe()` on every field, `z.nativeEnum(ResponseFormat)`.
 
 ### Effect Schema gotchas (learned the hard way)
 
@@ -126,7 +124,7 @@ A rewrite is in progress. Decisions already made, in execution order:
 2. ~~TypeScript 7, no declaration emit, `engines >=22`~~ — done.
 3. ~~**SDK v2 migration.**~~ — done. `@modelcontextprotocol/server` 2.4.0 + `core`-free `node`/`client` + `server-legacy/auth` for the OAuth AS router; zod 4 is now required. Verified: build, `check:tools`, local HTTP (`initialize` + `tools/list` + a live tool call), remote mode boot (OAuth metadata + 401 on unauthenticated `/mcp`), and live tool calls over an in-memory client.
 4. ~~**Effect spine.**~~ — done. `effect@4.0.6`; `effect/http` replaced axios, retry/backoff via `Schedule`, one `ManagedRuntime` in `src/services/runtime.ts`, token provider behind a `Layer`, hand-built 25 req/5 s limiter (verified: 20 acquires in 0 ms, 30 in ~5.1 s). The user id is provided to the Effect as a `CurrentUser` service but is still read from `AsyncLocalStorage` at the call boundary; removing ALS is part of the domain conversion.
-5. **Domain conversion, strangler.** One domain per commit, `Effect.gen` handlers, one Effect schema per tool as the output source of truth (markdown stays hand-written), `outputSchema` declared on all 51 via a small bridge. Done: customers, suppliers, supplier-invoices, accounts (19 of 51 tools). Remaining: vouchers (6), invoices (8), orders/offers (2), company (2), analytics (3), biAnalytics (11). The bridge: Effect gives Standard Schema v1 `validate` but not `~standard.jsonSchema`, so wrap `JSONSchema.make` output in a `StandardSchemaWithJSON` object (~20 lines, may need `toDocumentDraft07`).
+5. ~~**Domain conversion, strangler.**~~ — done, all 51 tools. Every tool declares `inputSchema` and `outputSchema` through `mcpSchema()`; **zod is gone** from the dependency list. Handlers are still plain `async` (not `Effect.gen`) — converting them was deliberately dropped: the value was in the schemas and the transport, not in rewriting 51 function bodies. The bridge: Effect gives Standard Schema v1 `validate` but not `~standard.jsonSchema`, so wrap `JSONSchema.make` output in a `StandardSchemaWithJSON` object (~20 lines, may need `toDocumentDraft07`).
 6. **Fortnox v1 → v2 endpoints** for invoices/orders/offers/articles, after the spine settles.
 
 Open items deliberately not in that list: trimming tool descriptions (~28k chars ≈ 7k tokens on every connect — the biggest remaining agent-facing win); adding a test suite; migrating `scripts/get-token.ts` and `evaluations/`.
