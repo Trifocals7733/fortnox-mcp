@@ -1,5 +1,5 @@
-import { Schema } from "effect";
 import type { StandardSchemaWithJSON } from "@modelcontextprotocol/server";
+import { Schema } from "effect";
 
 /**
  * Bridges an Effect schema to what the MCP SDK advertises and validates with.

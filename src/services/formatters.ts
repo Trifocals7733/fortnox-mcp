@@ -1,4 +1,4 @@
-import { ResponseFormat, CHARACTER_LIMIT } from "../constants.js";
+import { CHARACTER_LIMIT } from "../constants.js";
 
 /**
  * Format a monetary amount with currency
@@ -34,7 +34,7 @@ export function formatBoolean(value: boolean | undefined): string {
  */
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength - 3) + "...";
+  return `${text.substring(0, maxLength - 3)}...`;
 }
 
 /**

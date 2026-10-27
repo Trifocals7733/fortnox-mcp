@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from "async_hooks";
-import { RequestContext } from "./types.js";
+import type { RequestContext } from "./types.js";
 
 // Passes user context through call stack
 export const requestContext = new AsyncLocalStorage<RequestContext>();

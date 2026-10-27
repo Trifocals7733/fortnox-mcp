@@ -1,14 +1,14 @@
-import express, { Express, Request, Response, NextFunction } from "express";
-import { mcpAuthRouter, requireBearerAuth } from "@modelcontextprotocol/server-legacy/auth";
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
+import { mcpAuthRouter, requireBearerAuth } from "@modelcontextprotocol/server-legacy/auth";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
+import { runWithContext } from "../auth/context.js";
 import {
   FortnoxProxyOAuthProvider,
   getUserIdFromAuth,
   initializeTokenProvider
 } from "../auth/index.js";
-import { runWithContext } from "../auth/context.js";
+import type { ITokenStorage } from "../auth/storage/types.js";
 import { createMcpServer } from "./mcp.js";
-import { ITokenStorage } from "../auth/storage/types.js";
 
 export interface RemoteServerOptions {
   serverUrl: string;

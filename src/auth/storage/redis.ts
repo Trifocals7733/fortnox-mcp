@@ -1,5 +1,5 @@
-import { TokenInfo } from "../types.js";
-import { ITokenStorage, StoredTokenInfo } from "./types.js";
+import type { TokenInfo } from "../types.js";
+import type { ITokenStorage, StoredTokenInfo } from "./types.js";
 
 // Token TTL: 90 days in seconds
 const TOKEN_TTL_SECONDS = 90 * 24 * 60 * 60;
@@ -37,7 +37,7 @@ export class UpstashRedisTokenStorage implements ITokenStorage {
         }
 
         this.redis = new Redis({ url, token });
-      } catch (error) {
+      } catch (_error) {
         throw new Error(
           "Upstash Redis not available. Install @upstash/redis and configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN."
         );

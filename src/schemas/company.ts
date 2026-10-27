@@ -1,5 +1,4 @@
 import { Schema } from "effect";
-import { describe } from "../services/mcpSchema.js";
 import { NullableString, ResponseFormatSchema } from "./shared.js";
 
 /**

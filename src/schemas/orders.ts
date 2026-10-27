@@ -5,11 +5,10 @@ import {
   DateString,
   ListPaginationInput,
   NullableString,
-  PaginationFields,
-  ResponseFormatSchema,
-  ShortText,
   optional,
-  optionalValue
+  optionalValue,
+  ResponseFormatSchema,
+  ShortText
 } from "./shared.js";
 
 /**
@@ -112,7 +111,7 @@ const OfferListItemSchema = Schema.Struct({
   order_reference: NullableString
 });
 
-const FetchAllFields = {
+const _FetchAllFields = {
   total: Schema.Finite,
   count: Schema.Finite,
   fetched_all: Schema.Boolean,

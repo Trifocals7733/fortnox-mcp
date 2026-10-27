@@ -1,4 +1,4 @@
-import { TokenInfo } from "../types.js";
+import type { TokenInfo } from "../types.js";
 
 /**
  * Interface for token storage backends

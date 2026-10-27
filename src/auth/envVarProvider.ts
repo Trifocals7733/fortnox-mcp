@@ -1,8 +1,8 @@
 import { FORTNOX_OAUTH_URL, TOKEN_REFRESH_BUFFER_MS } from "../constants.js";
-import { ITokenProvider, TokenInfo, AuthRequiredError } from "./types.js";
-import { getFortnoxCredentials } from "./credentials.js";
-import { readPersistedTokens, persistTokens } from "./fileTokenStore.js";
 import { postTokenRequest, TokenRequestError } from "../services/oauthToken.js";
+import { getFortnoxCredentials } from "./credentials.js";
+import { persistTokens, readPersistedTokens } from "./fileTokenStore.js";
+import { AuthRequiredError, type ITokenProvider, type TokenInfo } from "./types.js";
 
 interface TokenResponse {
   access_token: string;

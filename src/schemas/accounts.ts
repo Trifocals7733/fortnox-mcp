@@ -3,10 +3,10 @@ import { describe } from "../services/mcpSchema.js";
 import {
   ListPaginationInput,
   MutationResult,
+  optional,
   PaginationFields,
   ResponseFormatSchema,
-  ShortText,
-  optional
+  ShortText
 } from "./shared.js";
 
 /**

@@ -1,20 +1,20 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fortnoxRequest } from "../services/api.js";
+import type { McpServer } from "@modelcontextprotocol/server";
 import { ResponseFormat } from "../constants.js";
-import { mcpSchema } from "../services/mcpSchema.js";
 import {
-  buildToolResponse,
+  type CompanyInfoInput,
+  CompanyInfoOutput,
+  CompanyInfoSchema,
+  type ListFinancialYearsInput,
+  ListFinancialYearsOutput,
+  ListFinancialYearsSchema
+} from "../schemas/company.js";
+import { fortnoxRequest } from "../services/api.js";
+import {
   buildErrorResponse,
+  buildToolResponse,
   formatDetailMarkdown
 } from "../services/formatters.js";
-import {
-  CompanyInfoSchema,
-  ListFinancialYearsSchema,
-  CompanyInfoOutput,
-  ListFinancialYearsOutput,
-  type CompanyInfoInput,
-  type ListFinancialYearsInput
-} from "../schemas/company.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // API response types
 interface FortnoxCompanyInfo {

@@ -1,5 +1,5 @@
-import { TokenInfo } from "../types.js";
-import { ITokenStorage, StoredTokenInfo } from "./types.js";
+import type { TokenInfo } from "../types.js";
+import type { ITokenStorage, StoredTokenInfo } from "./types.js";
 
 /**
  * In-memory token storage

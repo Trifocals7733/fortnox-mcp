@@ -1,10 +1,10 @@
+export { getMemoryStorage, MemoryTokenStorage } from "./memory.js";
+export { getUpstashRedisStorage, UpstashRedisTokenStorage } from "./redis.js";
 export * from "./types.js";
-export { MemoryTokenStorage, getMemoryStorage } from "./memory.js";
-export { UpstashRedisTokenStorage, getUpstashRedisStorage } from "./redis.js";
 
-import { ITokenStorage } from "./types.js";
 import { MemoryTokenStorage } from "./memory.js";
 import { UpstashRedisTokenStorage } from "./redis.js";
+import type { ITokenStorage } from "./types.js";
 
 export type StorageType = "memory" | "upstash-redis";
 
@@ -12,7 +12,6 @@ export function createTokenStorage(type: StorageType): ITokenStorage {
   switch (type) {
     case "upstash-redis":
       return new UpstashRedisTokenStorage();
-    case "memory":
     default:
       return new MemoryTokenStorage();
   }

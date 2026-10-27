@@ -1,14 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/server";
+import { registerAccountTools } from "../tools/accounts.js";
+import { registerAnalyticsTools } from "../tools/analytics.js";
+import { registerBIAnalyticsTools } from "../tools/biAnalytics.js";
+import { registerCompanyTools } from "../tools/company.js";
 import { registerCustomerTools } from "../tools/customers.js";
 import { registerInvoiceTools } from "../tools/invoices.js";
-import { registerSupplierTools } from "../tools/suppliers.js";
-import { registerSupplierInvoiceTools } from "../tools/supplierInvoices.js";
-import { registerAccountTools } from "../tools/accounts.js";
-import { registerVoucherTools } from "../tools/vouchers.js";
-import { registerCompanyTools } from "../tools/company.js";
-import { registerAnalyticsTools } from "../tools/analytics.js";
 import { registerOrderTools } from "../tools/orders.js";
-import { registerBIAnalyticsTools } from "../tools/biAnalytics.js";
+import { registerSupplierInvoiceTools } from "../tools/supplierInvoices.js";
+import { registerSupplierTools } from "../tools/suppliers.js";
+import { registerVoucherTools } from "../tools/vouchers.js";
 
 /**
  * The one place tools are registered. Every transport (stdio, local HTTP,

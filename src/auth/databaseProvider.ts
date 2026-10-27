@@ -1,8 +1,8 @@
 import { FORTNOX_OAUTH_URL, TOKEN_REFRESH_BUFFER_MS } from "../constants.js";
-import { ITokenProvider, TokenInfo, AuthRequiredError } from "./types.js";
-import { ITokenStorage } from "./storage/types.js";
-import { getFortnoxCredentials } from "./credentials.js";
 import { postTokenRequest, TokenRequestError } from "../services/oauthToken.js";
+import { getFortnoxCredentials } from "./credentials.js";
+import type { ITokenStorage } from "./storage/types.js";
+import { AuthRequiredError, type ITokenProvider, type TokenInfo } from "./types.js";
 
 interface TokenPayload {
   access_token: string;
@@ -58,7 +58,7 @@ export class DatabaseTokenProvider implements ITokenProvider {
     return !!userId;
   }
 
-  getTokenInfo(userId?: string): TokenInfo | null {
+  getTokenInfo(_userId?: string): TokenInfo | null {
     // For async storage, return null (caller should use async methods)
     return null;
   }

@@ -1,24 +1,24 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fetchAllPages } from "../services/api.js";
-import { ResponseFormat, FORTNOX_PATHS } from "../constants.js";
-import { buildToolResponse, buildErrorResponse, formatMoney } from "../services/formatters.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { FORTNOX_PATHS, ResponseFormat } from "../constants.js";
 import {
-  periodToDateRange,
-  getPeriodDescription,
-  getAgeBucket,
-  type AgeBucket
-} from "../services/dateHelpers.js";
-import {
-  InvoiceSummarySchema,
-  TopCustomersSchema,
-  UnpaidReportSchema,
-  InvoiceSummaryOutput,
-  TopCustomersOutput,
-  UnpaidReportOutput,
   type InvoiceSummaryInput,
+  InvoiceSummaryOutput,
+  InvoiceSummarySchema,
   type TopCustomersInput,
-  type UnpaidReportInput
+  TopCustomersOutput,
+  TopCustomersSchema,
+  type UnpaidReportInput,
+  UnpaidReportOutput,
+  UnpaidReportSchema
 } from "../schemas/analytics.js";
+import { fetchAllPages } from "../services/api.js";
+import {
+  type AgeBucket,
+  getAgeBucket,
+  getPeriodDescription,
+  periodToDateRange
+} from "../services/dateHelpers.js";
+import { buildErrorResponse, buildToolResponse, formatMoney } from "../services/formatters.js";
 import { mcpSchema } from "../services/mcpSchema.js";
 
 // Reuse invoice types from invoices.ts

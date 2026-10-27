@@ -26,14 +26,12 @@
 
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
-import { McpServer } from "@modelcontextprotocol/server";
 import express from "express";
-
-import { loadConfig, validateEnvironment, logConfig } from "./config.js";
 import { getTokenProvider } from "./auth/index.js";
 import { getStorageFromEnv } from "./auth/storage/index.js";
-import { runRemoteServer } from "./server/remote.js";
+import { loadConfig, logConfig, validateEnvironment } from "./config.js";
 import { createMcpServer } from "./server/mcp.js";
+import { runRemoteServer } from "./server/remote.js";
 import { closeRuntime } from "./services/runtime.js";
 
 async function runStdio(): Promise<void> {

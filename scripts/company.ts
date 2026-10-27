@@ -11,7 +11,7 @@
  * Archives are the same JSON under tokens.<databaseNumber>.json.
  */
 
-import { copyFileSync, existsSync, readFileSync, readdirSync } from "node:fs";
+import { copyFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 

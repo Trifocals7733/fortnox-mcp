@@ -87,7 +87,7 @@ async function main(): Promise<void> {
 
   if (!check) {
     mkdirSync("test", { recursive: true });
-    writeFileSync(BASELINE_PATH, JSON.stringify(current, null, 2) + "\n");
+    writeFileSync(BASELINE_PATH, `${JSON.stringify(current, null, 2)}\n`);
     console.log(`Wrote ${current.length} tools to ${BASELINE_PATH}`);
     return;
   }

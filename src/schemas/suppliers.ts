@@ -5,10 +5,10 @@ import {
   ListPaginationInput,
   MutationResult,
   NullableString,
+  optional,
   PaginationFields,
   ResponseFormatSchema,
-  ShortText,
-  optional
+  ShortText
 } from "./shared.js";
 
 /**

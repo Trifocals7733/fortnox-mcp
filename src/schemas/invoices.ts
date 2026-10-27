@@ -6,11 +6,10 @@ import {
   ListPaginationInput,
   MutationResult,
   NullableString,
-  PaginationFields,
-  ResponseFormatSchema,
-  ShortText,
   optional,
-  optionalValue
+  optionalValue,
+  ResponseFormatSchema,
+  ShortText
 } from "./shared.js";
 
 /**
@@ -183,7 +182,7 @@ export type SendInvoiceEmailInput = typeof SendInvoiceEmailSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 
-const FetchAllFields = {
+const _FetchAllFields = {
   total: Schema.Finite,
   count: Schema.Finite,
   fetched_all: Schema.Boolean,

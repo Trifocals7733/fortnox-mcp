@@ -2,11 +2,11 @@ import { Duration, Effect, Schedule, Schema } from "effect";
 import { HttpClient, HttpClientRequest, HttpIncomingMessage } from "effect/http";
 import { getCurrentUserId } from "../auth/context.js";
 import {
-  FORTNOX_API_BASE_URL,
-  MAX_FETCH_ALL_RESULTS,
-  MAX_FETCH_ALL_PAGES,
+  FETCH_ALL_DELAY_MS,
   FETCH_ALL_PAGE_SIZE,
-  FETCH_ALL_DELAY_MS
+  FORTNOX_API_BASE_URL,
+  MAX_FETCH_ALL_PAGES,
+  MAX_FETCH_ALL_RESULTS
 } from "../constants.js";
 import { RateLimiter } from "./rateLimiter.js";
 import { getRuntime } from "./runtime.js";

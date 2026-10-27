@@ -1,36 +1,36 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat, FETCH_ALL_DELAY_MS, DEFAULT_PAGE_SIZE } from "../constants.js";
-import { mcpSchema } from "../services/mcpSchema.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { DEFAULT_PAGE_SIZE, FETCH_ALL_DELAY_MS, ResponseFormat } from "../constants.js";
 import {
-  buildToolResponse,
+  type AccountActivityInput,
+  AccountActivityOutput,
+  AccountActivitySchema,
+  type CreateVoucherInput,
+  CreateVoucherOutput,
+  CreateVoucherSchema,
+  type GetVoucherInput,
+  GetVoucherSchema,
+  type ListVoucherSeriesInput,
+  ListVoucherSeriesOutput,
+  ListVoucherSeriesSchema,
+  type ListVouchersInput,
+  ListVouchersOutput,
+  ListVouchersSchema,
+  type SearchVouchersInput,
+  SearchVouchersOutput,
+  SearchVouchersSchema,
+  VoucherDetailSchema
+} from "../schemas/vouchers.js";
+import { fetchAllPages, fortnoxRequest } from "../services/api.js";
+import { getPeriodDescription, periodToDateRange } from "../services/dateHelpers.js";
+import {
   buildErrorResponse,
-  formatMoney,
+  buildPaginationMeta,
+  buildToolResponse,
   formatDisplayDate,
   formatListMarkdown,
-  buildPaginationMeta
+  formatMoney
 } from "../services/formatters.js";
-import { periodToDateRange, getPeriodDescription } from "../services/dateHelpers.js";
-import {
-  ListVouchersSchema,
-  GetVoucherSchema,
-  CreateVoucherSchema,
-  ListVoucherSeriesSchema,
-  AccountActivitySchema,
-  SearchVouchersSchema,
-  type ListVouchersInput,
-  type GetVoucherInput,
-  type CreateVoucherInput,
-  type ListVoucherSeriesInput,
-  type AccountActivityInput,
-  type SearchVouchersInput,
-  ListVouchersOutput,
-  VoucherDetailSchema,
-  CreateVoucherOutput,
-  ListVoucherSeriesOutput,
-  AccountActivityOutput,
-  SearchVouchersOutput
-} from "../schemas/vouchers.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // API response types
 interface FortnoxVoucherRow {
@@ -183,7 +183,7 @@ export function registerVoucherTools(server: McpServer): void {
     },
     async (params: GetVoucherInput) => {
       try {
-        let endpoint = `/3/vouchers/${encodeURIComponent(params.voucher_series)}/${params.voucher_number}`;
+        const endpoint = `/3/vouchers/${encodeURIComponent(params.voucher_series)}/${params.voucher_number}`;
         const queryParams: Record<string, string | number | boolean | undefined> = {};
 
         if (params.financial_year) {
@@ -429,7 +429,7 @@ Returns:
           accountFilter.add(params.account_number);
         }
         if (params.account_numbers) {
-          params.account_numbers.forEach((n) => accountFilter.add(n));
+          for (const n of params.account_numbers) accountFilter.add(n);
         }
         let accountRangeFrom: number | undefined;
         let accountRangeTo: number | undefined;
@@ -530,7 +530,7 @@ Returns:
 
           // Process results
           for (const voucher of details) {
-            if (!voucher || !voucher.VoucherRows) continue;
+            if (!voucher?.VoucherRows) continue;
 
             for (const row of voucher.VoucherRows) {
               if (accountMatches(row.Account)) {

@@ -15,7 +15,6 @@
 
 import http from "http";
 import { URL } from "url";
-import readline from "readline";
 import { persistTokens } from "../src/auth/fileTokenStore.js";
 
 function requireEnv(name: string): string {

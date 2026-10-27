@@ -1,31 +1,30 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fortnoxRequest } from "../services/api.js";
-import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
-import { mcpSchema } from "../services/mcpSchema.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { DEFAULT_PAGE_SIZE, ResponseFormat } from "../constants.js";
 import {
-  buildToolResponse,
-  buildErrorResponse,
-  formatBoolean,
-  formatListMarkdown,
-  formatDetailMarkdown,
-  buildPaginationMeta
-} from "../services/formatters.js";
-import {
-  ListAccountsSchema,
-  GetAccountSchema,
-  CreateAccountSchema,
-  UpdateAccountSchema,
-  DeleteAccountSchema,
-  type ListAccountsInput,
-  type GetAccountInput,
-  type CreateAccountInput,
-  type UpdateAccountInput,
-  type DeleteAccountInput,
-  ListAccountsOutput,
   AccountDetailSchema,
   AccountMutationOutput,
-  DeleteAccountOutput
+  type CreateAccountInput,
+  CreateAccountSchema,
+  type DeleteAccountInput,
+  DeleteAccountOutput,
+  DeleteAccountSchema,
+  type GetAccountInput,
+  GetAccountSchema,
+  type ListAccountsInput,
+  ListAccountsOutput,
+  ListAccountsSchema,
+  type UpdateAccountInput,
+  UpdateAccountSchema
 } from "../schemas/accounts.js";
+import { fortnoxRequest } from "../services/api.js";
+import {
+  buildErrorResponse,
+  buildPaginationMeta,
+  buildToolResponse,
+  formatDetailMarkdown,
+  formatListMarkdown
+} from "../services/formatters.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // API response types
 interface FortnoxAccount {

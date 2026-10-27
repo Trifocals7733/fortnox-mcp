@@ -1,20 +1,20 @@
-import { Response } from "express";
-import * as jose from "jose";
-import crypto from "crypto";
-import {
+import type {
+  AuthInfo,
   OAuthClientInformationFull,
-  OAuthTokens,
   OAuthTokenRevocationRequest,
-  AuthInfo
+  OAuthTokens
 } from "@modelcontextprotocol/server";
-import {
-  OAuthServerProvider,
+import type {
   AuthorizationParams,
-  OAuthRegisteredClientsStore
+  OAuthRegisteredClientsStore,
+  OAuthServerProvider
 } from "@modelcontextprotocol/server-legacy/auth";
-import { ITokenStorage } from "./storage/types.js";
-import { DatabaseTokenProvider } from "./databaseProvider.js";
+import crypto from "crypto";
+import type { Response } from "express";
+import * as jose from "jose";
 import { FORTNOX_SCOPES } from "./credentials.js";
+import { DatabaseTokenProvider } from "./databaseProvider.js";
+import type { ITokenStorage } from "./storage/types.js";
 
 // JWT configuration
 const JWT_ALGORITHM = "HS256";

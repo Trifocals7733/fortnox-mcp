@@ -1,74 +1,70 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fetchAllPages } from "../services/api.js";
-import { ResponseFormat, FORTNOX_PATHS } from "../constants.js";
-import { mcpSchema } from "../services/mcpSchema.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { FORTNOX_PATHS, ResponseFormat } from "../constants.js";
 import {
-  buildToolResponse,
-  buildErrorResponse,
-  formatMoney,
-  formatTrend,
-  formatCashFlowTable,
-  formatFunnelVisualization,
-  formatComparisonTableHeader,
-  formatComparisonRow,
-  formatMargin
-} from "../services/formatters.js";
-import {
-  periodToDateRange,
-  getPeriodDescription,
-  getPreviousPeriod,
-  comparePeriods,
-  getLastNYears,
-  getFutureDate,
-  getTodayString,
-  isDueDateInRange,
-  type DatePeriod
-} from "../services/dateHelpers.js";
+  type CashFlowForecastInput,
+  CashFlowForecastOutput,
+  CashFlowForecastSchema,
+  type CostCenterAnalysisInput,
+  CostCenterAnalysisOutput,
+  CostCenterAnalysisSchema,
+  type CustomerGrowthInput,
+  CustomerGrowthOutput,
+  CustomerGrowthSchema,
+  type ExpenseAnalysisInput,
+  ExpenseAnalysisOutput,
+  ExpenseAnalysisSchema,
+  type GrossMarginTrendInput,
+  GrossMarginTrendOutput,
+  GrossMarginTrendSchema,
+  type OrderPipelineInput,
+  OrderPipelineOutput,
+  OrderPipelineSchema,
+  type PeriodComparisonInput,
+  PeriodComparisonOutput,
+  PeriodComparisonSchema,
+  type ProductPerformanceInput,
+  ProductPerformanceOutput,
+  ProductPerformanceSchema,
+  type ProjectProfitabilityInput,
+  ProjectProfitabilityOutput,
+  ProjectProfitabilitySchema,
+  type SalesFunnelInput,
+  SalesFunnelOutput,
+  SalesFunnelSchema,
+  type YearlyComparisonInput,
+  YearlyComparisonOutput,
+  YearlyComparisonSchema
+} from "../schemas/biAnalytics.js";
 import {
   aggregateByDimension,
-  groupByTimePeriod,
   calculateGrowth,
-  sumBy,
   countUnique,
+  type GrowthResult,
   generateTimeBucketKeys,
-  getTimeBucketKey,
-  type GrowthResult
+  groupByTimePeriod,
+  sumBy
 } from "../services/aggregationHelpers.js";
+import { fetchAllPages } from "../services/api.js";
 import {
-  CashFlowForecastSchema,
-  OrderPipelineSchema,
-  SalesFunnelSchema,
-  ProductPerformanceSchema,
-  PeriodComparisonSchema,
-  CustomerGrowthSchema,
-  ProjectProfitabilitySchema,
-  CostCenterAnalysisSchema,
-  ExpenseAnalysisSchema,
-  YearlyComparisonSchema,
-  GrossMarginTrendSchema,
-  type CashFlowForecastInput,
-  type OrderPipelineInput,
-  type SalesFunnelInput,
-  type ProductPerformanceInput,
-  type PeriodComparisonInput,
-  type CustomerGrowthInput,
-  type ProjectProfitabilityInput,
-  type CostCenterAnalysisInput,
-  type ExpenseAnalysisInput,
-  type YearlyComparisonInput,
-  type GrossMarginTrendInput,
-  CashFlowForecastOutput,
-  OrderPipelineOutput,
-  SalesFunnelOutput,
-  ProductPerformanceOutput,
-  PeriodComparisonOutput,
-  CustomerGrowthOutput,
-  ProjectProfitabilityOutput,
-  CostCenterAnalysisOutput,
-  ExpenseAnalysisOutput,
-  YearlyComparisonOutput,
-  GrossMarginTrendOutput
-} from "../schemas/biAnalytics.js";
+  comparePeriods,
+  getFutureDate,
+  getLastNYears,
+  getPeriodDescription,
+  getTodayString,
+  isDueDateInRange,
+  periodToDateRange
+} from "../services/dateHelpers.js";
+import {
+  buildErrorResponse,
+  buildToolResponse,
+  formatCashFlowTable,
+  formatComparisonRow,
+  formatComparisonTableHeader,
+  formatFunnelVisualization,
+  formatMoney,
+  formatTrend
+} from "../services/formatters.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // Shared type interfaces
 interface FortnoxInvoiceListItem {
@@ -155,25 +151,6 @@ interface OfferListResponse {
   };
 }
 
-interface FortnoxInvoiceDetail {
-  DocumentNumber: string;
-  CustomerNumber: string;
-  CustomerName?: string;
-  InvoiceDate?: string;
-  Total?: number;
-  InvoiceRows?: Array<{
-    ArticleNumber?: string;
-    Description?: string;
-    DeliveredQuantity?: number;
-    Price?: number;
-    Total?: number;
-  }>;
-}
-
-interface InvoiceDetailResponse {
-  Invoice: FortnoxInvoiceDetail;
-}
-
 interface FortnoxProject {
   ProjectNumber: string;
   Description?: string;
@@ -197,31 +174,6 @@ interface FortnoxCostCenter {
 
 interface CostCenterListResponse {
   CostCenters: FortnoxCostCenter[];
-  MetaInformation?: {
-    "@TotalResources": number;
-  };
-}
-
-interface FortnoxVoucherRow {
-  Account: number;
-  Debit?: number;
-  Credit?: number;
-  Description?: string;
-  Project?: string;
-  CostCenter?: string;
-}
-
-interface FortnoxVoucher {
-  VoucherNumber: number;
-  VoucherSeries: string;
-  Year: number;
-  Description?: string;
-  TransactionDate?: string;
-  VoucherRows?: FortnoxVoucherRow[];
-}
-
-interface VoucherListResponse {
-  Vouchers: FortnoxVoucher[];
   MetaInformation?: {
     "@TotalResources": number;
   };
@@ -516,7 +468,6 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           case "month":
             groups = groupByTimePeriod(orders, (o) => o.OrderDate, "month");
             break;
-          case "status":
           default:
             groups = aggregateByDimension(orders, (o) => getStatus(o));
             break;
@@ -1513,8 +1464,8 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           { class: "7xxx", name: "Depreciation", amount: 0 },
           { class: "8xxx", name: "Financial Items", amount: 0 }
         ].filter((c) => {
-          const classStart = parseInt(c.class.replace("xxx", "000"));
-          const classEnd = parseInt(c.class.replace("xxx", "999"));
+          const classStart = parseInt(c.class.replace("xxx", "000"), 10);
+          const classEnd = parseInt(c.class.replace("xxx", "999"), 10);
           return (
             classStart <= (params.account_range_to ?? 9999) &&
             classEnd >= (params.account_range_from ?? 4000)

@@ -256,7 +256,7 @@ export function generateTimeBucketKeys(
   const start = new Date(from_date);
   const end = new Date(to_date);
 
-  let current = new Date(start);
+  const current = new Date(start);
 
   while (current <= end) {
     keys.push(getTimeBucketKey(formatDateString(current), bucket));

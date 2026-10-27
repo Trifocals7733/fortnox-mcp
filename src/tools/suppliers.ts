@@ -1,30 +1,30 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fortnoxRequest } from "../services/api.js";
-import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
-import { mcpSchema } from "../services/mcpSchema.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { DEFAULT_PAGE_SIZE, ResponseFormat } from "../constants.js";
 import {
-  buildToolResponse,
-  buildErrorResponse,
-  formatListMarkdown,
-  formatDetailMarkdown,
-  buildPaginationMeta
-} from "../services/formatters.js";
-import {
-  ListSuppliersSchema,
-  GetSupplierSchema,
-  CreateSupplierSchema,
-  UpdateSupplierSchema,
-  DeleteSupplierSchema,
-  type ListSuppliersInput,
-  type GetSupplierInput,
   type CreateSupplierInput,
-  type UpdateSupplierInput,
+  CreateSupplierSchema,
   type DeleteSupplierInput,
+  DeleteSupplierOutput,
+  DeleteSupplierSchema,
+  type GetSupplierInput,
+  GetSupplierSchema,
+  type ListSuppliersInput,
   ListSuppliersOutput,
+  ListSuppliersSchema,
   SupplierDetailSchema,
   SupplierMutationOutput,
-  DeleteSupplierOutput
+  type UpdateSupplierInput,
+  UpdateSupplierSchema
 } from "../schemas/suppliers.js";
+import { fortnoxRequest } from "../services/api.js";
+import {
+  buildErrorResponse,
+  buildPaginationMeta,
+  buildToolResponse,
+  formatDetailMarkdown,
+  formatListMarkdown
+} from "../services/formatters.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // API response types
 interface FortnoxSupplier {

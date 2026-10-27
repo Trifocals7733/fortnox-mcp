@@ -1,40 +1,38 @@
-import { McpServer } from "@modelcontextprotocol/server";
-import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat, DEFAULT_PAGE_SIZE, FORTNOX_PATHS } from "../constants.js";
-import { mcpSchema } from "../services/mcpSchema.js";
+import type { McpServer } from "@modelcontextprotocol/server";
+import { DEFAULT_PAGE_SIZE, FORTNOX_PATHS, ResponseFormat } from "../constants.js";
 import {
-  buildToolResponse,
-  buildErrorResponse,
-  formatMoney,
-  formatDisplayDate,
-  formatBoolean,
-  formatListMarkdown,
-  formatDetailMarkdown,
-  buildPaginationMeta
-} from "../services/formatters.js";
-import { periodToDateRange, getPeriodDescription } from "../services/dateHelpers.js";
-import {
-  ListInvoicesSchema,
-  GetInvoiceSchema,
-  CreateInvoiceSchema,
-  UpdateInvoiceSchema,
-  InvoiceActionSchema,
-  SendInvoiceEmailSchema,
-  type ListInvoicesInput,
-  type GetInvoiceInput,
-  type CreateInvoiceInput,
-  type UpdateInvoiceInput,
-  type InvoiceActionInput,
-  type SendInvoiceEmailInput,
-  ListInvoicesOutput,
-  InvoiceDetailSchema,
-  CreateInvoiceOutput,
-  UpdateInvoiceOutput,
   BookkeepInvoiceOutput,
   CancelInvoiceOutput,
+  type CreateInvoiceInput,
+  CreateInvoiceOutput,
+  CreateInvoiceSchema,
   CreditInvoiceOutput,
-  SendInvoiceEmailOutput
+  type GetInvoiceInput,
+  GetInvoiceSchema,
+  type InvoiceActionInput,
+  InvoiceActionSchema,
+  InvoiceDetailSchema,
+  type ListInvoicesInput,
+  ListInvoicesOutput,
+  ListInvoicesSchema,
+  type SendInvoiceEmailInput,
+  SendInvoiceEmailOutput,
+  SendInvoiceEmailSchema,
+  type UpdateInvoiceInput,
+  UpdateInvoiceOutput,
+  UpdateInvoiceSchema
 } from "../schemas/invoices.js";
+import { fetchAllPages, fortnoxRequest } from "../services/api.js";
+import { getPeriodDescription, periodToDateRange } from "../services/dateHelpers.js";
+import {
+  buildErrorResponse,
+  buildPaginationMeta,
+  buildToolResponse,
+  formatDisplayDate,
+  formatListMarkdown,
+  formatMoney
+} from "../services/formatters.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // API response types
 interface FortnoxInvoiceRow {
