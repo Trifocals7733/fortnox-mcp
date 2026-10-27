@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat, FETCH_ALL_DELAY_MS } from "../constants.js";
+import { ResponseFormat, FETCH_ALL_DELAY_MS, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -22,7 +23,13 @@ import {
   type CreateVoucherInput,
   type ListVoucherSeriesInput,
   type AccountActivityInput,
-  type SearchVouchersInput
+  type SearchVouchersInput,
+  ListVouchersOutput,
+  VoucherDetailSchema,
+  CreateVoucherOutput,
+  ListVoucherSeriesOutput,
+  AccountActivityOutput,
+  SearchVouchersOutput
 } from "../schemas/vouchers.js";
 
 // API response types
@@ -109,7 +116,8 @@ Examples:
   - First call fortnox_list_financial_years to find that ID 4 = 2025
   - List vouchers for 2025: financial_year=4
   - List manual vouchers: voucher_series="A", financial_year=4`,
-      inputSchema: ListVouchersSchema,
+      inputSchema: mcpSchema(ListVouchersSchema),
+      outputSchema: mcpSchema(ListVouchersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -121,8 +129,8 @@ Examples:
       try {
         let endpoint = "/3/vouchers";
         const queryParams: Record<string, string | number | boolean | undefined> = {
-          limit: params.limit,
-          page: params.page
+          limit: params.limit ?? DEFAULT_PAGE_SIZE,
+          page: params.page ?? 1
         };
 
         // Use sublist endpoint if filtering by series
@@ -139,7 +147,7 @@ Examples:
         const total = response.MetaInformation?.["@TotalResources"] || vouchers.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page, params.limit, vouchers.length),
+          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, vouchers.length),
           vouchers: vouchers.map((v) => ({
             voucher_series: v.VoucherSeries,
             voucher_number: v.VoucherNumber,
@@ -156,8 +164,8 @@ Examples:
             "Vouchers",
             vouchers,
             total,
-            params.page,
-            params.limit,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
             (v) => `- **${v.VoucherSeries}${v.VoucherNumber}** (${formatDisplayDate(v.TransactionDate)}): ${v.Description}`
           );
         }
@@ -187,7 +195,8 @@ Args:
 
 Returns:
   Complete voucher details including all debit/credit rows.`,
-      inputSchema: GetVoucherSchema,
+      inputSchema: mcpSchema(GetVoucherSchema),
+      outputSchema: mcpSchema(VoucherDetailSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -295,7 +304,8 @@ Example:
       { "account_number": 1910, "credit": 500, "description": "Cash" }
     ]
   }`,
-      inputSchema: CreateVoucherSchema,
+      inputSchema: mcpSchema(CreateVoucherSchema),
+      outputSchema: mcpSchema(CreateVoucherOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -391,7 +401,8 @@ Args:
 
 Returns:
   List of voucher series with code, description, and whether manual entries are allowed.`,
-      inputSchema: ListVoucherSeriesSchema,
+      inputSchema: mcpSchema(ListVoucherSeriesSchema),
+      outputSchema: mcpSchema(ListVoucherSeriesOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -478,7 +489,8 @@ Examples:
   - Bank transactions this month: account_number=1930, financial_year=4, period="this_month"
   - Salary costs: account_range={ from: 7000, to: 7999 }, financial_year=4
   - Rent expenses: account_number=5010, financial_year=4`,
-      inputSchema: AccountActivitySchema,
+      inputSchema: mcpSchema(AccountActivitySchema),
+      outputSchema: mcpSchema(AccountActivityOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -535,7 +547,7 @@ Examples:
           queryParams,
           (r) => r.Vouchers || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0,
-          { maxResults: params.max_vouchers, maxPages: Math.ceil(params.max_vouchers / 100) }
+          { maxResults: params.max_vouchers ?? 500, maxPages: Math.ceil((params.max_vouchers ?? 500) / 100) }
         );
 
         const voucherList = result.items;
@@ -603,7 +615,7 @@ Examples:
                 });
 
                 // Update summary
-                if (params.include_summary) {
+                if (params.include_summary ?? true) {
                   const existing = accountSummary.get(row.Account) || { debit: 0, credit: 0, count: 0 };
                   existing.debit += row.Debit || 0;
                   existing.credit += row.Credit || 0;
@@ -627,7 +639,7 @@ Examples:
         );
 
         // Build output
-        const summaryArray = params.include_summary
+        const summaryArray = (params.include_summary ?? true)
           ? Array.from(accountSummary.entries())
               .map(([account, data]) => ({
                 account,
@@ -762,7 +774,8 @@ Examples:
   - First call fortnox_list_financial_years to find that ID 4 = 2025
   - Find salary vouchers: search_text="salary", financial_year=4, period="this_year"
   - Find rent payments: search_text="rent", financial_year=4, voucher_series="B"`,
-      inputSchema: SearchVouchersSchema,
+      inputSchema: mcpSchema(SearchVouchersSchema),
+      outputSchema: mcpSchema(SearchVouchersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -804,14 +817,14 @@ Examples:
           queryParams,
           (r) => r.Vouchers || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0,
-          { maxResults: params.max_vouchers, maxPages: Math.ceil(params.max_vouchers / 100) }
+          { maxResults: params.max_vouchers ?? 500, maxPages: Math.ceil((params.max_vouchers ?? 500) / 100) }
         );
 
         const voucherList = result.items;
         const totalVouchers = result.total;
 
         // Prepare search
-        const searchText = params.case_sensitive
+        const searchText = (params.case_sensitive ?? false)
           ? params.search_text
           : params.search_text.toLowerCase();
 
@@ -841,7 +854,7 @@ Examples:
 
         const matchingVouchers: MatchingVoucher[] = [];
 
-        if (params.include_rows) {
+        if (params.include_rows ?? false) {
           // Fetch details for all vouchers (to check row descriptions too)
           const batchSize = 10;
           for (let i = 0; i < voucherList.length; i += batchSize) {

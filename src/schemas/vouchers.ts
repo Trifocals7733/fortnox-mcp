@@ -1,248 +1,313 @@
-import { z } from "zod";
-import { ResponseFormat, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "../constants.js";
-import { DatePeriodEnum } from "./invoices.js";
+import { Schema } from "effect";
+import { describe } from "../services/mcpSchema.js";
+import {
+  DatePeriodSchema,
+  DateString,
+  ListPaginationInput,
+  MutationResult,
+  NullableString,
+  PaginationFields,
+  ResponseFormatSchema,
+  ShortText,
+  optional,
+  optionalValue
+} from "./shared.js";
 
 /**
- * Voucher row schema for creating vouchers
+ * Input and output schemas for the voucher (journal entry) tools.
  */
-export const VoucherRowSchema = z.object({
-  account_number: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .describe("Account number (1000-9999, required)"),
-  debit: z.number()
-    .min(0)
-    .optional()
-    .describe("Debit amount (use either debit or credit, not both)"),
-  credit: z.number()
-    .min(0)
-    .optional()
-    .describe("Credit amount (use either debit or credit, not both)"),
-  description: z.string()
-    .max(200)
-    .optional()
-    .describe("Description for this row"),
-  cost_center: z.string()
-    .max(20)
-    .optional()
-    .describe("Cost center code"),
-  project: z.string()
-    .max(20)
-    .optional()
-    .describe("Project code")
-}).strict().refine(
-  (data) => (data.debit !== undefined && data.debit > 0) || (data.credit !== undefined && data.credit > 0),
-  { message: "Each row must have either a debit or credit amount greater than 0" }
+
+const AccountNumber = (description: string) =>
+  Schema.Int.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(1000)),
+    Schema.check(Schema.isLessThanOrEqualTo(9999)),
+    describe(description)
+  );
+
+const FinancialYear = optional(
+  Schema.Int.pipe(
+    describe(
+      "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+    )
+  )
 );
 
-export type VoucherRowInput = z.infer<typeof VoucherRowSchema>;
+const VoucherSeriesCode = (description: string) =>
+  Schema.String.pipe(
+    Schema.check(Schema.isMinLength(1)),
+    Schema.check(Schema.isMaxLength(2)),
+    describe(description)
+  );
 
-/**
- * Schema for listing vouchers
- */
-export const ListVouchersSchema = z.object({
-  limit: z.number()
-    .int()
-    .min(1)
-    .max(MAX_PAGE_SIZE)
-    .default(DEFAULT_PAGE_SIZE)
-    .describe("Maximum number of results to return (1-100)"),
-  page: z.number()
-    .int()
-    .min(1)
-    .default(1)
-    .describe("Page number for pagination"),
-  voucher_series: z.string()
-    .max(2)
-    .optional()
-    .describe("Filter by voucher series (e.g., 'A', 'B')"),
-  financial_year: z.number()
-    .int()
-    .optional()
-    .describe("Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter vouchers from this date (YYYY-MM-DD)"),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter vouchers to this date (YYYY-MM-DD)"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+/** Filter shorthand shared by account_activity and search_vouchers. */
+const VoucherFilters = {
+  financial_year: FinancialYear,
+  period: optional(
+    DatePeriodSchema.pipe(
+      describe(
+        "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."
+      )
+    )
+  ),
+  from_date: DateString("Filter vouchers from this date (YYYY-MM-DD)"),
+  to_date: DateString("Filter vouchers to this date (YYYY-MM-DD)"),
+  voucher_series: optional(
+    Schema.String.pipe(
+      Schema.check(Schema.isMaxLength(2)),
+      describe("Filter by voucher series (e.g., 'A', 'B')")
+    )
+  )
+};
 
-export type ListVouchersInput = z.infer<typeof ListVouchersSchema>;
-
-/**
- * Schema for getting a single voucher
- */
-export const GetVoucherSchema = z.object({
-  voucher_series: z.string()
-    .min(1)
-    .max(2)
-    .describe("Voucher series (e.g., 'A')"),
-  voucher_number: z.number()
-    .int()
-    .min(1)
-    .describe("Voucher number within the series"),
-  financial_year: z.number()
-    .int()
-    .optional()
-    .describe("Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
-
-export type GetVoucherInput = z.infer<typeof GetVoucherSchema>;
-
-/**
- * Schema for creating a voucher
- */
-export const CreateVoucherSchema = z.object({
-  voucher_series: z.string()
-    .min(1)
-    .max(2)
-    .describe("Voucher series (e.g., 'A', 'B') (required)"),
-  description: z.string()
-    .min(1)
-    .max(200)
-    .describe("Voucher description (required)"),
-  transaction_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .describe("Transaction date (YYYY-MM-DD, required)"),
-  rows: z.array(VoucherRowSchema)
-    .min(2)
-    .describe("Voucher rows (minimum 2 rows required, debit must equal credit)"),
-  cost_center: z.string()
-    .max(20)
-    .optional()
-    .describe("Default cost center for all rows"),
-  project: z.string()
-    .max(20)
-    .optional()
-    .describe("Default project for all rows"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
-
-export type CreateVoucherInput = z.infer<typeof CreateVoucherSchema>;
-
-/**
- * Schema for listing voucher series
- */
-export const ListVoucherSeriesSchema = z.object({
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
-
-export type ListVoucherSeriesInput = z.infer<typeof ListVoucherSeriesSchema>;
-
-/**
- * Schema for account activity tool - filter vouchers by account number
- */
-export const AccountActivitySchema = z.object({
-  account_number: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .optional()
-    .describe("Single account number to filter by (1000-9999)"),
-  account_numbers: z.array(z.number().int().min(1000).max(9999))
-    .max(20)
-    .optional()
-    .describe("Multiple account numbers to filter by (max 20)"),
-  account_range: z.object({
-    from: z.number().int().min(1000).max(9999),
-    to: z.number().int().min(1000).max(9999)
-  })
-    .optional()
-    .describe("Account number range (e.g., 3000-3999 for revenue accounts)"),
-  financial_year: z.number()
-    .int()
-    .optional()
-    .describe("Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."),
-  period: DatePeriodEnum
-    .optional()
-    .describe("Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter vouchers from this date (YYYY-MM-DD)"),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter vouchers to this date (YYYY-MM-DD)"),
-  voucher_series: z.string()
-    .max(2)
-    .optional()
-    .describe("Filter by voucher series (e.g., 'A', 'B')"),
-  include_summary: z.boolean()
-    .default(true)
-    .describe("Include totals and summary per account"),
-  max_vouchers: z.number()
-    .int()
-    .min(10)
-    .max(500)
-    .default(500)
-    .describe("Maximum vouchers to scan (10-500). Use date filtering for larger datasets."),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict().refine(
-  (data) => data.account_number !== undefined || data.account_numbers !== undefined || data.account_range !== undefined,
-  { message: "Must specify at least one of: account_number, account_numbers, or account_range" }
+export const VoucherRowSchema = Schema.Struct({
+  account_number: AccountNumber("Account number (1000-9999, required)"),
+  debit: optional(
+    Schema.Finite.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+      describe("Debit amount (use either debit or credit, not both)")
+    )
+  ),
+  credit: optional(
+    Schema.Finite.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+      describe("Credit amount (use either debit or credit, not both)")
+    )
+  ),
+  description: ShortText(200, "Description for this row"),
+  cost_center: ShortText(20, "Cost center code"),
+  project: ShortText(20, "Project code")
+}).pipe(
+  Schema.check(
+    Schema.makeFilter(
+      (row) =>
+        (row.debit !== undefined && row.debit > 0) || (row.credit !== undefined && row.credit > 0),
+      { message: "Each row must have either a debit or credit amount greater than 0" }
+    )
+  )
 );
 
-export type AccountActivityInput = z.infer<typeof AccountActivitySchema>;
+export type VoucherRowInput = typeof VoucherRowSchema.Type;
 
-/**
- * Schema for voucher text search tool
- */
-export const SearchVouchersSchema = z.object({
-  search_text: z.string()
-    .min(2)
-    .max(100)
-    .describe("Text to search for in voucher descriptions (min 2 chars)"),
-  financial_year: z.number()
-    .int()
-    .optional()
-    .describe("Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."),
-  period: DatePeriodEnum
-    .optional()
-    .describe("Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter vouchers from this date (YYYY-MM-DD)"),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter vouchers to this date (YYYY-MM-DD)"),
-  voucher_series: z.string()
-    .max(2)
-    .optional()
-    .describe("Filter by voucher series (e.g., 'A', 'B')"),
-  case_sensitive: z.boolean()
-    .default(false)
-    .describe("Whether search should be case-sensitive"),
-  include_rows: z.boolean()
-    .default(false)
-    .describe("Include full voucher row details in results"),
-  max_vouchers: z.number()
-    .int()
-    .min(10)
-    .max(500)
-    .default(500)
-    .describe("Maximum vouchers to scan (10-500). Use date filtering for larger datasets."),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const ListVouchersSchema = Schema.Struct({
+  ...ListPaginationInput,
+  ...VoucherFilters,
+  response_format: ResponseFormatSchema
+});
 
-export type SearchVouchersInput = z.infer<typeof SearchVouchersSchema>;
+export type ListVouchersInput = typeof ListVouchersSchema.Type;
+
+export const GetVoucherSchema = Schema.Struct({
+  voucher_series: VoucherSeriesCode("Voucher series (e.g., 'A')"),
+  voucher_number: Schema.Int.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(1)),
+    describe("Voucher number within the series")
+  ),
+  financial_year: FinancialYear,
+  response_format: ResponseFormatSchema
+});
+
+export type GetVoucherInput = typeof GetVoucherSchema.Type;
+
+export const CreateVoucherSchema = Schema.Struct({
+  voucher_series: VoucherSeriesCode("Voucher series (e.g., 'A', 'B') (required)"),
+  description: Schema.String.pipe(
+    Schema.check(Schema.isMinLength(1)),
+    Schema.check(Schema.isMaxLength(200)),
+    describe("Voucher description (required)")
+  ),
+  transaction_date: Schema.String.pipe(
+    Schema.check(Schema.isPattern(/^\d{4}-\d{2}-\d{2}$/)),
+    describe("Transaction date (YYYY-MM-DD, required)")
+  ),
+  rows: Schema.Array(VoucherRowSchema).pipe(
+    Schema.check(Schema.isMinLength(2)),
+    describe("Voucher rows (minimum 2 rows required, debit must equal credit)")
+  ),
+  cost_center: ShortText(20, "Default cost center for all rows"),
+  project: ShortText(20, "Default project for all rows"),
+  response_format: ResponseFormatSchema
+});
+
+export type CreateVoucherInput = typeof CreateVoucherSchema.Type;
+
+export const ListVoucherSeriesSchema = Schema.Struct({
+  response_format: ResponseFormatSchema
+});
+
+export type ListVoucherSeriesInput = typeof ListVoucherSeriesSchema.Type;
+
+export const AccountActivitySchema = Schema.Struct({
+  account_number: optional(AccountNumber("Single account number to filter by (1000-9999)")),
+  account_numbers: optional(
+    Schema.Array(AccountNumber("Account number")).pipe(
+      Schema.check(Schema.isMaxLength(20)),
+      describe("Multiple account numbers to filter by (max 20)")
+    )
+  ),
+  account_range: optional(
+    Schema.Struct({
+      from: AccountNumber("First account number in the range"),
+      to: AccountNumber("Last account number in the range")
+    }).pipe(describe("Account number range (e.g., 3000-3999 for revenue accounts)"))
+  ),
+  ...VoucherFilters,
+  include_summary: optional(
+    Schema.Boolean.pipe(describe("Include totals and summary per account (default true)"))
+  ),
+  max_vouchers: optional(
+    Schema.Int.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(10)),
+      Schema.check(Schema.isLessThanOrEqualTo(500)),
+      describe("Maximum vouchers to scan (10-500, default 500). Use date filtering for larger datasets.")
+    )
+  ),
+  response_format: ResponseFormatSchema
+}).pipe(
+  Schema.check(
+    Schema.makeFilter(
+      (params) =>
+        params.account_number !== undefined ||
+        params.account_numbers !== undefined ||
+        params.account_range !== undefined,
+      { message: "Must specify at least one of: account_number, account_numbers, or account_range" }
+    )
+  )
+);
+
+export type AccountActivityInput = typeof AccountActivitySchema.Type;
+
+export const SearchVouchersSchema = Schema.Struct({
+  search_text: Schema.String.pipe(
+    Schema.check(Schema.isMinLength(2)),
+    Schema.check(Schema.isMaxLength(100)),
+    describe("Text to search for in voucher descriptions (min 2 chars)")
+  ),
+  ...VoucherFilters,
+  case_sensitive: optional(
+    Schema.Boolean.pipe(describe("Whether search should be case-sensitive (default false)"))
+  ),
+  include_rows: optional(
+    Schema.Boolean.pipe(describe("Include full voucher row details in results (default false)"))
+  ),
+  max_vouchers: optional(
+    Schema.Int.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(10)),
+      Schema.check(Schema.isLessThanOrEqualTo(500)),
+      describe("Maximum vouchers to scan (10-500, default 500)")
+    )
+  ),
+  response_format: ResponseFormatSchema
+});
+
+export type SearchVouchersInput = typeof SearchVouchersSchema.Type;
+
+/* ------------------------------- outputs ------------------------------- */
+
+export const VoucherListItemSchema = Schema.Struct({
+  voucher_series: Schema.String,
+  voucher_number: Schema.Finite,
+  description: Schema.String,
+  transaction_date: Schema.String
+});
+
+export const ListVouchersOutput = Schema.Struct({
+  ...PaginationFields,
+  vouchers: Schema.Array(VoucherListItemSchema)
+});
+
+export type ListVouchersOutput = typeof ListVouchersOutput.Type;
+
+export const VoucherRowOutputSchema = Schema.Struct({
+  account_number: Schema.Finite,
+  debit: Schema.Finite,
+  credit: Schema.Finite,
+  description: NullableString,
+  cost_center: NullableString,
+  project: NullableString
+});
+
+export const VoucherDetailSchema = Schema.Struct({
+  voucher_series: Schema.String,
+  voucher_number: Schema.Finite,
+  year: Schema.Finite,
+  description: Schema.String,
+  transaction_date: Schema.String,
+  rows: Schema.Array(VoucherRowOutputSchema)
+});
+
+export type VoucherDetail = typeof VoucherDetailSchema.Type;
+
+export const CreateVoucherOutput = Schema.Struct({
+  ...MutationResult.fields,
+  voucher_series: Schema.String,
+  voucher_number: Schema.Finite,
+  description: Schema.String,
+  transaction_date: Schema.String
+});
+
+export const VoucherSeriesItemSchema = Schema.Struct({
+  code: Schema.String,
+  description: Schema.String,
+  manual: Schema.Boolean
+});
+
+export const ListVoucherSeriesOutput = Schema.Struct({
+  count: Schema.Finite,
+  series: Schema.Array(VoucherSeriesItemSchema)
+});
+
+export const AccountActivityTransactionSchema = Schema.Struct({
+  voucher_series: Schema.String,
+  voucher_number: Schema.Finite,
+  transaction_date: Schema.String,
+  voucher_description: Schema.String,
+  account: Schema.Finite,
+  description: NullableString,
+  debit: Schema.Finite,
+  credit: Schema.Finite
+});
+
+export const AccountActivityOutput = Schema.Struct({
+  filter: Schema.Struct({
+    accounts: Schema.Array(Schema.Finite),
+    account_range: Schema.NullOr(
+      Schema.Struct({ from: Schema.Finite, to: Schema.Finite })
+    ),
+    financial_year: optionalValue(Schema.Finite),
+    date_range: NullableString,
+    voucher_series: NullableString
+  }),
+  vouchers_scanned: Schema.Finite,
+  total_vouchers_available: Schema.Finite,
+  truncated: Schema.Boolean,
+  truncation_reason: optionalValue(NullableString),
+  matching_transactions: Schema.Finite,
+  summary: optionalValue(
+    Schema.Array(
+      Schema.Struct({
+        account: Schema.Finite,
+        total_debit: Schema.Finite,
+        total_credit: Schema.Finite,
+        net_change: Schema.Finite,
+        transaction_count: Schema.Finite
+      })
+    )
+  ),
+  transactions: Schema.Array(AccountActivityTransactionSchema)
+});
+
+export const SearchVouchersOutput = Schema.Struct({
+  search_text: Schema.String,
+  case_sensitive: optionalValue(Schema.Boolean),
+  financial_year: optionalValue(Schema.Finite),
+  date_range: NullableString,
+  voucher_series: NullableString,
+  vouchers_scanned: Schema.Finite,
+  total_vouchers_available: Schema.Finite,
+  truncated: Schema.Boolean,
+  truncation_reason: optionalValue(NullableString),
+  matching_count: Schema.Finite,
+  vouchers: Schema.Array(Schema.Unknown).pipe(
+    describe("Matching vouchers; shape follows the voucher detail schema")
+  )
+});
