@@ -145,15 +145,16 @@ npm run build          # tsc -> dist/
 npm run clean          # rm -rf dist
 npm run snapshot:tools # rewrite test/tools-baseline.json from the server
 npm run check:tools    # diff the advertised tool surface, exit 1 on drift
+npm run smoke          # live read-only calls against the real Fortnox account
 ```
 
-There is no test suite and no linter. `npm run build` plus `npm run check:tools` is what "works" means here; the 51-tool `tools/list` output is frozen in `test/tools-baseline.json` so a refactor that drops a tool, an argument or a description shows up as a diff. It runs over an in-memory transport and needs no Fortnox credentials.
+There is no test suite and no linter. `npm run build` plus `npm run check:tools` is what "works" means for the code; `npm run smoke` is what "works" means against a real account — it drives a dozen read-only tools over an in-memory MCP client and exits 1 on any failure. The 51-tool `tools/list` output is frozen in `test/tools-baseline.json` so a refactor that drops a tool, an argument or a description shows up as a diff. Neither needs a Fortnox token except `smoke`.
 
 Adding tools: see [AGENTS.md](./AGENTS.md) for the codebase map and the conventions to follow.
 
 ## Limits
 
-The Fortnox API allows 25 requests per 5 seconds; outgoing calls are throttled to stay under that. The limiter is in-process, so it does not coordinate across several instances.
+The Fortnox API allows 25 requests per 5 seconds; outgoing calls pass through a sliding-window gate that keeps the server under that, with automatic retry and exponential backoff on 429/5xx. The gate is in-process, so it does not coordinate across several instances.
 
 Long analytics queries page through results with a delay, capped at 10 000 items / 100 pages, with truncation reported in the response. Tool responses are truncated at 25 000 characters.
 

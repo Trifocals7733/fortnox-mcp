@@ -1,166 +1,190 @@
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { getTokenProvider } from "../auth/index.js";
+import { Duration, Effect, Schedule, Schema } from "effect";
+import { HttpClient, HttpClientRequest, HttpIncomingMessage } from "effect/http";
 import { getCurrentUserId } from "../auth/context.js";
 import {
   FORTNOX_API_BASE_URL,
-  RATE_LIMIT_REQUESTS,
-  RATE_LIMIT_WINDOW_MS,
   MAX_FETCH_ALL_RESULTS,
   MAX_FETCH_ALL_PAGES,
   FETCH_ALL_PAGE_SIZE,
   FETCH_ALL_DELAY_MS
 } from "../constants.js";
+import { RateLimiter } from "./rateLimiter.js";
+import { getRuntime } from "./runtime.js";
+import { accessToken, CurrentUser } from "./tokenProvider.js";
 
-// Rate limiting state
-let requestTimestamps: number[] = [];
+type Method = "GET" | "POST" | "PUT" | "DELETE";
 
-/**
- * Simple rate limiter for Fortnox API (25 requests per 5 seconds)
- */
-async function waitForRateLimit(): Promise<void> {
-  const now = Date.now();
-
-  // Remove timestamps outside the window
-  requestTimestamps = requestTimestamps.filter(
-    (ts) => now - ts < RATE_LIMIT_WINDOW_MS
-  );
-
-  // If at limit, wait for oldest request to expire
-  if (requestTimestamps.length >= RATE_LIMIT_REQUESTS) {
-    const oldestTimestamp = requestTimestamps[0];
-    const waitTime = RATE_LIMIT_WINDOW_MS - (now - oldestTimestamp) + 50; // +50ms buffer
-    if (waitTime > 0) {
-      await new Promise((resolve) => setTimeout(resolve, waitTime));
-    }
-    // Clean up again after waiting
-    requestTimestamps = requestTimestamps.filter(
-      (ts) => Date.now() - ts < RATE_LIMIT_WINDOW_MS
-    );
-  }
-
-  requestTimestamps.push(Date.now());
-}
-
-/**
- * Make an authenticated request to the Fortnox API
- * Automatically uses the current user context in remote mode
- */
-export async function fortnoxRequest<T>(
-  endpoint: string,
-  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-  data?: unknown,
-  params?: Record<string, string | number | boolean | undefined>
-): Promise<T> {
-  await waitForRateLimit();
-
-  // Get access token using the token provider
-  // In local mode, userId is undefined and ignored
-  // In remote mode, userId comes from the request context
-  const tokenProvider = getTokenProvider();
-  const userId = getCurrentUserId();
-  const accessToken = await tokenProvider.getAccessToken(userId);
-
-  // Clean undefined params
-  const cleanParams: Record<string, string | number | boolean> = {};
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        cleanParams[key] = value;
-      }
-    }
-  }
-
-  const config: AxiosRequestConfig = {
-    method,
-    url: `${FORTNOX_API_BASE_URL}${endpoint}`,
-    headers: {
-      "Authorization": `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    timeout: 30000,
-    params: Object.keys(cleanParams).length > 0 ? cleanParams : undefined,
-    data
-  };
-
-  try {
-    const response = await axios(config);
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, endpoint);
+/** A Fortnox failure with the same wording the tools have always surfaced. */
+export class FortnoxError extends Error {
+  constructor(
+    message: string,
+    readonly status?: number,
+    readonly retryable: boolean = false
+  ) {
+    super(message);
+    this.name = "FortnoxError";
   }
 }
 
-/**
- * Handle API errors with descriptive messages
- */
-export function handleApiError(error: unknown, context?: string): Error {
+function messageForStatus(
+  status: number | undefined,
+  fortnoxMessage: string | undefined,
+  prefix: string
+): { message: string; retryable: boolean } {
+  switch (status) {
+    case 400:
+      return {
+        message:
+          `${prefix}Bad request: ${fortnoxMessage || "Invalid parameters"}. ` +
+          `Check that all required fields are provided and values are valid.`,
+        retryable: false
+      };
+    case 401:
+      return {
+        message: `${prefix}Authentication failed. The access token may be expired or invalid. Try refreshing authentication.`,
+        retryable: false
+      };
+    case 403:
+      return {
+        message: `${prefix}Permission denied. Your API credentials don't have access to this resource. Check your Fortnox app scopes.`,
+        retryable: false
+      };
+    case 404:
+      return {
+        message: `${prefix}Resource not found. The requested item does not exist or has been deleted.`,
+        retryable: false
+      };
+    case 429:
+      return {
+        message: `${prefix}Rate limit exceeded. Fortnox allows 25 requests per 5 seconds. Please wait before retrying.`,
+        retryable: true
+      };
+    case 500:
+    case 502:
+    case 503:
+      return {
+        message: `${prefix}Fortnox server error (${status}). The service may be temporarily unavailable. Please try again later.`,
+        retryable: true
+      };
+    default:
+      return {
+        message: `${prefix}API error ${status}: ${fortnoxMessage ?? "no message"}`,
+        retryable: false
+      };
+  }
+}
+
+function describe(error: unknown, context?: string): Error {
   const prefix = context ? `[${context}] ` : "";
 
-  if (error instanceof AxiosError) {
-    const status = error.response?.status;
-    const data = error.response?.data;
-
-    // Extract Fortnox-specific error message
-    const fortnoxError = data?.ErrorInformation?.message ||
-      data?.ErrorInformation?.Message ||
-      data?.message ||
-      data?.error;
-
-    switch (status) {
-      case 400:
-        return new Error(
-          `${prefix}Bad request: ${fortnoxError || "Invalid parameters"}. ` +
-          `Check that all required fields are provided and values are valid.`
-        );
-      case 401:
-        return new Error(
-          `${prefix}Authentication failed. The access token may be expired or invalid. ` +
-          `Try refreshing authentication.`
-        );
-      case 403:
-        return new Error(
-          `${prefix}Permission denied. Your API credentials don't have access to this resource. ` +
-          `Check your Fortnox app scopes.`
-        );
-      case 404:
-        return new Error(
-          `${prefix}Resource not found. The requested item does not exist or has been deleted.`
-        );
-      case 429:
-        return new Error(
-          `${prefix}Rate limit exceeded. Fortnox allows 25 requests per 5 seconds. ` +
-          `Please wait before retrying.`
-        );
-      case 500:
-      case 502:
-      case 503:
-        return new Error(
-          `${prefix}Fortnox server error (${status}). The service may be temporarily unavailable. ` +
-          `Please try again later.`
-        );
-      default:
-        return new Error(
-          `${prefix}API error ${status}: ${fortnoxError || JSON.stringify(data)}`
-        );
-    }
-  }
+  if (error instanceof FortnoxError) return error;
 
   if (error instanceof Error) {
     if (error.message.includes("ECONNABORTED") || error.message.includes("timeout")) {
-      return new Error(
+      return new FortnoxError(
         `${prefix}Request timed out. The Fortnox API is not responding. Please try again.`
       );
     }
     if (error.message.includes("ENOTFOUND") || error.message.includes("ECONNREFUSED")) {
-      return new Error(
+      return new FortnoxError(
         `${prefix}Cannot connect to Fortnox API. Check your internet connection.`
       );
     }
-    return new Error(`${prefix}${error.message}`);
+    return new FortnoxError(`${prefix}${error.message}`);
   }
 
-  return new Error(`${prefix}Unexpected error: ${String(error)}`);
+  return new FortnoxError(`${prefix}Unexpected error: ${String(error)}`);
+}
+
+/** Public for callers that wrap their own errors in tool handlers. */
+export function handleApiError(error: unknown, context?: string): Error {
+  return describe(error, context);
+}
+
+function buildUrl(
+  endpoint: string,
+  params?: Record<string, string | number | boolean | undefined>
+): string {
+  const url = new URL(`${FORTNOX_API_BASE_URL}${endpoint}`);
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value !== undefined) url.searchParams.set(key, String(value));
+  }
+  return url.toString();
+}
+
+function buildRequest(url: string, method: Method, data?: unknown): HttpClientRequest.HttpClientRequest {
+  const base =
+    method === "GET"
+      ? HttpClientRequest.get(url)
+      : method === "POST"
+        ? HttpClientRequest.post(url)
+        : method === "PUT"
+          ? HttpClientRequest.put(url)
+          : HttpClientRequest.make("DELETE")(url);
+
+  return data === undefined
+    ? base
+    : HttpClientRequest.bodyJsonUnsafe(base, data);
+}
+
+/**
+ * Make an authenticated request to the Fortnox API.
+ *
+ * Runs inside the app runtime: the rate limiter gate and the HTTP client are
+ * shared process-wide, and the access token comes from the token provider for
+ * the current request's user.
+ */
+export async function fortnoxRequest<T>(
+  endpoint: string,
+  method: Method = "GET",
+  data?: unknown,
+  params?: Record<string, string | number | boolean | undefined>
+): Promise<T> {
+  const userId = getCurrentUserId();
+  const url = buildUrl(endpoint, params);
+
+  const program = Effect.gen(function* () {
+    const limiter = yield* RateLimiter;
+    yield* limiter.acquire;
+
+    const token = yield* accessToken;
+    const request = buildRequest(url, method, data).pipe(
+      HttpClientRequest.setHeader("Authorization", `Bearer ${token}`),
+      HttpClientRequest.setHeader("Accept", "application/json")
+    );
+
+    const response = yield* HttpClient.execute(request);
+    const body =
+      response.status === 204
+        ? undefined
+        : yield* HttpIncomingMessage.schemaBodyJson(Schema.Unknown)(response);
+
+    if (response.status >= 400) {
+      const fortnoxMessage =
+        (body as any)?.ErrorInformation?.message ??
+        (body as any)?.ErrorInformation?.Message ??
+        (body as any)?.message ??
+        (body as any)?.error;
+      const { message, retryable } = messageForStatus(
+        response.status,
+        fortnoxMessage,
+        `[${endpoint}] `
+      );
+      return yield* Effect.fail(new FortnoxError(message, response.status, retryable));
+    }
+
+    return body as T;
+  }).pipe(
+    Effect.timeout("30 seconds"),
+    Effect.mapError((error) => describe(error, endpoint) as FortnoxError),
+    Effect.retry({
+      schedule: Schedule.exponential(Duration.millis(250)),
+      times: 3,
+      while: (error: FortnoxError) => error.retryable
+    })
+  );
+
+  return getRuntime().runPromise(program.pipe(Effect.provideService(CurrentUser, { userId })));
 }
 
 /**
@@ -217,7 +241,6 @@ function delay(ms: number): Promise<void> {
 /**
  * Fetch all pages of a paginated Fortnox API endpoint
  *
- * This function automatically paginates through all results from a Fortnox endpoint.
  * It includes safety limits to prevent runaway queries and respects rate limits.
  *
  * @param endpoint - API endpoint (e.g., "/3/invoices")
@@ -226,14 +249,6 @@ function delay(ms: number): Promise<void> {
  * @param extractTotal - Function to extract total count from response
  * @param config - Optional configuration for limits and delays
  * @returns All items fetched with metadata about the fetch operation
- *
- * @example
- * const result = await fetchAllPages<Invoice, InvoiceListResponse>(
- *   "/3/invoices",
- *   { filter: "unpaid" },
- *   (r) => r.Invoices || [],
- *   (r) => r.MetaInformation?.["@TotalResources"] || 0
- * );
  */
 export async function fetchAllPages<T, R>(
   endpoint: string,

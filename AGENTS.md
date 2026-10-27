@@ -23,7 +23,10 @@ npm run dev          # tsx watch src/index.ts
 npm run clean
 npm run snapshot:tools # rewrite test/tools-baseline.json from the live server
 npm run check:tools    # diff the advertised tool surface against it, exit 1 on drift
+npm run smoke          # live read-only calls against the real Fortnox account
 ```
+
+`smoke` needs credentials and is read-only on purpose (safe against production books); it prints tool names and counts, never account data or tokens, and exits 1 on any failure.
 
 There is no test suite. `npm run build` passing plus `npm run check:tools` reporting no drift is the bar for "it works". Don't claim a change is verified beyond that.
 
@@ -40,6 +43,9 @@ src/constants.ts          base URLs, rate limits, page sizes, 25k char response 
 src/tools/<domain>.ts     tool registration — one file per domain, self-contained
 src/schemas/<domain>.ts   zod input schemas (snake_case) + inferred input types
 src/services/api.ts       fortnoxRequest(), rate limiter, fetchAllPages(), error mapping
+src/services/runtime.ts   AppLayer + the single ManagedRuntime (rate limiter, token provider, fetch HTTP client)
+src/services/rateLimiter.ts  hand-built 25 req / 5 s gate (Effect 4 has no RateLimiter module)
+src/services/tokenProvider.ts  access-token lookup as an Effect service + CurrentUser
 src/services/formatters.ts buildToolResponse(), buildErrorResponse(), md money/list/detail helpers
 src/services/dateHelpers.ts      period → date range, aging buckets
 src/services/aggregationHelpers.ts  stats, growth, groupBy helpers for BI tools
@@ -66,8 +72,11 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 
 ## API + data conventions
 
-- All Fortnox traffic goes through `fortnoxRequest` / `fetchAllPages` in `src/services/api.ts`. Don't call axios directly from a tool.
-- The rate limiter is module-global (25 req / 5 s, in-memory, per process). It does not coordinate across processes, so running several instances multiplies the effective request rate.
+- All Fortnox traffic goes through `fortnoxRequest` / `fetchAllPages` in `src/services/api.ts`. Don't call `effect/http` directly from a tool.
+- `fortnoxRequest` keeps its plain `async` signature and runs an Effect internally through the process-wide runtime (`getRuntime()`). That is deliberate: the 51 handlers stay untouched until the domain conversion, so the transport swap is one file.
+- Effect services live in `src/services/runtime.ts`: `RateLimiter` (sliding window, one per process), `TokenProviderService`, `CurrentUser`, plus `FetchHttpClient.layer`. Retry/backoff (429/5xx/timeouts, 3 attempts, exponential) and the 30s timeout are inside `fortnoxRequest`.
+- **The user id is still read from `AsyncLocalStorage` once per call**, then provided to the Effect as the `CurrentUser` service. True removal needs the handlers to receive it, which is the domain conversion's job — do not claim ALS is gone until `runWithContext` is.
+- The rate limiter is one per process, so running several instances multiplies the effective request rate.
 - Fortnox returns PascalCase objects (`Invoice`, `MetaInformation["@TotalResources"]`). Declare local `Fortnox*` interfaces per tool file (that's the existing pattern — no shared API type module) and convert to snake_case keys in `output`.
 - Pagination: `limit` 1–100 (default 20), `page` from 1. Analytics/BI queries use `fetchAllPages`, which is capped by `MAX_FETCH_ALL_RESULTS` / `MAX_FETCH_ALL_PAGES` and reports `truncated` — surface that, don't drop it.
 - Money: `formatMoney` → `sv-SE` with 2 decimals + `SEK`. Dates in and out are `YYYY-MM-DD`; `formatDisplayDate` only for md output.
@@ -102,7 +111,7 @@ A rewrite is in progress. Decisions already made, in execution order:
 1. ~~Shared registry + frozen `tools/list` baseline~~ — done.
 2. ~~TypeScript 7, no declaration emit, `engines >=22`~~ — done.
 3. ~~**SDK v2 migration.**~~ — done. `@modelcontextprotocol/server` 2.4.0 + `core`-free `node`/`client` + `server-legacy/auth` for the OAuth AS router; zod 4 is now required. Verified: build, `check:tools`, local HTTP (`initialize` + `tools/list` + a live tool call), remote mode boot (OAuth metadata + 401 on unauthenticated `/mcp`), and live tool calls over an in-memory client.
-4. **Effect spine.** Effect 4 (`effect@^4`, LTS, zero deps): `effect/http` replaces axios, retry/backoff via `Schedule`, a `ManagedRuntime` built once, token provider behind a `Layer`, and the remote user id passed per request as a service (replacing `AsyncLocalStorage`). The 25 req/5 s limiter is **hand-built** — Effect 4 has no `RateLimiter` module.
+4. ~~**Effect spine.**~~ — done. `effect@4.0.6`; `effect/http` replaced axios, retry/backoff via `Schedule`, one `ManagedRuntime` in `src/services/runtime.ts`, token provider behind a `Layer`, hand-built 25 req/5 s limiter (verified: 20 acquires in 0 ms, 30 in ~5.1 s). The user id is provided to the Effect as a `CurrentUser` service but is still read from `AsyncLocalStorage` at the call boundary; removing ALS is part of the domain conversion.
 5. **Domain conversion, strangler.** One domain per commit, `Effect.gen` handlers, one Effect schema per tool as the output source of truth (markdown stays hand-written), `outputSchema` declared on all 51 via a small bridge. The bridge: Effect gives Standard Schema v1 `validate` but not `~standard.jsonSchema`, so wrap `JSONSchema.make` output in a `StandardSchemaWithJSON` object (~20 lines, may need `toDocumentDraft07`).
 6. **Fortnox v1 → v2 endpoints** for invoices/orders/offers/articles, after the spine settles.
 
