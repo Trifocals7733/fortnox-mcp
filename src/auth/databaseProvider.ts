@@ -1,8 +1,16 @@
-import axios, { AxiosError } from "axios";
 import { FORTNOX_OAUTH_URL, TOKEN_REFRESH_BUFFER_MS } from "../constants.js";
 import { ITokenProvider, TokenInfo, AuthRequiredError } from "./types.js";
 import { ITokenStorage } from "./storage/types.js";
 import { getFortnoxCredentials } from "./credentials.js";
+import { postTokenRequest, TokenRequestError } from "../services/oauthToken.js";
+
+interface TokenPayload {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  scope: string;
+}
 
 // Token provider for remote mode (multi-user with database storage)
 export class DatabaseTokenProvider implements ITokenProvider {
@@ -76,32 +84,21 @@ export class DatabaseTokenProvider implements ITokenProvider {
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString("base64");
 
     try {
-      const response = await axios.post<{
-        access_token: string;
-        refresh_token: string;
-        token_type: string;
-        expires_in: number;
-        scope: string;
-      }>(
+      const payload = await postTokenRequest<TokenPayload>(
         tokenUrl,
-        new URLSearchParams({
+        {
           grant_type: "authorization_code",
           code: code,
           redirect_uri: redirectUri
-        }),
-        {
-          headers: {
-            "Authorization": `Basic ${auth}`,
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        }
+        },
+        auth
       );
 
       const tokens: TokenInfo = {
-        accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token,
-        expiresAt: Date.now() + response.data.expires_in * 1000,
-        scope: response.data.scope
+        accessToken: payload.access_token,
+        refreshToken: payload.refresh_token,
+        expiresAt: Date.now() + payload.expires_in * 1000,
+        scope: payload.scope
       };
 
       await this.storeTokens(userId, tokens);
@@ -120,31 +117,20 @@ export class DatabaseTokenProvider implements ITokenProvider {
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString("base64");
 
     try {
-      const response = await axios.post<{
-        access_token: string;
-        refresh_token: string;
-        token_type: string;
-        expires_in: number;
-        scope: string;
-      }>(
+      const response = await postTokenRequest<TokenPayload>(
         tokenUrl,
-        new URLSearchParams({
+        {
           grant_type: "refresh_token",
           refresh_token: tokens.refreshToken
-        }),
-        {
-          headers: {
-            "Authorization": `Basic ${auth}`,
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        }
+        },
+        auth
       );
 
       const newTokens: TokenInfo = {
-        accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token,
-        expiresAt: Date.now() + response.data.expires_in * 1000,
-        scope: response.data.scope
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
+        expiresAt: Date.now() + response.expires_in * 1000,
+        scope: response.scope
       };
 
       await this.storeTokens(userId, newTokens);
@@ -173,9 +159,9 @@ export class DatabaseTokenProvider implements ITokenProvider {
   }
 
   private handleAuthError(error: unknown, context: string): Error {
-    if (error instanceof AxiosError) {
-      const status = error.response?.status;
-      const data = error.response?.data;
+    if (error instanceof TokenRequestError) {
+      const status = error.status;
+      const data = error.data as { error_description?: string; error?: string } | undefined;
 
       if (status === 401) {
         return new Error(

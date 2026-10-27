@@ -34,7 +34,6 @@
     "@modelcontextprotocol/node": "^2.1.2",
     "@modelcontextprotocol/server": "^2.4.0",
     "@modelcontextprotocol/server-legacy": "^2.4.0",
-    "axios": "^1.7.9",
     "effect": "^4.0.6",
     "express": "^4.21.0",
     "jose": "^5.9.6",

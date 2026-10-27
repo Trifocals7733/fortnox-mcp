@@ -1,8 +1,8 @@
-import axios, { AxiosError } from "axios";
 import { FORTNOX_OAUTH_URL, TOKEN_REFRESH_BUFFER_MS } from "../constants.js";
 import { ITokenProvider, TokenInfo, AuthRequiredError } from "./types.js";
 import { getFortnoxCredentials } from "./credentials.js";
 import { readPersistedTokens, persistTokens } from "./fileTokenStore.js";
+import { postTokenRequest, TokenRequestError } from "../services/oauthToken.js";
 
 interface TokenResponse {
   access_token: string;
@@ -78,22 +78,17 @@ export class EnvVarTokenProvider implements ITokenProvider {
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString("base64");
 
     try {
-      const response = await axios.post<TokenResponse>(
+      const tokens = await postTokenRequest<TokenResponse>(
         tokenUrl,
-        new URLSearchParams({
+        {
           grant_type: "authorization_code",
           code: code,
           redirect_uri: redirectUri
-        }),
-        {
-          headers: {
-            "Authorization": `Basic ${auth}`,
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        }
+        },
+        auth
       );
 
-      this.storeTokens(response.data);
+      this.storeTokens(tokens);
     } catch (error) {
       throw this.handleAuthError(error, "Failed to exchange authorization code");
     }
@@ -124,21 +119,16 @@ export class EnvVarTokenProvider implements ITokenProvider {
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString("base64");
 
     try {
-      const response = await axios.post<TokenResponse>(
+      const tokens = await postTokenRequest<TokenResponse>(
         tokenUrl,
-        new URLSearchParams({
+        {
           grant_type: "refresh_token",
           refresh_token: this.tokens.refreshToken
-        }),
-        {
-          headers: {
-            "Authorization": `Basic ${auth}`,
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        }
+        },
+        auth
       );
 
-      this.storeTokens(response.data);
+      this.storeTokens(tokens);
       return this.tokens!.accessToken;
     } catch (error) {
       this.tokens = null;
@@ -159,9 +149,9 @@ export class EnvVarTokenProvider implements ITokenProvider {
   }
 
   private handleAuthError(error: unknown, context: string): Error {
-    if (error instanceof AxiosError) {
-      const status = error.response?.status;
-      const data = error.response?.data;
+    if (error instanceof TokenRequestError) {
+      const status = error.status;
+      const data = error.data as { error_description?: string; error?: string } | undefined;
 
       if (status === 401) {
         return new Error(
