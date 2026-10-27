@@ -134,7 +134,7 @@ Nothing outstanding from the rewrite plan. Two tools remain unverified, and both
 
 Everything else is exercised by `npm run test:live`. The aggregation arrays declared `Schema.Array(Schema.Unknown)` are still unmodelled, and no agent has used the 51 tools for real work.
 
-**Connect cost, measured** (`tools/list` as the client receives it): 103 409 chars ≈ 25.9k tokens for 51 tools — down from 127k at the start of the rewrite (descriptions alone were 27 598 chars). Current split: `inputSchema` 42 517, `outputSchema` 39 980, descriptions 9 495.
+**Connect cost, measured** (`tools/list` as the client receives it): 100 352 chars ≈ 25.1k tokens for 51 tools — down from 127k at the start of the rewrite. Split: `inputSchema` ~42.5k, `outputSchema` ~40k, descriptions 6 338 (they were 27 598).
 
 That is close to the floor for anything short of removing declared schemas: the remainder is irreducible JSON Schema structure for 102 schemas, plus ~9.8k chars of `anyOf` noise from nullable fields. The user has explicitly chosen to **keep `outputSchema` on all 51** (13.9k chars would have gone by dropping it for the 14 analytics/BI tools), so don't re-open that without them. If cost matters again, the levers are: make nullable output fields optional instead of null, or shorten field descriptions further — not dropping schemas.
 
