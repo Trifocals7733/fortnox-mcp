@@ -1,4 +1,4 @@
-#WIP
+> **WIP — not a usable product yet.**
 # Fortnox MCP Server
 
 An MCP ([Model Context Protocol](https://modelcontextprotocol.io)) server for the Fortnox Swedish accounting API. It exposes customers, invoices, suppliers, supplier invoices, orders, accounts, vouchers and a set of analytics/BI tools as typed tool calls, so an agent can read and write Fortnox data without knowing the REST API.
