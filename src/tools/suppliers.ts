@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -18,7 +19,11 @@ import {
   type GetSupplierInput,
   type CreateSupplierInput,
   type UpdateSupplierInput,
-  type DeleteSupplierInput
+  type DeleteSupplierInput,
+  ListSuppliersOutput,
+  SupplierDetailSchema,
+  SupplierMutationOutput,
+  DeleteSupplierOutput
 } from "../schemas/suppliers.js";
 
 // API response types
@@ -88,7 +93,8 @@ Args:
 
 Returns:
   List of suppliers with supplier number, name, email, city, and organisation number.`,
-      inputSchema: ListSuppliersSchema,
+      inputSchema: mcpSchema(ListSuppliersSchema),
+      outputSchema: mcpSchema(ListSuppliersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -99,8 +105,8 @@ Returns:
     async (params: ListSuppliersInput) => {
       try {
         const queryParams: Record<string, string | number | boolean | undefined> = {
-          limit: params.limit,
-          page: params.page
+          limit: params.limit ?? DEFAULT_PAGE_SIZE,
+          page: params.page ?? 1
         };
 
         if (params.filter) queryParams.filter = params.filter;
@@ -111,7 +117,7 @@ Returns:
         const total = response.MetaInformation?.["@TotalResources"] || suppliers.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page, params.limit, suppliers.length),
+          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, suppliers.length),
           suppliers: suppliers.map((s) => ({
             supplier_number: s.SupplierNumber,
             name: s.Name,
@@ -129,8 +135,8 @@ Returns:
             "Suppliers",
             suppliers,
             total,
-            params.page,
-            params.limit,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
             (s) => `## ${s.Name} (${s.SupplierNumber})\n` +
               (s.Email ? `- **Email**: ${s.Email}\n` : "") +
               (s.City ? `- **City**: ${s.City}\n` : "") +
@@ -158,7 +164,8 @@ Args:
 
 Returns:
   Complete supplier details including contact info, addresses, bank details, and payment terms.`,
-      inputSchema: GetSupplierSchema,
+      inputSchema: mcpSchema(GetSupplierSchema),
+      outputSchema: mcpSchema(SupplierDetailSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -249,7 +256,8 @@ Args:
 
 Returns:
   The created supplier with assigned supplier number.`,
-      inputSchema: CreateSupplierSchema,
+      inputSchema: mcpSchema(CreateSupplierSchema),
+      outputSchema: mcpSchema(SupplierMutationOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -325,7 +333,8 @@ Args:
 
 Returns:
   The updated supplier details.`,
-      inputSchema: UpdateSupplierSchema,
+      inputSchema: mcpSchema(UpdateSupplierSchema),
+      outputSchema: mcpSchema(SupplierMutationOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -398,7 +407,8 @@ Args:
 
 Returns:
   Confirmation of deletion.`,
-      inputSchema: DeleteSupplierSchema,
+      inputSchema: mcpSchema(DeleteSupplierSchema),
+      outputSchema: mcpSchema(DeleteSupplierOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,

@@ -883,110 +883,129 @@
           "description": "Supplier name (required)"
         },
         "supplier_number": {
-          "description": "Supplier number (auto-generated if not provided)",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Supplier number (auto-generated if not provided)"
         },
         "organisation_number": {
-          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30
+          "maxLength": 30,
+          "description": "Organisation/company number"
         },
         "email": {
-          "description": "Primary email address",
           "type": "string",
-          "format": "email",
-          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          "description": "Primary email address"
         },
         "phone": {
-          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Primary phone number"
         },
         "address1": {
-          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 1"
         },
         "address2": {
-          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 2"
         },
         "zip_code": {
-          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10
+          "maxLength": 10,
+          "description": "Postal/ZIP code"
         },
         "city": {
-          "description": "City",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "City"
         },
         "country": {
-          "description": "Country name",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Country name"
         },
         "country_code": {
-          "description": "Two-letter country code (e.g., 'SE' for Sweden)",
           "type": "string",
-          "minLength": 2,
-          "maxLength": 2
+          "maxLength": 2,
+          "description": "Two-letter country code (e.g., 'SE' for Sweden)"
         },
         "currency": {
-          "description": "Currency code (e.g., 'SEK', 'EUR')",
           "type": "string",
-          "minLength": 3,
-          "maxLength": 3
+          "maxLength": 3,
+          "description": "Currency code (e.g., 'SEK', 'EUR')"
         },
         "vat_number": {
-          "description": "VAT registration number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "VAT registration number"
         },
         "bank_account": {
-          "description": "Bank account number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Bank account number"
         },
         "bg_number": {
-          "description": "Bankgiro number",
           "type": "string",
-          "maxLength": 20
+          "maxLength": 20,
+          "description": "Bankgiro number"
         },
         "pg_number": {
-          "description": "Plusgiro number",
           "type": "string",
-          "maxLength": 20
+          "maxLength": 20,
+          "description": "Plusgiro number"
         },
         "terms_of_payment": {
-          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Payment terms code"
         },
         "comments": {
-          "description": "Internal comments about the supplier",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Internal comments about the supplier"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "name"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "supplier_number": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "supplier_number",
+        "name"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -1306,10 +1325,26 @@
       "required": [
         "supplier_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        }
+      },
+      "required": [
+        "success",
+        "message"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": true,
@@ -1727,22 +1762,204 @@
           "description": "The supplier number to retrieve"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "supplier_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "supplier_number": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zip_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "organisation_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vat_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "bank_account": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bg_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pg_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terms_of_payment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "supplier_number",
+        "name",
+        "email",
+        "phone",
+        "address1",
+        "address2",
+        "zip_code",
+        "city",
+        "country",
+        "organisation_number",
+        "vat_number",
+        "currency",
+        "active",
+        "bank_account",
+        "bg_number",
+        "pg_number",
+        "terms_of_payment",
+        "comments"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -2714,46 +2931,134 @@
       "type": "object",
       "properties": {
         "limit": {
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "description": "Maximum number of results to return (1-100, default 20)"
         },
         "page": {
-          "default": 1,
-          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "Page number for pagination (starts at 1)"
         },
         "filter": {
-          "description": "Filter by supplier status",
           "type": "string",
           "enum": [
             "active",
             "inactive"
-          ]
+          ],
+          "description": "Filter by supplier status"
         },
         "search_name": {
-          "description": "Search suppliers by name (partial match)",
           "type": "string",
-          "maxLength": 100
+          "maxLength": 100,
+          "description": "Search suppliers by name (partial match)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "number",
+          "description": "Total matching records in Fortnox"
+        },
+        "page": {
+          "type": "number",
+          "description": "Current page"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Page size"
+        },
+        "count": {
+          "type": "number",
+          "description": "Records in this page"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more pages exist"
+        },
+        "total_pages": {
+          "type": "number",
+          "description": "Total number of pages"
+        },
+        "suppliers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "supplier_number": {
+                "type": "string",
+                "description": "Fortnox supplier number"
+              },
+              "name": {
+                "type": "string",
+                "description": "Supplier name"
+              },
+              "email": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "city": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "organisation_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "supplier_number",
+              "name",
+              "email",
+              "city",
+              "organisation_number"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "count",
+        "has_more",
+        "total_pages",
+        "suppliers"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -3989,98 +4294,119 @@
           "description": "Supplier number to update (required)"
         },
         "name": {
-          "description": "Supplier name",
           "type": "string",
           "minLength": 1,
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Supplier name"
         },
         "organisation_number": {
-          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30
+          "maxLength": 30,
+          "description": "Organisation/company number"
         },
         "email": {
-          "description": "Primary email address",
           "type": "string",
-          "format": "email",
-          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          "description": "Primary email address"
         },
         "phone": {
-          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Primary phone number"
         },
         "address1": {
-          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 1"
         },
         "address2": {
-          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 2"
         },
         "zip_code": {
-          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10
+          "maxLength": 10,
+          "description": "Postal/ZIP code"
         },
         "city": {
-          "description": "City",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "City"
         },
         "country": {
-          "description": "Country name",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Country name"
         },
         "active": {
-          "description": "Whether the supplier is active",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the supplier is active"
         },
         "bank_account": {
-          "description": "Bank account number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Bank account number"
         },
         "bg_number": {
-          "description": "Bankgiro number",
           "type": "string",
-          "maxLength": 20
+          "maxLength": 20,
+          "description": "Bankgiro number"
         },
         "pg_number": {
-          "description": "Plusgiro number",
           "type": "string",
-          "maxLength": 20
+          "maxLength": 20,
+          "description": "Plusgiro number"
         },
         "terms_of_payment": {
-          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Payment terms code"
         },
         "comments": {
-          "description": "Internal comments",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Internal comments"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "supplier_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "supplier_number": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "supplier_number",
+        "name"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
