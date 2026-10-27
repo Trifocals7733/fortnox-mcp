@@ -25,11 +25,7 @@ const AccountNumber = (description: string) =>
   );
 
 const FinancialYear = optional(
-  Schema.Int.pipe(
-    describe(
-      "Fortnox year ID (1,2,3...), not a calendar year."
-    )
-  )
+  Schema.Int.pipe(describe("Fortnox year ID (1,2,3...), not a calendar year."))
 );
 
 const VoucherSeriesCode = (description: string) =>
@@ -42,13 +38,7 @@ const VoucherSeriesCode = (description: string) =>
 /** Filter shorthand shared by account_activity and search_vouchers. */
 const VoucherFilters = {
   financial_year: FinancialYear,
-  period: optional(
-    DatePeriodSchema.pipe(
-      describe(
-        "Named period; overrides from_date/to_date."
-      )
-    )
-  ),
+  period: optional(DatePeriodSchema.pipe(describe("Named period; overrides from_date/to_date."))),
   from_date: DateString("Filter vouchers from this date (YYYY-MM-DD)"),
   to_date: DateString("Filter vouchers to this date (YYYY-MM-DD)"),
   voucher_series: optional(
@@ -158,7 +148,9 @@ export const AccountActivitySchema = Schema.Struct({
     Schema.Int.pipe(
       Schema.check(Schema.isGreaterThanOrEqualTo(10)),
       Schema.check(Schema.isLessThanOrEqualTo(500)),
-      describe("Maximum vouchers to scan (10-500, default 500). Use date filtering for larger datasets.")
+      describe(
+        "Maximum vouchers to scan (10-500, default 500). Use date filtering for larger datasets."
+      )
     )
   ),
   response_format: ResponseFormatSchema
@@ -270,9 +262,7 @@ export const AccountActivityTransactionSchema = Schema.Struct({
 export const AccountActivityOutput = Schema.Struct({
   filter: Schema.Struct({
     accounts: Schema.Array(Schema.Finite),
-    account_range: Schema.NullOr(
-      Schema.Struct({ from: Schema.Finite, to: Schema.Finite })
-    ),
+    account_range: Schema.NullOr(Schema.Struct({ from: Schema.Finite, to: Schema.Finite })),
     financial_year: optionalValue(Schema.Finite),
     date_range: NullableString,
     voucher_series: NullableString

@@ -110,12 +110,22 @@ export function registerCustomerTools(server: McpServer): void {
           queryParams.organisationnumber = params.organisation_number;
         }
 
-        const response = await fortnoxRequest<CustomerListResponse>("/3/customers", "GET", undefined, queryParams);
+        const response = await fortnoxRequest<CustomerListResponse>(
+          "/3/customers",
+          "GET",
+          undefined,
+          queryParams
+        );
         const customers = response.Customers || [];
         const total = response.MetaInformation?.["@TotalResources"] || customers.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, customers.length),
+          ...buildPaginationMeta(
+            total,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
+            customers.length
+          ),
           customers: customers.map((c) => ({
             customer_number: c.CustomerNumber,
             name: c.Name,
@@ -135,7 +145,8 @@ export function registerCustomerTools(server: McpServer): void {
             total,
             params.page ?? 1,
             params.limit ?? DEFAULT_PAGE_SIZE,
-            (c) => `## ${c.Name} (${c.CustomerNumber})\n` +
+            (c) =>
+              `## ${c.Name} (${c.CustomerNumber})\n` +
               (c.Email ? `- **Email**: ${c.Email}\n` : "") +
               (c.City ? `- **City**: ${c.City}\n` : "") +
               (c.OrganisationNumber ? `- **Org.nr**: ${c.OrganisationNumber}` : "")
@@ -206,8 +217,14 @@ Returns:
             { label: "Name", value: customer.Name },
             { label: "Email", value: customer.Email },
             { label: "Phone", value: customer.Phone1 },
-            { label: "Address", value: [customer.Address1, customer.Address2].filter(Boolean).join(", ") },
-            { label: "ZIP/City", value: [customer.ZipCode, customer.City].filter(Boolean).join(" ") },
+            {
+              label: "Address",
+              value: [customer.Address1, customer.Address2].filter(Boolean).join(", ")
+            },
+            {
+              label: "ZIP/City",
+              value: [customer.ZipCode, customer.City].filter(Boolean).join(" ")
+            },
             { label: "Country", value: customer.Country },
             { label: "Organisation Number", value: customer.OrganisationNumber },
             { label: "VAT Number", value: customer.VATNumber },
@@ -247,7 +264,8 @@ Returns:
         };
 
         if (params.customer_number) customerData.CustomerNumber = params.customer_number;
-        if (params.organisation_number) customerData.OrganisationNumber = params.organisation_number;
+        if (params.organisation_number)
+          customerData.OrganisationNumber = params.organisation_number;
         if (params.email) customerData.Email = params.email;
         if (params.phone) customerData.Phone1 = params.phone;
         if (params.address1) customerData.Address1 = params.address1;
@@ -263,11 +281,9 @@ Returns:
         if (params.price_list) customerData.PriceList = params.price_list;
         if (params.comments) customerData.Comments = params.comments;
 
-        const response = await fortnoxRequest<CustomerResponse>(
-          "/3/customers",
-          "POST",
-          { Customer: customerData }
-        );
+        const response = await fortnoxRequest<CustomerResponse>("/3/customers", "POST", {
+          Customer: customerData
+        });
         const customer = response.Customer;
 
         const output = {
@@ -281,7 +297,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Customer Created\n\n` +
+          textContent =
+            `# Customer Created\n\n` +
             `**Customer Number**: ${customer.CustomerNumber}\n` +
             `**Name**: ${customer.Name}\n\n` +
             `Customer has been successfully created in Fortnox.`;
@@ -321,7 +338,8 @@ Returns:
         const customerData: Record<string, unknown> = {};
 
         if (params.name) customerData.Name = params.name;
-        if (params.organisation_number) customerData.OrganisationNumber = params.organisation_number;
+        if (params.organisation_number)
+          customerData.OrganisationNumber = params.organisation_number;
         if (params.email) customerData.Email = params.email;
         if (params.phone) customerData.Phone1 = params.phone;
         if (params.address1) customerData.Address1 = params.address1;
@@ -354,7 +372,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Customer Updated\n\n` +
+          textContent =
+            `# Customer Updated\n\n` +
             `**Customer Number**: ${customer.CustomerNumber}\n` +
             `**Name**: ${customer.Name}\n\n` +
             `Customer has been successfully updated.`;

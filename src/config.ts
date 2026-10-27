@@ -17,7 +17,7 @@ export function loadConfig(): ServerConfig {
   const config: ServerConfig = {
     authMode,
     transport,
-    port,
+    port
   };
 
   if (authMode === "remote") {
@@ -25,15 +25,11 @@ export function loadConfig(): ServerConfig {
     config.jwtSecret = process.env.JWT_SECRET;
 
     if (!config.serverUrl) {
-      throw new Error(
-        "SERVER_URL environment variable is required in remote mode"
-      );
+      throw new Error("SERVER_URL environment variable is required in remote mode");
     }
 
     if (!config.jwtSecret) {
-      throw new Error(
-        "JWT_SECRET environment variable is required in remote mode"
-      );
+      throw new Error("JWT_SECRET environment variable is required in remote mode");
     }
 
     // In remote mode, always use HTTP transport

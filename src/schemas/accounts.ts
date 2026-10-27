@@ -47,9 +47,7 @@ export const CreateAccountSchema = Schema.Struct({
     describe("Account description (required)")
   ),
   vat_code: ShortText(10, "VAT code for the account"),
-  active: optional(
-    Schema.Boolean.pipe(describe("Whether the account is active (default true)"))
-  ),
+  active: optional(Schema.Boolean.pipe(describe("Whether the account is active (default true)"))),
   cost_center_settings: optional(
     SettingValue.pipe(describe("Cost center settings for the account"))
   ),

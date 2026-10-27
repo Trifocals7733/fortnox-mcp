@@ -165,17 +165,22 @@ export function registerInvoiceTools(server: McpServer): void {
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<InvoiceListResponse>(FORTNOX_PATHS.invoices, "GET", undefined, queryParams);
+          const response = await fortnoxRequest<InvoiceListResponse>(
+            FORTNOX_PATHS.invoices,
+            "GET",
+            undefined,
+            queryParams
+          );
           invoices = response.Invoices || [];
           total = response.MetaInformation?.["@TotalResources"] || invoices.length;
         }
 
         // Apply client-side amount filters
         if (params.min_amount !== undefined) {
-          invoices = invoices.filter(inv => (inv.Total || 0) >= params.min_amount!);
+          invoices = invoices.filter((inv) => (inv.Total || 0) >= params.min_amount!);
         }
         if (params.max_amount !== undefined) {
-          invoices = invoices.filter(inv => (inv.Total || 0) <= params.max_amount!);
+          invoices = invoices.filter((inv) => (inv.Total || 0) <= params.max_amount!);
         }
 
         // Build pagination metadata
@@ -189,8 +194,16 @@ export function registerInvoiceTools(server: McpServer): void {
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, invoices.length),
-              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
+              ...buildPaginationMeta(
+                total,
+                params.page ?? 1,
+                params.limit ?? DEFAULT_PAGE_SIZE,
+                invoices.length
+              ),
+              next_offset:
+                (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total
+                  ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE)
+                  : undefined
             };
 
         const output = {
@@ -235,13 +248,21 @@ export function registerInvoiceTools(server: McpServer): void {
             lines.push("");
 
             for (const inv of invoices) {
-              const status = inv.Cancelled ? "CANCELLED" :
-                (inv.Balance === 0 ? "PAID" :
-                  (inv.Booked ? "BOOKED" : "DRAFT"));
+              const status = inv.Cancelled
+                ? "CANCELLED"
+                : inv.Balance === 0
+                  ? "PAID"
+                  : inv.Booked
+                    ? "BOOKED"
+                    : "DRAFT";
               lines.push(`## Invoice #${inv.DocumentNumber}`);
               lines.push(`- **Customer**: ${inv.CustomerName || inv.CustomerNumber}`);
-              lines.push(`- **Date**: ${formatDisplayDate(inv.InvoiceDate)} | **Due**: ${formatDisplayDate(inv.DueDate)}`);
-              lines.push(`- **Total**: ${formatMoney(inv.Total, inv.Currency)} | **Balance**: ${formatMoney(inv.Balance, inv.Currency)}`);
+              lines.push(
+                `- **Date**: ${formatDisplayDate(inv.InvoiceDate)} | **Due**: ${formatDisplayDate(inv.DueDate)}`
+              );
+              lines.push(
+                `- **Total**: ${formatMoney(inv.Total, inv.Currency)} | **Balance**: ${formatMoney(inv.Balance, inv.Currency)}`
+              );
               lines.push(`- **Status**: ${status}`);
               lines.push("");
             }
@@ -255,14 +276,20 @@ export function registerInvoiceTools(server: McpServer): void {
               params.page ?? 1,
               params.limit ?? DEFAULT_PAGE_SIZE,
               (inv) => {
-                const status = inv.Cancelled ? "CANCELLED" :
-                  (inv.Balance === 0 ? "PAID" :
-                    (inv.Booked ? "BOOKED" : "DRAFT"));
-                return `## Invoice #${inv.DocumentNumber}\n` +
+                const status = inv.Cancelled
+                  ? "CANCELLED"
+                  : inv.Balance === 0
+                    ? "PAID"
+                    : inv.Booked
+                      ? "BOOKED"
+                      : "DRAFT";
+                return (
+                  `## Invoice #${inv.DocumentNumber}\n` +
                   `- **Customer**: ${inv.CustomerName || inv.CustomerNumber}\n` +
                   `- **Date**: ${formatDisplayDate(inv.InvoiceDate)} | **Due**: ${formatDisplayDate(inv.DueDate)}\n` +
                   `- **Total**: ${formatMoney(inv.Total, inv.Currency)} | **Balance**: ${formatMoney(inv.Balance, inv.Currency)}\n` +
-                  `- **Status**: ${status}`;
+                  `- **Status**: ${status}`
+                );
               }
             );
           }
@@ -339,9 +366,13 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const status = invoice.Cancelled ? "CANCELLED" :
-            (invoice.Balance === 0 ? "PAID" :
-              (invoice.Booked ? "BOOKED" : "DRAFT"));
+          const status = invoice.Cancelled
+            ? "CANCELLED"
+            : invoice.Balance === 0
+              ? "PAID"
+              : invoice.Booked
+                ? "BOOKED"
+                : "DRAFT";
 
           const lines = [
             `# Invoice #${invoice.DocumentNumber}`,
@@ -434,13 +465,12 @@ Returns:
         if (params.comments) invoiceData.Comments = params.comments;
         if (params.remarks) invoiceData.Remarks = params.remarks;
         if (params.freight !== undefined) invoiceData.Freight = params.freight;
-        if (params.administration_fee !== undefined) invoiceData.AdministrationFee = params.administration_fee;
+        if (params.administration_fee !== undefined)
+          invoiceData.AdministrationFee = params.administration_fee;
 
-        const response = await fortnoxRequest<InvoiceResponse>(
-          FORTNOX_PATHS.invoices,
-          "POST",
-          { Invoice: invoiceData }
-        );
+        const response = await fortnoxRequest<InvoiceResponse>(FORTNOX_PATHS.invoices, "POST", {
+          Invoice: invoiceData
+        });
         const invoice = response.Invoice;
 
         const output = {
@@ -457,7 +487,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Invoice Created\n\n` +
+          textContent =
+            `# Invoice Created\n\n` +
             `**Document Number**: ${invoice.DocumentNumber}\n` +
             `**Customer**: ${invoice.CustomerName || invoice.CustomerNumber}\n` +
             `**Total**: ${formatMoney(invoice.Total, invoice.Currency)}\n\n` +
@@ -520,7 +551,8 @@ Returns:
         if (params.comments) invoiceData.Comments = params.comments;
         if (params.remarks) invoiceData.Remarks = params.remarks;
         if (params.freight !== undefined) invoiceData.Freight = params.freight;
-        if (params.administration_fee !== undefined) invoiceData.AdministrationFee = params.administration_fee;
+        if (params.administration_fee !== undefined)
+          invoiceData.AdministrationFee = params.administration_fee;
 
         const response = await fortnoxRequest<InvoiceResponse>(
           `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}`,
@@ -540,7 +572,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Invoice Updated\n\n` +
+          textContent =
+            `# Invoice Updated\n\n` +
             `**Document Number**: ${invoice.DocumentNumber}\n` +
             `**Total**: ${formatMoney(invoice.Total, invoice.Currency)}\n\n` +
             `Invoice has been updated.`;
@@ -594,7 +627,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Invoice Booked\n\n` +
+          textContent =
+            `# Invoice Booked\n\n` +
             `Invoice **#${invoice.DocumentNumber}** has been successfully booked.\n\n` +
             `Accounting entries have been created.`;
         }
@@ -647,7 +681,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Invoice Cancelled\n\n` +
+          textContent =
+            `# Invoice Cancelled\n\n` +
             `Invoice **#${invoice.DocumentNumber}** has been cancelled.`;
         }
 
@@ -700,7 +735,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Credit Invoice Created\n\n` +
+          textContent =
+            `# Credit Invoice Created\n\n` +
             `**Credit Invoice**: #${creditInvoice.DocumentNumber}\n` +
             `**Original Invoice**: #${params.document_number}\n` +
             `**Total**: ${formatMoney(creditInvoice.Total, creditInvoice.Currency)}`;
@@ -755,7 +791,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Invoice Sent\n\n` +
+          textContent =
+            `# Invoice Sent\n\n` +
             `Invoice **#${invoice.DocumentNumber}** has been sent by email to the customer.`;
         }
 

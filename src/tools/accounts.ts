@@ -92,12 +92,22 @@ export function registerAccountTools(server: McpServer): void {
         if (params.from_account) queryParams.fromaccount = params.from_account;
         if (params.to_account) queryParams.toaccount = params.to_account;
 
-        const response = await fortnoxRequest<AccountListResponse>("/3/accounts", "GET", undefined, queryParams);
+        const response = await fortnoxRequest<AccountListResponse>(
+          "/3/accounts",
+          "GET",
+          undefined,
+          queryParams
+        );
         const accounts = response.Accounts || [];
         const total = response.MetaInformation?.["@TotalResources"] || accounts.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, accounts.length),
+          ...buildPaginationMeta(
+            total,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
+            accounts.length
+          ),
           accounts: accounts.map((a) => ({
             account_number: a.Number,
             description: a.Description,
@@ -216,15 +226,14 @@ Returns:
 
         if (params.vat_code) accountData.VATCode = params.vat_code;
         accountData.Active = params.active ?? true;
-        if (params.cost_center_settings) accountData.CostCenterSettings = params.cost_center_settings;
+        if (params.cost_center_settings)
+          accountData.CostCenterSettings = params.cost_center_settings;
         if (params.project_settings) accountData.ProjectSettings = params.project_settings;
         if (params.sru_code !== undefined) accountData.SRU = params.sru_code;
 
-        const response = await fortnoxRequest<AccountResponse>(
-          "/3/accounts",
-          "POST",
-          { Account: accountData }
-        );
+        const response = await fortnoxRequest<AccountResponse>("/3/accounts", "POST", {
+          Account: accountData
+        });
         const account = response.Account;
 
         const output = {
@@ -238,7 +247,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Account Created\n\n` +
+          textContent =
+            `# Account Created\n\n` +
             `**Account Number**: ${account.Number}\n` +
             `**Description**: ${account.Description}\n\n` +
             `Account has been successfully created.`;
@@ -273,7 +283,8 @@ Returns:
         if (params.description) accountData.Description = params.description;
         if (params.vat_code) accountData.VATCode = params.vat_code;
         if (params.active !== undefined) accountData.Active = params.active;
-        if (params.cost_center_settings) accountData.CostCenterSettings = params.cost_center_settings;
+        if (params.cost_center_settings)
+          accountData.CostCenterSettings = params.cost_center_settings;
         if (params.project_settings) accountData.ProjectSettings = params.project_settings;
 
         const response = await fortnoxRequest<AccountResponse>(
@@ -294,7 +305,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Account Updated\n\n` +
+          textContent =
+            `# Account Updated\n\n` +
             `**Account Number**: ${account.Number}\n` +
             `**Description**: ${account.Description}\n\n` +
             `Account has been successfully updated.`;
@@ -332,10 +344,7 @@ Returns:
     },
     async (params: DeleteAccountInput) => {
       try {
-        await fortnoxRequest(
-          `/3/accounts/${params.account_number}`,
-          "DELETE"
-        );
+        await fortnoxRequest(`/3/accounts/${params.account_number}`, "DELETE");
 
         const output = {
           success: true,

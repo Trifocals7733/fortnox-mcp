@@ -80,7 +80,9 @@ function main(): void {
       console.log(`  ${databaseNumber}  ${describe(path)}`);
     }
     if (active && !activeNumber) {
-      console.log(`\nThe active token belongs to no archive. Archive it with:\n  npm run company -- save <databaseNumber>`);
+      console.log(
+        `\nThe active token belongs to no archive. Archive it with:\n  npm run company -- save <databaseNumber>`
+      );
     }
     return;
   }
@@ -104,7 +106,9 @@ function main(): void {
     }
     const path = known.get(argument);
     if (!path) {
-      console.error(`No archive for company ${argument}. Known: ${[...known.keys()].join(", ") || "none"}`);
+      console.error(
+        `No archive for company ${argument}. Known: ${[...known.keys()].join(", ") || "none"}`
+      );
       process.exit(1);
     }
 

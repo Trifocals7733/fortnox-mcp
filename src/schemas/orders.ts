@@ -20,28 +20,14 @@ export const OrderFilters = {
   customer_number: ShortText(50, "Filter by customer number"),
   from_date: DateString("Filter from this date (YYYY-MM-DD)"),
   to_date: DateString("Filter to this date (YYYY-MM-DD)"),
-  period: optional(
-    DatePeriodSchema.pipe(
-      describe(
-        "Named period; overrides from_date/to_date."
-      )
-    )
-  )
+  period: optional(DatePeriodSchema.pipe(describe("Named period; overrides from_date/to_date.")))
 };
 
 const SortOrder = optional(
-  Schema.Literals(["ascending", "descending"]).pipe(
-    describe("default 'ascending'")
-  )
+  Schema.Literals(["ascending", "descending"]).pipe(describe("default 'ascending'"))
 );
 
-const FetchAll = optional(
-  Schema.Boolean.pipe(
-    describe(
-      "Auto-paginate up to 10,000 results."
-    )
-  )
-);
+const FetchAll = optional(Schema.Boolean.pipe(describe("Auto-paginate up to 10,000 results.")));
 
 export const ListOrdersSchema = Schema.Struct({
   ...ListPaginationInput,
@@ -54,9 +40,13 @@ export const ListOrdersSchema = Schema.Struct({
   ),
   ...OrderFilters,
   sortby: optional(
-    Schema.Literals(["customername", "customernumber", "documentnumber", "orderdate", "total"]).pipe(
-      describe("Field to sort results by")
-    )
+    Schema.Literals([
+      "customername",
+      "customernumber",
+      "documentnumber",
+      "orderdate",
+      "total"
+    ]).pipe(describe("Field to sort results by"))
   ),
   sortorder: SortOrder,
   fetch_all: FetchAll,
@@ -69,16 +59,18 @@ export const ListOffersSchema = Schema.Struct({
   ...ListPaginationInput,
   filter: optional(
     Schema.Literals(["cancelled", "expired", "ordercreated", "ordernotcreated"]).pipe(
-      describe(
-        "Filter offers by status: 'cancelled', 'expired', 'ordercreated', 'ordernotcreated'"
-      )
+      describe("Filter offers by status: 'cancelled', 'expired', 'ordercreated', 'ordernotcreated'")
     )
   ),
   ...OrderFilters,
   sortby: optional(
-    Schema.Literals(["customername", "customernumber", "documentnumber", "offerdate", "total"]).pipe(
-      describe("Field to sort results by")
-    )
+    Schema.Literals([
+      "customername",
+      "customernumber",
+      "documentnumber",
+      "offerdate",
+      "total"
+    ]).pipe(describe("Field to sort results by"))
   ),
   sortorder: SortOrder,
   fetch_all: FetchAll,

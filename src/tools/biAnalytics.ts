@@ -264,11 +264,19 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         );
 
         // Fetch unpaid supplier invoices (payables) with error handling for missing scope
-        let payablesResult: { items: FortnoxSupplierInvoiceListItem[]; total: number; truncated: boolean; truncationReason?: string | undefined };
+        let payablesResult: {
+          items: FortnoxSupplierInvoiceListItem[];
+          total: number;
+          truncated: boolean;
+          truncationReason?: string | undefined;
+        };
         let supplierInvoicesWarning: string | undefined;
 
         try {
-          payablesResult = await fetchAllPages<FortnoxSupplierInvoiceListItem, SupplierInvoiceListResponse>(
+          payablesResult = await fetchAllPages<
+            FortnoxSupplierInvoiceListItem,
+            SupplierInvoiceListResponse
+          >(
             "/3/supplierinvoices",
             { filter: "unpaid" },
             (r) => r.SupplierInvoices || [],
@@ -276,8 +284,14 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           );
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
-          if (msg.includes("behörighet") || msg.includes("403") || msg.includes("Permission") || msg.includes("scope")) {
-            supplierInvoicesWarning = "⚠️ Supplier invoices unavailable (missing scope). Outflows show as 0.";
+          if (
+            msg.includes("behörighet") ||
+            msg.includes("403") ||
+            msg.includes("Permission") ||
+            msg.includes("scope")
+          ) {
+            supplierInvoicesWarning =
+              "⚠️ Supplier invoices unavailable (missing scope). Outflows show as 0.";
             payablesResult = { items: [], total: 0, truncated: false };
           } else {
             throw error;
@@ -291,8 +305,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           return isDueDateInRange(dueDate, today, futureDate);
         };
 
-        const receivables = receivablesResult.items.filter(inv => filterByDueDate(inv.DueDate));
-        const payables = payablesResult.items.filter(inv => filterByDueDate(inv.DueDate));
+        const receivables = receivablesResult.items.filter((inv) => filterByDueDate(inv.DueDate));
+        const payables = payablesResult.items.filter((inv) => filterByDueDate(inv.DueDate));
 
         // Generate time buckets
         const buckets = generateTimeBucketKeys(today, futureDate, params.group_by ?? "week");
@@ -301,12 +315,12 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         const receivablesByPeriod = groupByTimePeriod(
           receivables,
           (inv) => inv.DueDate,
-          (params.group_by ?? "week")
+          params.group_by ?? "week"
         );
         const payablesByPeriod = groupByTimePeriod(
           payables,
           (inv) => inv.DueDate,
-          (params.group_by ?? "week")
+          params.group_by ?? "week"
         );
 
         // Handle overdue items - put them in the first bucket
@@ -314,14 +328,16 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           const firstBucket = buckets[0];
 
           // Move overdue receivables to first bucket
-          const overdueReceivables = receivables.filter(inv => inv.DueDate && inv.DueDate < today);
+          const overdueReceivables = receivables.filter(
+            (inv) => inv.DueDate && inv.DueDate < today
+          );
           if (overdueReceivables.length > 0) {
             const existing = receivablesByPeriod.get(firstBucket) || [];
             receivablesByPeriod.set(firstBucket, [...existing, ...overdueReceivables]);
           }
 
           // Move overdue payables to first bucket
-          const overduePayables = payables.filter(inv => inv.DueDate && inv.DueDate < today);
+          const overduePayables = payables.filter((inv) => inv.DueDate && inv.DueDate < today);
           if (overduePayables.length > 0) {
             const existing = payablesByPeriod.get(firstBucket) || [];
             payablesByPeriod.set(firstBucket, [...existing, ...overduePayables]);
@@ -344,8 +360,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           const periodReceivables = receivablesByPeriod.get(bucket) || [];
           const periodPayables = payablesByPeriod.get(bucket) || [];
 
-          const inflows = sumBy(periodReceivables, inv => inv.Balance || 0);
-          const outflows = sumBy(periodPayables, inv => inv.Balance || 0);
+          const inflows = sumBy(periodReceivables, (inv) => inv.Balance || 0);
+          const outflows = sumBy(periodPayables, (inv) => inv.Balance || 0);
           const netFlow = inflows - outflows;
           runningBalance += netFlow;
 
@@ -361,8 +377,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         }
 
         // Calculate totals
-        const totalInflows = sumBy(receivables, inv => inv.Balance || 0);
-        const totalOutflows = sumBy(payables, inv => inv.Balance || 0);
+        const totalInflows = sumBy(receivables, (inv) => inv.Balance || 0);
+        const totalOutflows = sumBy(payables, (inv) => inv.Balance || 0);
 
         const output: Record<string, unknown> = {
           forecast: {
@@ -394,10 +410,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            "# Cash Flow Forecast",
-            ""
-          ];
+          const lines: string[] = ["# Cash Flow Forecast", ""];
 
           if (supplierInvoicesWarning) {
             lines.push(supplierInvoicesWarning);
@@ -407,7 +420,9 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           lines.push(
             `**Period**: ${today} to ${futureDate} (${params.horizon_days ?? 90} days)`,
             `**Grouped by**: ${params.group_by ?? "week"}`,
-            params.starting_balance ? `**Starting Balance**: ${formatMoney(params.starting_balance)}` : "",
+            params.starting_balance
+              ? `**Starting Balance**: ${formatMoney(params.starting_balance)}`
+              : "",
             "",
             "## Summary",
             "",
@@ -424,7 +439,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           );
 
           // Filter empty lines added by conditional starting_balance
-          const filteredLines = lines.filter(line => line !== "");
+          const filteredLines = lines.filter((line) => line !== "");
 
           if (output.truncated) {
             filteredLines.push("");
@@ -493,14 +508,17 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
         switch (params.group_by ?? "week") {
           case "customer":
-            groups = aggregateByDimension(orders, o => o.CustomerName || o.CustomerNumber || "unknown");
+            groups = aggregateByDimension(
+              orders,
+              (o) => o.CustomerName || o.CustomerNumber || "unknown"
+            );
             break;
           case "month":
-            groups = groupByTimePeriod(orders, o => o.OrderDate, "month");
+            groups = groupByTimePeriod(orders, (o) => o.OrderDate, "month");
             break;
           case "status":
           default:
-            groups = aggregateByDimension(orders, o => getStatus(o));
+            groups = aggregateByDimension(orders, (o) => getStatus(o));
             break;
         }
 
@@ -509,15 +527,15 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           .map(([key, items]) => ({
             key,
             count: items.length,
-            total_value: sumBy(items, o => o.Total || 0),
-            average_value: items.length > 0 ? sumBy(items, o => o.Total || 0) / items.length : 0
+            total_value: sumBy(items, (o) => o.Total || 0),
+            average_value: items.length > 0 ? sumBy(items, (o) => o.Total || 0) / items.length : 0
           }))
           .sort((a, b) => b.total_value - a.total_value);
 
         // Calculate overall summary
-        const pendingOrders = orders.filter(o => !o.Cancelled && !o.InvoiceReference);
-        const invoicedOrders = orders.filter(o => o.InvoiceReference && !o.Cancelled);
-        const cancelledOrders = orders.filter(o => o.Cancelled);
+        const pendingOrders = orders.filter((o) => !o.Cancelled && !o.InvoiceReference);
+        const invoicedOrders = orders.filter((o) => o.InvoiceReference && !o.Cancelled);
+        const cancelledOrders = orders.filter((o) => o.Cancelled);
 
         const output = {
           period: params.period || null,
@@ -525,13 +543,13 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           group_by: params.group_by ?? "week",
           summary: {
             total_orders: orders.length,
-            total_value: sumBy(orders, o => o.Total || 0),
+            total_value: sumBy(orders, (o) => o.Total || 0),
             pending_orders: pendingOrders.length,
-            pending_value: sumBy(pendingOrders, o => o.Total || 0),
+            pending_value: sumBy(pendingOrders, (o) => o.Total || 0),
             invoiced_orders: invoicedOrders.length,
-            invoiced_value: sumBy(invoicedOrders, o => o.Total || 0),
+            invoiced_value: sumBy(invoicedOrders, (o) => o.Total || 0),
             cancelled_orders: cancelledOrders.length,
-            unique_customers: countUnique(orders, o => o.CustomerNumber || "unknown")
+            unique_customers: countUnique(orders, (o) => o.CustomerNumber || "unknown")
           },
           groups: groupStats,
           truncated: result.truncated,
@@ -542,10 +560,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            "# Order Pipeline",
-            ""
-          ];
+          const lines: string[] = ["# Order Pipeline", ""];
 
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
@@ -556,20 +571,30 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           lines.push("");
           lines.push("| Metric | Count | Value |");
           lines.push("|--------|-------|-------|");
-          lines.push(`| Total Orders | ${orders.length} | ${formatMoney(output.summary.total_value)} |`);
-          lines.push(`| **Pending (Backlog)** | **${pendingOrders.length}** | **${formatMoney(output.summary.pending_value)}** |`);
-          lines.push(`| Invoiced | ${invoicedOrders.length} | ${formatMoney(output.summary.invoiced_value)} |`);
+          lines.push(
+            `| Total Orders | ${orders.length} | ${formatMoney(output.summary.total_value)} |`
+          );
+          lines.push(
+            `| **Pending (Backlog)** | **${pendingOrders.length}** | **${formatMoney(output.summary.pending_value)}** |`
+          );
+          lines.push(
+            `| Invoiced | ${invoicedOrders.length} | ${formatMoney(output.summary.invoiced_value)} |`
+          );
           lines.push(`| Cancelled | ${cancelledOrders.length} | - |`);
           lines.push(`| Unique Customers | ${output.summary.unique_customers} | - |`);
 
           lines.push("");
           lines.push(`## Breakdown by ${params.group_by}`);
           lines.push("");
-          lines.push(`| ${params.group_by === "customer" ? "Customer" : params.group_by === "month" ? "Month" : "Status"} | Orders | Value | Avg Value |`);
+          lines.push(
+            `| ${params.group_by === "customer" ? "Customer" : params.group_by === "month" ? "Month" : "Status"} | Orders | Value | Avg Value |`
+          );
           lines.push("|--------|--------|-------|-----------|");
 
           for (const group of groupStats.slice(0, 20)) {
-            lines.push(`| ${group.key} | ${group.count} | ${formatMoney(group.total_value)} | ${formatMoney(group.average_value)} |`);
+            lines.push(
+              `| ${group.key} | ${group.count} | ${formatMoney(group.total_value)} | ${formatMoney(group.average_value)} |`
+            );
           }
 
           if (groupStats.length > 20) {
@@ -640,25 +665,25 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         ]);
 
         // Filter out cancelled items
-        const offers = offersResult.items.filter(o => !o.Cancelled);
-        const orders = ordersResult.items.filter(o => !o.Cancelled);
-        const invoices = invoicesResult.items.filter(i => !i.Cancelled);
+        const offers = offersResult.items.filter((o) => !o.Cancelled);
+        const orders = ordersResult.items.filter((o) => !o.Cancelled);
+        const invoices = invoicesResult.items.filter((i) => !i.Cancelled);
 
         // Count converted offers (those with OrderReference)
-        const convertedOffers = offers.filter(o => o.OrderReference);
+        const convertedOffers = offers.filter((o) => o.OrderReference);
 
         // Count converted orders (those with InvoiceReference)
-        const convertedOrders = orders.filter(o => o.InvoiceReference);
+        const convertedOrders = orders.filter((o) => o.InvoiceReference);
 
         // Calculate funnel metrics
         const offerCount = offers.length;
-        const offerValue = sumBy(offers, o => o.Total || 0);
+        const offerValue = sumBy(offers, (o) => o.Total || 0);
 
         const orderCount = orders.length;
-        const orderValue = sumBy(orders, o => o.Total || 0);
+        const orderValue = sumBy(orders, (o) => o.Total || 0);
 
         const invoiceCount = invoices.length;
-        const invoiceValue = sumBy(invoices, i => i.Total || 0);
+        const invoiceValue = sumBy(invoices, (i) => i.Total || 0);
 
         // Conversion rates
         const offerToOrderRate = offerCount > 0 ? (convertedOffers.length / offerCount) * 100 : 0;
@@ -719,10 +744,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            "# Sales Funnel Analysis",
-            ""
-          ];
+          const lines: string[] = ["# Sales Funnel Analysis", ""];
 
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
@@ -734,15 +756,33 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           lines.push("");
           lines.push("## Conversion Rates");
           lines.push("");
-          lines.push(`- **Offer → Order**: ${offerToOrderRate.toFixed(1)}% (${convertedOffers.length} of ${offerCount})`);
-          lines.push(`- **Order → Invoice**: ${orderToInvoiceRate.toFixed(1)}% (${convertedOrders.length} of ${orderCount})`);
+          lines.push(
+            `- **Offer → Order**: ${offerToOrderRate.toFixed(1)}% (${convertedOffers.length} of ${offerCount})`
+          );
+          lines.push(
+            `- **Order → Invoice**: ${orderToInvoiceRate.toFixed(1)}% (${convertedOrders.length} of ${orderCount})`
+          );
           lines.push(`- **Overall (Offer → Invoice)**: ${overallConversionRate.toFixed(1)}%`);
 
           lines.push("");
           lines.push("## Pipeline Value");
           lines.push("");
-          lines.push(`- **Open Offers**: ${formatMoney(sumBy(offers.filter(o => !o.OrderReference), o => o.Total || 0))} (${offerCount - convertedOffers.length} offers)`);
-          lines.push(`- **Open Orders**: ${formatMoney(sumBy(orders.filter(o => !o.InvoiceReference), o => o.Total || 0))} (${orderCount - convertedOrders.length} orders)`);
+          lines.push(
+            `- **Open Offers**: ${formatMoney(
+              sumBy(
+                offers.filter((o) => !o.OrderReference),
+                (o) => o.Total || 0
+              )
+            )} (${offerCount - convertedOffers.length} offers)`
+          );
+          lines.push(
+            `- **Open Orders**: ${formatMoney(
+              sumBy(
+                orders.filter((o) => !o.InvoiceReference),
+                (o) => o.Total || 0
+              )
+            )} (${orderCount - convertedOrders.length} orders)`
+          );
 
           textContent = lines.join("\n");
         }
@@ -793,19 +833,22 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           (r) => r.MetaInformation?.["@TotalResources"] || 0
         );
 
-        const invoices = result.items.filter(i => !i.Cancelled);
+        const invoices = result.items.filter((i) => !i.Cancelled);
 
         // Aggregate by product - use invoice totals grouped by customer as proxy
         // Note: Full product breakdown requires fetching each invoice detail which is expensive
         // For a real implementation, you'd need to fetch invoice details with rows
         // For now, we'll show customer-based analytics as a placeholder
 
-        const customerStats = new Map<string, {
-          customer_number: string;
-          customer_name: string;
-          revenue: number;
-          invoice_count: number;
-        }>();
+        const customerStats = new Map<
+          string,
+          {
+            customer_number: string;
+            customer_name: string;
+            revenue: number;
+            invoice_count: number;
+          }
+        >();
 
         for (const inv of invoices) {
           const key = inv.CustomerNumber || "unknown";
@@ -841,7 +884,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           date_range: dateRangeDescription || null,
           metric: params.metric,
           summary: {
-            total_revenue: sumBy(invoices, i => i.Total || 0),
+            total_revenue: sumBy(invoices, (i) => i.Total || 0),
             total_invoices: invoices.length,
             unique_customers: customerStats.size
           },
@@ -880,13 +923,17 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           lines.push(`- **Unique Customers**: ${output.summary.unique_customers}`);
           lines.push("");
 
-          lines.push(`## Top ${params.top_n ?? 10} by ${(params.metric ?? "revenue") === "revenue" ? "Revenue" : "Invoice Count"}`);
+          lines.push(
+            `## Top ${params.top_n ?? 10} by ${(params.metric ?? "revenue") === "revenue" ? "Revenue" : "Invoice Count"}`
+          );
           lines.push("");
           lines.push("| Rank | Customer | Revenue | Invoices |");
           lines.push("|------|----------|---------|----------|");
 
           for (const s of sortedStats) {
-            lines.push(`| ${sortedStats.indexOf(s) + 1} | ${s.customer_name} | ${formatMoney(s.revenue)} | ${s.invoice_count} |`);
+            lines.push(
+              `| ${sortedStats.indexOf(s) + 1} | ${s.customer_name} | ${formatMoney(s.revenue)} | ${s.invoice_count} |`
+            );
           }
 
           textContent = lines.join("\n");
@@ -944,15 +991,16 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           )
         ]);
 
-        const currentInvoices = currentResult.items.filter(i => !i.Cancelled);
-        const previousInvoices = previousResult.items.filter(i => !i.Cancelled);
+        const currentInvoices = currentResult.items.filter((i) => !i.Cancelled);
+        const previousInvoices = previousResult.items.filter((i) => !i.Cancelled);
 
         // Calculate metrics
         const calculateMetrics = (invoices: FortnoxInvoiceListItem[]) => ({
-          revenue: sumBy(invoices, i => i.Total || 0),
+          revenue: sumBy(invoices, (i) => i.Total || 0),
           invoice_count: invoices.length,
-          average_invoice: invoices.length > 0 ? sumBy(invoices, i => i.Total || 0) / invoices.length : 0,
-          new_customers: countUnique(invoices, i => i.CustomerNumber || "unknown")
+          average_invoice:
+            invoices.length > 0 ? sumBy(invoices, (i) => i.Total || 0) / invoices.length : 0,
+          new_customers: countUnique(invoices, (i) => i.CustomerNumber || "unknown")
         });
 
         const currentMetrics = calculateMetrics(currentInvoices);
@@ -996,7 +1044,10 @@ export function registerBIAnalyticsTools(server: McpServer): void {
             "",
             "## Comparison",
             "",
-            ...formatComparisonTableHeader(comparison.currentPeriod.description, comparison.previousPeriod.description)
+            ...formatComparisonTableHeader(
+              comparison.currentPeriod.description,
+              comparison.previousPeriod.description
+            )
           ];
 
           const metricLabels: Record<string, string> = {
@@ -1008,12 +1059,14 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
           for (const metric of params.metrics ?? ["revenue", "invoice_count"]) {
             const isCount = metric === "invoice_count" || metric === "new_customers";
-            lines.push(formatComparisonRow(
-              metricLabels[metric] || metric,
-              currentMetrics[metric as keyof typeof currentMetrics],
-              previousMetrics[metric as keyof typeof previousMetrics],
-              isCount
-            ));
+            lines.push(
+              formatComparisonRow(
+                metricLabels[metric] || metric,
+                currentMetrics[metric as keyof typeof currentMetrics],
+                previousMetrics[metric as keyof typeof previousMetrics],
+                isCount
+              )
+            );
           }
 
           textContent = lines.join("\n");
@@ -1069,12 +1122,12 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
         // Group by customer
         const currentByCustomer = aggregateByDimension(
-          currentResult.items.filter(i => !i.Cancelled),
-          i => i.CustomerNumber || "unknown"
+          currentResult.items.filter((i) => !i.Cancelled),
+          (i) => i.CustomerNumber || "unknown"
         );
         const previousByCustomer = aggregateByDimension(
-          previousResult.items.filter(i => !i.Cancelled),
-          i => i.CustomerNumber || "unknown"
+          previousResult.items.filter((i) => !i.Cancelled),
+          (i) => i.CustomerNumber || "unknown"
         );
 
         // Get all unique customers
@@ -1095,20 +1148,23 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           const currentInvoices = currentByCustomer.get(customerNumber) || [];
           const previousInvoices = previousByCustomer.get(customerNumber) || [];
 
-          const currentRevenue = sumBy(currentInvoices, i => i.Total || 0);
-          const previousRevenue = sumBy(previousInvoices, i => i.Total || 0);
+          const currentRevenue = sumBy(currentInvoices, (i) => i.Total || 0);
+          const previousRevenue = sumBy(previousInvoices, (i) => i.Total || 0);
 
           // Apply min_revenue filter
-          if (params.min_revenue && currentRevenue < params.min_revenue && previousRevenue < params.min_revenue) {
+          if (
+            params.min_revenue &&
+            currentRevenue < params.min_revenue &&
+            previousRevenue < params.min_revenue
+          ) {
             continue;
           }
 
           const growth = calculateGrowth(currentRevenue, previousRevenue);
 
           // Get customer name from most recent invoice
-          const customerName = currentInvoices[0]?.CustomerName ||
-            previousInvoices[0]?.CustomerName ||
-            customerNumber;
+          const customerName =
+            currentInvoices[0]?.CustomerName || previousInvoices[0]?.CustomerName || customerNumber;
 
           customerGrowth.push({
             customer_number: customerNumber,
@@ -1124,9 +1180,9 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         // Filter by show parameter
         let filteredGrowth = customerGrowth;
         if (params.show === "growing") {
-          filteredGrowth = customerGrowth.filter(c => c.trend === "up");
+          filteredGrowth = customerGrowth.filter((c) => c.trend === "up");
         } else if (params.show === "declining") {
-          filteredGrowth = customerGrowth.filter(c => c.trend === "down");
+          filteredGrowth = customerGrowth.filter((c) => c.trend === "down");
         }
 
         // Sort by absolute change
@@ -1145,9 +1201,9 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           filter: params.show,
           summary: {
             total_customers_analyzed: allCustomers.size,
-            growing_customers: customerGrowth.filter(c => c.trend === "up").length,
-            declining_customers: customerGrowth.filter(c => c.trend === "down").length,
-            flat_customers: customerGrowth.filter(c => c.trend === "flat").length
+            growing_customers: customerGrowth.filter((c) => c.trend === "up").length,
+            declining_customers: customerGrowth.filter((c) => c.trend === "down").length,
+            flat_customers: customerGrowth.filter((c) => c.trend === "flat").length
           },
           customers: topCustomers,
           truncated: currentResult.truncated || previousResult.truncated
@@ -1157,7 +1213,12 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const filterLabel = params.show === "growing" ? "Growing" : params.show === "declining" ? "Declining" : "All";
+          const filterLabel =
+            params.show === "growing"
+              ? "Growing"
+              : params.show === "declining"
+                ? "Declining"
+                : "All";
           const lines: string[] = [
             `# Customer Growth Analysis - ${filterLabel}`,
             "",
@@ -1178,7 +1239,9 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           ];
 
           for (const c of topCustomers) {
-            lines.push(`| ${c.customer_name} | ${formatMoney(c.current_revenue)} | ${formatMoney(c.previous_revenue)} | ${formatTrend(c.percent_change)} |`);
+            lines.push(
+              `| ${c.customer_name} | ${formatMoney(c.current_revenue)} | ${formatMoney(c.previous_revenue)} | ${formatTrend(c.percent_change)} |`
+            );
           }
 
           textContent = lines.join("\n");
@@ -1222,7 +1285,7 @@ For actual project financials, use fortnox_account_activity with project filteri
 
         // Filter to specific project if requested
         if (params.project_number) {
-          projects = projects.filter(p => p.ProjectNumber === params.project_number);
+          projects = projects.filter((p) => p.ProjectNumber === params.project_number);
         }
 
         if (projects.length === 0) {
@@ -1257,7 +1320,7 @@ For actual project financials, use fortnox_account_activity with project filteri
 
         // Note: Full project profitability would require fetching vouchers
         // and filtering by project. This is a simplified version.
-        const projectStats = projects.map(p => ({
+        const projectStats = projects.map((p) => ({
           project_number: p.ProjectNumber,
           description: p.Description || p.ProjectNumber,
           status: p.Status || "UNKNOWN",
@@ -1340,11 +1403,11 @@ For actual cost center data, use fortnox_account_activity with cost center filte
           (r) => r.MetaInformation?.["@TotalResources"] || 0
         );
 
-        let costCenters = costCentersResult.items.filter(cc => cc.Active !== false);
+        let costCenters = costCentersResult.items.filter((cc) => cc.Active !== false);
 
         // Filter to specific cost center if requested
         if (params.cost_center) {
-          costCenters = costCenters.filter(cc => cc.Code === params.cost_center);
+          costCenters = costCenters.filter((cc) => cc.Code === params.cost_center);
         }
 
         let dateRangeDescription: string | undefined;
@@ -1356,7 +1419,7 @@ For actual cost center data, use fortnox_account_activity with cost center filte
 
         // Note: Full cost center analysis would require fetching vouchers
         // and summing by cost center dimension
-        const costCenterStats = costCenters.map(cc => ({
+        const costCenterStats = costCenters.map((cc) => ({
           code: cc.Code,
           description: cc.Description || cc.Code,
           active: cc.Active !== false,
@@ -1367,9 +1430,10 @@ For actual cost center data, use fortnox_account_activity with cost center filte
         const output = {
           period: params.period || null,
           date_range: dateRangeDescription || null,
-          account_range: params.account_range_from || params.account_range_to
-            ? { from: params.account_range_from, to: params.account_range_to }
-            : null,
+          account_range:
+            params.account_range_from || params.account_range_to
+              ? { from: params.account_range_from, to: params.account_range_to }
+              : null,
           note: "Cost breakdown requires voucher analysis with cost center dimension. Showing cost center list.",
           cost_centers: costCenterStats,
           truncated: costCentersResult.truncated
@@ -1448,10 +1512,13 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           { class: "6xxx", name: "Other External Costs", amount: 0 },
           { class: "7xxx", name: "Depreciation", amount: 0 },
           { class: "8xxx", name: "Financial Items", amount: 0 }
-        ].filter(c => {
+        ].filter((c) => {
           const classStart = parseInt(c.class.replace("xxx", "000"));
           const classEnd = parseInt(c.class.replace("xxx", "999"));
-          return classStart <= (params.account_range_to ?? 9999) && classEnd >= (params.account_range_from ?? 4000);
+          return (
+            classStart <= (params.account_range_to ?? 9999) &&
+            classEnd >= (params.account_range_from ?? 4000)
+          );
         });
 
         const output = {
@@ -1481,7 +1548,9 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
           }
-          lines.push(`**Account Range**: ${params.account_range_from} - ${params.account_range_to}`);
+          lines.push(
+            `**Account Range**: ${params.account_range_from} - ${params.account_range_to}`
+          );
           lines.push("");
 
           lines.push("## Expense Categories");
@@ -1533,21 +1602,21 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
               },
               (r) => r.Invoices || [],
               (r) => r.MetaInformation?.["@TotalResources"] || 0
-            ).then(result => ({ year, result }))
+            ).then((result) => ({ year, result }))
           )
         );
 
         // Calculate metrics for each year
         const yearMetrics = yearResults.map(({ year, result }) => {
-          const invoices = result.items.filter(i => !i.Cancelled);
-          const revenue = sumBy(invoices, i => i.Total || 0);
+          const invoices = result.items.filter((i) => !i.Cancelled);
+          const revenue = sumBy(invoices, (i) => i.Total || 0);
 
           return {
             year,
             revenue,
             invoice_count: invoices.length,
             average_invoice: invoices.length > 0 ? revenue / invoices.length : 0,
-            customer_count: countUnique(invoices, i => i.CustomerNumber || "unknown"),
+            customer_count: countUnique(invoices, (i) => i.CustomerNumber || "unknown"),
             truncated: result.truncated
           };
         });
@@ -1572,7 +1641,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           years_compared: params.years,
           metrics: params.metrics,
           years: yearsWithGrowth,
-          truncated: yearResults.some(r => r.result.truncated)
+          truncated: yearResults.some((r) => r.result.truncated)
         };
 
         let textContent: string;
@@ -1582,7 +1651,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           const lines: string[] = [
             "# Yearly Comparison",
             "",
-            `**Years**: ${yearRanges.map(y => y.year).join(", ")}`,
+            `**Years**: ${yearRanges.map((y) => y.year).join(", ")}`,
             "",
             "## Year-over-Year Metrics",
             ""
@@ -1608,7 +1677,9 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
             lines.push("| Year | Invoices | YoY Change |");
             lines.push("|------|----------|------------|");
             for (const y of yearsWithGrowth) {
-              const change = y.growth?.invoice_count ? formatTrend(y.growth.invoice_count.percentChange) : "-";
+              const change = y.growth?.invoice_count
+                ? formatTrend(y.growth.invoice_count.percentChange)
+                : "-";
               lines.push(`| ${y.year} | ${y.invoice_count} | ${change} |`);
             }
             lines.push("");
@@ -1621,7 +1692,9 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
             lines.push("| Year | Customers | YoY Change |");
             lines.push("|------|-----------|------------|");
             for (const y of yearsWithGrowth) {
-              const change = y.growth?.customer_count ? formatTrend(y.growth.customer_count.percentChange) : "-";
+              const change = y.growth?.customer_count
+                ? formatTrend(y.growth.customer_count.percentChange)
+                : "-";
               lines.push(`| ${y.year} | ${y.customer_count} | ${change} |`);
             }
           }
@@ -1714,7 +1787,9 @@ For actual margin data, use fortnox_account_activity with:
           lines.push("Gross Margin % = (Gross Margin / Revenue) × 100");
           lines.push("```");
           lines.push("");
-          lines.push("To get actual values, this tool needs voucher data with proper account coding.");
+          lines.push(
+            "To get actual values, this tool needs voucher data with proper account coding."
+          );
 
           textContent = lines.join("\n");
         }

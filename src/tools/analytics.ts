@@ -1,11 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fetchAllPages } from "../services/api.js";
 import { ResponseFormat, FORTNOX_PATHS } from "../constants.js";
-import {
-  buildToolResponse,
-  buildErrorResponse,
-  formatMoney
-} from "../services/formatters.js";
+import { buildToolResponse, buildErrorResponse, formatMoney } from "../services/formatters.js";
 import {
   periodToDateRange,
   getPeriodDescription,
@@ -74,11 +70,11 @@ function calculateStats(invoices: FortnoxInvoiceListItem[]): {
     };
   }
 
-  const totals = invoices.map(inv => inv.Total || 0);
+  const totals = invoices.map((inv) => inv.Total || 0);
   const sum = totals.reduce((a, b) => a + b, 0);
   const balanceSum = invoices.reduce((a, inv) => a + (inv.Balance || 0), 0);
-  const paidCount = invoices.filter(inv => (inv.Balance || 0) === 0 && !inv.Cancelled).length;
-  const unpaidCount = invoices.filter(inv => (inv.Balance || 0) > 0).length;
+  const paidCount = invoices.filter((inv) => (inv.Balance || 0) === 0 && !inv.Cancelled).length;
+  const unpaidCount = invoices.filter((inv) => (inv.Balance || 0) > 0).length;
 
   return {
     count: invoices.length,
@@ -210,7 +206,7 @@ export function registerAnalyticsTools(server: McpServer): void {
         }
 
         if (params.include_details ?? false) {
-          output.invoices = invoices.map(inv => ({
+          output.invoices = invoices.map((inv) => ({
             document_number: inv.DocumentNumber,
             customer_number: inv.CustomerNumber,
             customer_name: inv.CustomerName || null,
@@ -226,10 +222,7 @@ export function registerAnalyticsTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            "# Invoice Summary",
-            ""
-          ];
+          const lines: string[] = ["# Invoice Summary", ""];
 
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
@@ -258,11 +251,15 @@ export function registerAnalyticsTools(server: McpServer): void {
             lines.push("");
             lines.push(`## Breakdown by ${params.group_by}`);
             lines.push("");
-            lines.push(`| ${params.group_by === "month" ? "Month" : params.group_by === "customer" ? "Customer" : "Status"} | Count | Total | Average |`);
+            lines.push(
+              `| ${params.group_by === "month" ? "Month" : params.group_by === "customer" ? "Customer" : "Status"} | Count | Total | Average |`
+            );
             lines.push(`|--------|-------|-------|---------|`);
 
             for (const group of groups) {
-              lines.push(`| ${group.key} | ${group.stats.count} | ${formatMoney(group.stats.total)} | ${formatMoney(group.stats.average)} |`);
+              lines.push(
+                `| ${group.key} | ${group.stats.count} | ${formatMoney(group.stats.total)} | ${formatMoney(group.stats.average)} |`
+              );
             }
           }
 
@@ -320,11 +317,14 @@ export function registerAnalyticsTools(server: McpServer): void {
         const invoices = result.items;
 
         // Group by customer
-        const customerMap = new Map<string, {
-          customer_number: string;
-          customer_name: string;
-          invoices: FortnoxInvoiceListItem[];
-        }>();
+        const customerMap = new Map<
+          string,
+          {
+            customer_number: string;
+            customer_name: string;
+            invoices: FortnoxInvoiceListItem[];
+          }
+        >();
 
         for (const inv of invoices) {
           const key = inv.CustomerNumber || "unknown";
@@ -339,7 +339,7 @@ export function registerAnalyticsTools(server: McpServer): void {
         }
 
         // Calculate metrics and sort
-        const customerStats = Array.from(customerMap.values()).map(c => {
+        const customerStats = Array.from(customerMap.values()).map((c) => {
           const totalAmount = c.invoices.reduce((sum, inv) => sum + (inv.Total || 0), 0);
           const unpaidAmount = c.invoices.reduce((sum, inv) => sum + (inv.Balance || 0), 0);
           const invoiceCount = c.invoices.length;
@@ -357,7 +357,7 @@ export function registerAnalyticsTools(server: McpServer): void {
         });
 
         // Sort by selected metric
-        const metricKey = (params.metric ?? "total_amount") as keyof typeof customerStats[0];
+        const metricKey = (params.metric ?? "total_amount") as keyof (typeof customerStats)[0];
         customerStats.sort((a, b) => (b[metricKey] as number) - (a[metricKey] as number));
 
         // Take top N
@@ -384,7 +384,7 @@ export function registerAnalyticsTools(server: McpServer): void {
             };
 
             if (params.include_details ?? false) {
-              customer.invoices = c.invoices.map(inv => ({
+              customer.invoices = c.invoices.map((inv) => ({
                 document_number: inv.DocumentNumber,
                 invoice_date: inv.InvoiceDate,
                 total: inv.Total || 0,
@@ -416,7 +416,9 @@ export function registerAnalyticsTools(server: McpServer): void {
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
           }
-          lines.push(`**Invoices analyzed**: ${invoices.length} from ${customerMap.size} customers`);
+          lines.push(
+            `**Invoices analyzed**: ${invoices.length} from ${customerMap.size} customers`
+          );
           lines.push("");
 
           if (result.truncated) {
@@ -424,21 +426,26 @@ export function registerAnalyticsTools(server: McpServer): void {
             lines.push("");
           }
 
-          lines.push(`| Rank | Customer | ${metricLabels[metricKey]} | Invoices | Total | Unpaid |`);
-          lines.push(`|------|----------|${"-".repeat(metricLabels[metricKey].length + 2)}|----------|-------|--------|`);
+          lines.push(
+            `| Rank | Customer | ${metricLabels[metricKey]} | Invoices | Total | Unpaid |`
+          );
+          lines.push(
+            `|------|----------|${"-".repeat(metricLabels[metricKey].length + 2)}|----------|-------|--------|`
+          );
 
           for (const c of topCustomers) {
-            const metricValue = metricKey === "invoice_count"
-              ? c.invoice_count.toString()
-              : formatMoney(typeof c[metricKey] === "number" ? (c[metricKey] as number) : 0);
+            const metricValue =
+              metricKey === "invoice_count"
+                ? c.invoice_count.toString()
+                : formatMoney(typeof c[metricKey] === "number" ? (c[metricKey] as number) : 0);
 
             lines.push(
-              `| ${(output.customers as Array<{ rank: number }>).find(x => x.rank === topCustomers.indexOf(c) + 1)?.rank} ` +
-              `| ${c.customer_name} ` +
-              `| ${metricValue} ` +
-              `| ${c.invoice_count} ` +
-              `| ${formatMoney(c.total_amount)} ` +
-              `| ${formatMoney(c.unpaid_amount)} |`
+              `| ${(output.customers as Array<{ rank: number }>).find((x) => x.rank === topCustomers.indexOf(c) + 1)?.rank} ` +
+                `| ${c.customer_name} ` +
+                `| ${metricValue} ` +
+                `| ${c.invoice_count} ` +
+                `| ${formatMoney(c.total_amount)} ` +
+                `| ${formatMoney(c.unpaid_amount)} |`
             );
           }
 
@@ -488,7 +495,7 @@ export function registerAnalyticsTools(server: McpServer): void {
 
         // Apply min_amount filter
         if (params.min_amount !== undefined) {
-          invoices = invoices.filter(inv => (inv.Balance || 0) >= params.min_amount!);
+          invoices = invoices.filter((inv) => (inv.Balance || 0) >= params.min_amount!);
         }
 
         // Calculate overall summary
@@ -497,7 +504,13 @@ export function registerAnalyticsTools(server: McpServer): void {
 
         // Group by age bucket
         const byAgeBucket = new Map<AgeBucket, FortnoxInvoiceListItem[]>();
-        const ageBucketOrder: AgeBucket[] = ["not_due", "1-30 days", "31-60 days", "61-90 days", "90+ days"];
+        const ageBucketOrder: AgeBucket[] = [
+          "not_due",
+          "1-30 days",
+          "31-60 days",
+          "61-90 days",
+          "90+ days"
+        ];
 
         for (const bucket of ageBucketOrder) {
           byAgeBucket.set(bucket, []);
@@ -532,8 +545,11 @@ export function registerAnalyticsTools(server: McpServer): void {
         };
 
         // Add groupings based on params
-        if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
-          output.by_age_bucket = ageBucketOrder.map(bucket => {
+        if (
+          (params.group_by ?? "both") === "age_bucket" ||
+          (params.group_by ?? "both") === "both"
+        ) {
+          output.by_age_bucket = ageBucketOrder.map((bucket) => {
             const items = byAgeBucket.get(bucket)!;
             return {
               bucket,
@@ -556,7 +572,7 @@ export function registerAnalyticsTools(server: McpServer): void {
         if (params.include_details ?? true) {
           output.invoices = invoices
             .sort((a, b) => (b.Balance || 0) - (a.Balance || 0))
-            .map(inv => ({
+            .map((inv) => ({
               document_number: inv.DocumentNumber,
               customer_number: inv.CustomerNumber,
               customer_name: inv.CustomerName || null,
@@ -573,10 +589,7 @@ export function registerAnalyticsTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            "# Unpaid Invoices Report",
-            ""
-          ];
+          const lines: string[] = ["# Unpaid Invoices Report", ""];
 
           if (result.truncated) {
             lines.push(`⚠️ **Note**: ${result.truncationReason}`);
@@ -592,7 +605,10 @@ export function registerAnalyticsTools(server: McpServer): void {
           lines.push(`| **Total Unpaid Balance** | **${formatMoney(totalUnpaid)}** |`);
           lines.push(`| Unique Customers | ${byCustomer.size} |`);
 
-          if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
+          if (
+            (params.group_by ?? "both") === "age_bucket" ||
+            (params.group_by ?? "both") === "both"
+          ) {
             lines.push("");
             lines.push("## Aging Breakdown");
             lines.push("");
@@ -608,7 +624,10 @@ export function registerAnalyticsTools(server: McpServer): void {
             }
           }
 
-          if ((params.group_by ?? "both") === "customer" || (params.group_by ?? "both") === "both") {
+          if (
+            (params.group_by ?? "both") === "customer" ||
+            (params.group_by ?? "both") === "both"
+          ) {
             lines.push("");
             lines.push("## By Customer");
             lines.push("");
@@ -648,10 +667,10 @@ export function registerAnalyticsTools(server: McpServer): void {
               const bucket = getAgeBucket(inv.DueDate);
               lines.push(
                 `| #${inv.DocumentNumber} ` +
-                `| ${inv.CustomerName || inv.CustomerNumber} ` +
-                `| ${inv.DueDate || "-"} ` +
-                `| ${formatMoney(inv.Balance)} ` +
-                `| ${bucket} |`
+                  `| ${inv.CustomerName || inv.CustomerNumber} ` +
+                  `| ${inv.DueDate || "-"} ` +
+                  `| ${formatMoney(inv.Balance)} ` +
+                  `| ${bucket} |`
               );
             }
 

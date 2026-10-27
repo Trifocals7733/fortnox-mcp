@@ -164,19 +164,13 @@ export class DatabaseTokenProvider implements ITokenProvider {
       const data = error.data as { error_description?: string; error?: string } | undefined;
 
       if (status === 401) {
-        return new Error(
-          `${context}: Invalid credentials. Check Fortnox client configuration.`
-        );
+        return new Error(`${context}: Invalid credentials. Check Fortnox client configuration.`);
       }
       if (status === 400) {
         const errorDesc = data?.error_description || data?.error || "Bad request";
-        return new Error(
-          `${context}: ${errorDesc}. The refresh token may be expired or revoked.`
-        );
+        return new Error(`${context}: ${errorDesc}. The refresh token may be expired or revoked.`);
       }
-      return new Error(
-        `${context}: API error ${status} - ${JSON.stringify(data)}`
-      );
+      return new Error(`${context}: API error ${status} - ${JSON.stringify(data)}`);
     }
 
     return new Error(`${context}: ${error instanceof Error ? error.message : String(error)}`);

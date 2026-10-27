@@ -1,8 +1,17 @@
 import { Response } from "express";
 import * as jose from "jose";
 import crypto from "crypto";
-import { OAuthClientInformationFull, OAuthTokens, OAuthTokenRevocationRequest, AuthInfo } from "@modelcontextprotocol/server";
-import { OAuthServerProvider, AuthorizationParams, OAuthRegisteredClientsStore } from "@modelcontextprotocol/server-legacy/auth";
+import {
+  OAuthClientInformationFull,
+  OAuthTokens,
+  OAuthTokenRevocationRequest,
+  AuthInfo
+} from "@modelcontextprotocol/server";
+import {
+  OAuthServerProvider,
+  AuthorizationParams,
+  OAuthRegisteredClientsStore
+} from "@modelcontextprotocol/server-legacy/auth";
 import { ITokenStorage } from "./storage/types.js";
 import { DatabaseTokenProvider } from "./databaseProvider.js";
 import { FORTNOX_SCOPES } from "./credentials.js";
@@ -56,11 +65,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
   // Skip local PKCE validation since we handle it ourselves
   skipLocalPkceValidation = false;
 
-  constructor(
-    jwtSecret: string,
-    serverUrl: string,
-    tokenStorage: ITokenStorage
-  ) {
+  constructor(jwtSecret: string, serverUrl: string, tokenStorage: ITokenStorage) {
     this.jwtSecret = new TextEncoder().encode(jwtSecret);
     this.serverUrl = serverUrl;
     this.tokenProvider = new DatabaseTokenProvider(tokenStorage);
@@ -88,7 +93,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
       mcpClient: client,
       mcpParams: params,
       codeChallenge: params.codeChallenge,
-      createdAt: Date.now(),
+      createdAt: Date.now()
     });
 
     // Clean up old pending authorizations (older than 10 minutes)
@@ -135,7 +140,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
       codeChallenge: pending.codeChallenge,
       redirectUri: pending.mcpParams.redirectUri,
       scopes: pending.mcpParams.scopes || [],
-      createdAt: Date.now(),
+      createdAt: Date.now()
     });
 
     // Clean up old codes
@@ -144,7 +149,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
     return {
       redirectUri: pending.mcpParams.redirectUri,
       code: mcpAuthCode,
-      ...(pending.mcpParams.state ? { state: pending.mcpParams.state } : {}),
+      ...(pending.mcpParams.state ? { state: pending.mcpParams.state } : {})
     };
   }
 
@@ -207,11 +212,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
     }
 
     // Issue new tokens
-    return this.issueTokens(
-      payload.userId,
-      payload.clientId,
-      scopes || payload.scopes
-    );
+    return this.issueTokens(payload.userId, payload.clientId, scopes || payload.scopes);
   }
 
   async verifyAccessToken(token: string): Promise<AuthInfo> {
@@ -228,8 +229,8 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
       scopes: payload.scopes,
       expiresAt: payload.exp,
       extra: {
-        userId: payload.userId,
-      },
+        userId: payload.userId
+      }
     };
   }
 
@@ -252,7 +253,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
       userId,
       clientId,
       scopes,
-      type: "access",
+      type: "access"
     })
       .setProtectedHeader({ alg: JWT_ALGORITHM })
       .setIssuedAt()
@@ -265,7 +266,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
       userId,
       clientId,
       scopes,
-      type: "refresh",
+      type: "refresh"
     })
       .setProtectedHeader({ alg: JWT_ALGORITHM })
       .setIssuedAt()
@@ -278,7 +279,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
       token_type: "Bearer",
       expires_in: ACCESS_TOKEN_EXPIRES_IN,
       refresh_token: refreshToken,
-      scope: scopes.join(" "),
+      scope: scopes.join(" ")
     };
   }
 
@@ -293,7 +294,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
   }> {
     try {
       const { payload } = await jose.jwtVerify(token, this.jwtSecret, {
-        issuer: this.serverUrl,
+        issuer: this.serverUrl
       });
 
       if (payload.type !== expectedType) {
@@ -304,7 +305,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
         userId: payload.userId as string,
         clientId: payload.clientId as string,
         scopes: payload.scopes as string[],
-        exp: payload.exp as number,
+        exp: payload.exp as number
       };
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {
@@ -352,7 +353,7 @@ class InMemoryClientsStore implements OAuthRegisteredClientsStore {
     const fullClient: OAuthClientInformationFull = {
       ...client,
       client_id: clientId,
-      client_id_issued_at: Math.floor(Date.now() / 1000),
+      client_id_issued_at: Math.floor(Date.now() / 1000)
     };
 
     this.clients.set(clientId, fullClient);

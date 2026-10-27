@@ -154,7 +154,10 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
 
         if (params.fetch_all) {
           // Use fetchAllPages for complete dataset
-          const result = await fetchAllPages<FortnoxSupplierInvoiceListItem, SupplierInvoiceListResponse>(
+          const result = await fetchAllPages<
+            FortnoxSupplierInvoiceListItem,
+            SupplierInvoiceListResponse
+          >(
             "/3/supplierinvoices",
             queryParams,
             (r) => r.SupplierInvoices || [],
@@ -170,17 +173,22 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<SupplierInvoiceListResponse>("/3/supplierinvoices", "GET", undefined, queryParams);
+          const response = await fortnoxRequest<SupplierInvoiceListResponse>(
+            "/3/supplierinvoices",
+            "GET",
+            undefined,
+            queryParams
+          );
           invoices = response.SupplierInvoices || [];
           total = response.MetaInformation?.["@TotalResources"] || invoices.length;
         }
 
         // Apply client-side amount filters
         if (params.min_amount !== undefined) {
-          invoices = invoices.filter(inv => (inv.Total || 0) >= params.min_amount!);
+          invoices = invoices.filter((inv) => (inv.Total || 0) >= params.min_amount!);
         }
         if (params.max_amount !== undefined) {
-          invoices = invoices.filter(inv => (inv.Total || 0) <= params.max_amount!);
+          invoices = invoices.filter((inv) => (inv.Total || 0) <= params.max_amount!);
         }
 
         // Build pagination metadata
@@ -194,8 +202,16 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, invoices.length),
-              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
+              ...buildPaginationMeta(
+                total,
+                params.page ?? 1,
+                params.limit ?? DEFAULT_PAGE_SIZE,
+                invoices.length
+              ),
+              next_offset:
+                (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total
+                  ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE)
+                  : undefined
             };
 
         const output = {
@@ -245,8 +261,12 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
               lines.push(`## Supplier Invoice #${inv.GivenNumber}`);
               lines.push(`- **Supplier**: ${inv.SupplierName || inv.SupplierNumber}`);
               lines.push(`- **Invoice Number**: ${inv.InvoiceNumber || "-"}`);
-              lines.push(`- **Date**: ${formatDisplayDate(inv.InvoiceDate)} | **Due**: ${formatDisplayDate(inv.DueDate)}`);
-              lines.push(`- **Total**: ${formatMoney(inv.Total, inv.Currency)} | **Balance**: ${formatMoney(inv.Balance, inv.Currency)}`);
+              lines.push(
+                `- **Date**: ${formatDisplayDate(inv.InvoiceDate)} | **Due**: ${formatDisplayDate(inv.DueDate)}`
+              );
+              lines.push(
+                `- **Total**: ${formatMoney(inv.Total, inv.Currency)} | **Balance**: ${formatMoney(inv.Balance, inv.Currency)}`
+              );
               lines.push(`- **Status**: ${status.toUpperCase()}`);
               lines.push("");
             }
@@ -261,12 +281,14 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
               params.limit ?? DEFAULT_PAGE_SIZE,
               (inv) => {
                 const status = getSupplierInvoiceStatus(inv);
-                return `## Supplier Invoice #${inv.GivenNumber}\n` +
+                return (
+                  `## Supplier Invoice #${inv.GivenNumber}\n` +
                   `- **Supplier**: ${inv.SupplierName || inv.SupplierNumber}\n` +
                   `- **Invoice Number**: ${inv.InvoiceNumber || "-"}\n` +
                   `- **Date**: ${formatDisplayDate(inv.InvoiceDate)} | **Due**: ${formatDisplayDate(inv.DueDate)}\n` +
                   `- **Total**: ${formatMoney(inv.Total, inv.Currency)} | **Balance**: ${formatMoney(inv.Balance, inv.Currency)}\n` +
-                  `- **Status**: ${status.toUpperCase()}`;
+                  `- **Status**: ${status.toUpperCase()}`
+                );
               }
             );
           }
@@ -340,9 +362,13 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const status = invoice.Cancelled ? "CANCELLED" :
-            (invoice.Balance === 0 ? "PAID" :
-              (invoice.Booked ? "BOOKED" : "DRAFT"));
+          const status = invoice.Cancelled
+            ? "CANCELLED"
+            : invoice.Balance === 0
+              ? "PAID"
+              : invoice.Booked
+                ? "BOOKED"
+                : "DRAFT";
 
           const lines = [
             `# Supplier Invoice #${invoice.GivenNumber}`,
@@ -435,7 +461,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Supplier Invoice Approved\n\n` +
+          textContent =
+            `# Supplier Invoice Approved\n\n` +
             `Supplier invoice **#${invoice.GivenNumber}** has been approved for payment.\n\n` +
             `**Supplier**: ${invoice.SupplierName || invoice.SupplierNumber}\n` +
             `**Total**: ${formatMoney(invoice.Total, invoice.Currency)}\n\n` +
@@ -473,7 +500,10 @@ Returns:
 
         if (params.supplier_number) queryParams.suppliernumber = params.supplier_number;
 
-        const result = await fetchAllPages<FortnoxSupplierInvoiceListItem, SupplierInvoiceListResponse>(
+        const result = await fetchAllPages<
+          FortnoxSupplierInvoiceListItem,
+          SupplierInvoiceListResponse
+        >(
           "/3/supplierinvoices",
           queryParams,
           (r) => r.SupplierInvoices || [],
@@ -484,7 +514,7 @@ Returns:
 
         // Apply min_amount filter
         if (params.min_amount !== undefined) {
-          invoices = invoices.filter(inv => (inv.Balance || 0) >= params.min_amount!);
+          invoices = invoices.filter((inv) => (inv.Balance || 0) >= params.min_amount!);
         }
 
         // Calculate overall summary
@@ -493,7 +523,13 @@ Returns:
 
         // Group by age bucket
         const byAgeBucket = new Map<AgeBucket, FortnoxSupplierInvoiceListItem[]>();
-        const ageBucketOrder: AgeBucket[] = ["not_due", "1-30 days", "31-60 days", "61-90 days", "90+ days"];
+        const ageBucketOrder: AgeBucket[] = [
+          "not_due",
+          "1-30 days",
+          "31-60 days",
+          "61-90 days",
+          "90+ days"
+        ];
 
         for (const bucket of ageBucketOrder) {
           byAgeBucket.set(bucket, []);
@@ -528,8 +564,11 @@ Returns:
         };
 
         // Add groupings based on params
-        if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
-          output.by_age_bucket = ageBucketOrder.map(bucket => {
+        if (
+          (params.group_by ?? "both") === "age_bucket" ||
+          (params.group_by ?? "both") === "both"
+        ) {
+          output.by_age_bucket = ageBucketOrder.map((bucket) => {
             const items = byAgeBucket.get(bucket)!;
             return {
               bucket,
@@ -552,7 +591,7 @@ Returns:
         if (params.include_details ?? true) {
           output.invoices = invoices
             .sort((a, b) => (b.Balance || 0) - (a.Balance || 0))
-            .map(inv => ({
+            .map((inv) => ({
               given_number: inv.GivenNumber,
               supplier_number: inv.SupplierNumber,
               supplier_name: inv.SupplierName || null,
@@ -570,10 +609,7 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            "# Payables Aging Report (Accounts Payable)",
-            ""
-          ];
+          const lines: string[] = ["# Payables Aging Report (Accounts Payable)", ""];
 
           if (result.truncated) {
             lines.push(`**Note**: ${result.truncationReason}`);
@@ -589,7 +625,10 @@ Returns:
           lines.push(`| **Total Payable** | **${formatMoney(totalPayable)}** |`);
           lines.push(`| Unique Suppliers | ${bySupplier.size} |`);
 
-          if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
+          if (
+            (params.group_by ?? "both") === "age_bucket" ||
+            (params.group_by ?? "both") === "both"
+          ) {
             lines.push("");
             lines.push("## Aging Breakdown");
             lines.push("");
@@ -605,7 +644,10 @@ Returns:
             }
           }
 
-          if ((params.group_by ?? "both") === "supplier" || (params.group_by ?? "both") === "both") {
+          if (
+            (params.group_by ?? "both") === "supplier" ||
+            (params.group_by ?? "both") === "both"
+          ) {
             lines.push("");
             lines.push("## By Supplier");
             lines.push("");
@@ -645,10 +687,10 @@ Returns:
               const bucket = getAgeBucket(inv.DueDate);
               lines.push(
                 `| #${inv.GivenNumber} ` +
-                `| ${inv.SupplierName || inv.SupplierNumber} ` +
-                `| ${inv.DueDate || "-"} ` +
-                `| ${formatMoney(inv.Balance)} ` +
-                `| ${bucket} |`
+                  `| ${inv.SupplierName || inv.SupplierNumber} ` +
+                  `| ${inv.DueDate || "-"} ` +
+                  `| ${formatMoney(inv.Balance)} ` +
+                  `| ${bucket} |`
               );
             }
 

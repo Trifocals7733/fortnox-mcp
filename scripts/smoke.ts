@@ -51,12 +51,12 @@ async function main(): Promise<void> {
           continue;
         }
         const count = output?.total ?? output?.count ?? null;
-        console.log(
-          `${call.name.padEnd(32)} ok     ${count === null ? "" : `n=${count}`}`
-        );
+        console.log(`${call.name.padEnd(32)} ok     ${count === null ? "" : `n=${count}`}`);
       } catch (error) {
         failures++;
-        console.log(`${call.name.padEnd(32)} THREW  ${error instanceof Error ? error.message : error}`);
+        console.log(
+          `${call.name.padEnd(32)} THREW  ${error instanceof Error ? error.message : error}`
+        );
       }
     }
   } finally {
@@ -64,7 +64,11 @@ async function main(): Promise<void> {
     await server.close();
   }
 
-  console.log(failures === 0 ? `\nAll ${CALLS.length} calls ok.` : `\n${failures} of ${CALLS.length} calls failed.`);
+  console.log(
+    failures === 0
+      ? `\nAll ${CALLS.length} calls ok.`
+      : `\n${failures} of ${CALLS.length} calls failed.`
+  );
   if (failures > 0) process.exit(1);
 }
 

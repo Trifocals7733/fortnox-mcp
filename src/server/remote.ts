@@ -4,7 +4,7 @@ import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import {
   FortnoxProxyOAuthProvider,
   getUserIdFromAuth,
-  initializeTokenProvider,
+  initializeTokenProvider
 } from "../auth/index.js";
 import { runWithContext } from "../auth/context.js";
 import { createMcpServer } from "./mcp.js";
@@ -20,11 +20,7 @@ export interface RemoteServerOptions {
 export function createRemoteServer(options: RemoteServerOptions): Express {
   const { serverUrl, jwtSecret, tokenStorage } = options;
 
-  const oauthProvider = new FortnoxProxyOAuthProvider(
-    jwtSecret,
-    serverUrl,
-    tokenStorage
-  );
+  const oauthProvider = new FortnoxProxyOAuthProvider(jwtSecret, serverUrl, tokenStorage);
 
   initializeTokenProvider(oauthProvider.getTokenProvider());
 
@@ -39,7 +35,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
     res.json({
       status: "ok",
       server: "fortnox-mcp-server",
-      mode: "remote",
+      mode: "remote"
     });
   });
 
@@ -48,7 +44,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
       provider: oauthProvider,
       issuerUrl: new URL(serverUrl),
       scopesSupported: ["fortnox:read", "fortnox:write"],
-      resourceName: "Fortnox MCP Server",
+      resourceName: "Fortnox MCP Server"
     })
   );
 
@@ -59,7 +55,10 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
 
       if (error) {
         console.error(`[OAuth] Fortnox error: ${error} - ${error_description}`);
-        res.status(400).type("text").send(`OAuth error: ${error_description || error}`);
+        res
+          .status(400)
+          .type("text")
+          .send(`OAuth error: ${error_description || error}`);
         return;
       }
 
@@ -68,10 +67,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
         return;
       }
 
-      const result = await oauthProvider.handleFortnoxCallback(
-        code as string,
-        state as string
-      );
+      const result = await oauthProvider.handleFortnoxCallback(code as string, state as string);
 
       // Redirect back to Claude with our authorization code
       const redirectUrl = new URL(result.redirectUri);
@@ -95,7 +91,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
     /* @mcp-codemod-error requireBearerAuth: resource-server auth helpers routed to the frozen @modelcontextprotocol/server-legacy/auth copy. The maintained v2 home is @modelcontextprotocol/express — when re-pointing, verifiers must throw the v2 OAuthError (the express middleware does not recognize the legacy error classes). See the migration guide's server auth split section. */
     requireBearerAuth({
       verifier: oauthProvider,
-      resourceMetadataUrl: `${serverUrl}/.well-known/oauth-protected-resource`,
+      resourceMetadataUrl: `${serverUrl}/.well-known/oauth-protected-resource`
     }),
     async (req: Request, res: Response) => {
       try {
@@ -108,7 +104,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
 
         const transport = new NodeStreamableHTTPServerTransport({
           sessionIdGenerator: undefined,
-          enableJsonResponse: true,
+          enableJsonResponse: true
         });
 
         res.on("close", () => transport.close());

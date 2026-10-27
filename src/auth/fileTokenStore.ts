@@ -44,10 +44,10 @@ export function persistTokens(
       accessToken,
       expiresAt,
       scope,
-      updatedAt: Date.now(),
+      updatedAt: Date.now()
     };
     writeFileSync(TOKEN_FILE, JSON.stringify(data, null, 2), {
-      mode: 0o600,
+      mode: 0o600
     });
   } catch (error) {
     console.error(

@@ -120,12 +120,22 @@ export function registerVoucherTools(server: McpServer): void {
         if (params.from_date) queryParams.fromdate = params.from_date;
         if (params.to_date) queryParams.todate = params.to_date;
 
-        const response = await fortnoxRequest<VoucherListResponse>(endpoint, "GET", undefined, queryParams);
+        const response = await fortnoxRequest<VoucherListResponse>(
+          endpoint,
+          "GET",
+          undefined,
+          queryParams
+        );
         const vouchers = response.Vouchers || [];
         const total = response.MetaInformation?.["@TotalResources"] || vouchers.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, vouchers.length),
+          ...buildPaginationMeta(
+            total,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
+            vouchers.length
+          ),
           vouchers: vouchers.map((v) => ({
             voucher_series: v.VoucherSeries,
             voucher_number: v.VoucherNumber,
@@ -144,7 +154,8 @@ export function registerVoucherTools(server: McpServer): void {
             total,
             params.page ?? 1,
             params.limit ?? DEFAULT_PAGE_SIZE,
-            (v) => `- **${v.VoucherSeries}${v.VoucherNumber}** (${formatDisplayDate(v.TransactionDate)}): ${v.Description}`
+            (v) =>
+              `- **${v.VoucherSeries}${v.VoucherNumber}** (${formatDisplayDate(v.TransactionDate)}): ${v.Description}`
           );
         }
 
@@ -179,7 +190,12 @@ export function registerVoucherTools(server: McpServer): void {
           queryParams.financialyear = params.financial_year;
         }
 
-        const response = await fortnoxRequest<VoucherResponse>(endpoint, "GET", undefined, queryParams);
+        const response = await fortnoxRequest<VoucherResponse>(
+          endpoint,
+          "GET",
+          undefined,
+          queryParams
+        );
         const voucher = response.Voucher;
 
         const output = {
@@ -226,7 +242,9 @@ export function registerVoucherTools(server: McpServer): void {
             );
           }
 
-          lines.push(`| **Total** | | **${formatMoney(totalDebit)}** | **${formatMoney(totalCredit)}** |`);
+          lines.push(
+            `| **Total** | | **${formatMoney(totalDebit)}** | **${formatMoney(totalCredit)}** |`
+          );
 
           textContent = lines.join("\n");
         }
@@ -292,11 +310,9 @@ export function registerVoucherTools(server: McpServer): void {
           })
         };
 
-        const response = await fortnoxRequest<VoucherResponse>(
-          "/3/vouchers",
-          "POST",
-          { Voucher: voucherData }
-        );
+        const response = await fortnoxRequest<VoucherResponse>("/3/vouchers", "POST", {
+          Voucher: voucherData
+        });
         const voucher = response.Voucher;
 
         const output = {
@@ -312,7 +328,8 @@ export function registerVoucherTools(server: McpServer): void {
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Voucher Created\n\n` +
+          textContent =
+            `# Voucher Created\n\n` +
             `**Voucher**: ${voucher.VoucherSeries}${voucher.VoucherNumber}\n` +
             `**Description**: ${voucher.Description}\n` +
             `**Date**: ${formatDisplayDate(voucher.TransactionDate)}\n` +
@@ -412,7 +429,7 @@ Returns:
           accountFilter.add(params.account_number);
         }
         if (params.account_numbers) {
-          params.account_numbers.forEach(n => accountFilter.add(n));
+          params.account_numbers.forEach((n) => accountFilter.add(n));
         }
         let accountRangeFrom: number | undefined;
         let accountRangeTo: number | undefined;
@@ -453,7 +470,10 @@ Returns:
           queryParams,
           (r) => r.Vouchers || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0,
-          { maxResults: params.max_vouchers ?? 500, maxPages: Math.ceil((params.max_vouchers ?? 500) / 100) }
+          {
+            maxResults: params.max_vouchers ?? 500,
+            maxPages: Math.ceil((params.max_vouchers ?? 500) / 100)
+          }
         );
 
         const voucherList = result.items;
@@ -494,7 +514,12 @@ Returns:
               financialyear: params.financial_year
             };
             try {
-              const detail = await fortnoxRequest<VoucherResponse>(detailEndpoint, "GET", undefined, detailParams);
+              const detail = await fortnoxRequest<VoucherResponse>(
+                detailEndpoint,
+                "GET",
+                undefined,
+                detailParams
+              );
               return detail.Voucher;
             } catch {
               return null;
@@ -522,7 +547,11 @@ Returns:
 
                 // Update summary
                 if (params.include_summary ?? true) {
-                  const existing = accountSummary.get(row.Account) || { debit: 0, credit: 0, count: 0 };
+                  const existing = accountSummary.get(row.Account) || {
+                    debit: 0,
+                    credit: 0,
+                    count: 0
+                  };
                   existing.debit += row.Debit || 0;
                   existing.credit += row.Credit || 0;
                   existing.count += 1;
@@ -534,28 +563,30 @@ Returns:
 
           // Rate limit delay between batches (except last batch)
           if (i + batchSize < voucherList.length) {
-            await new Promise(resolve => setTimeout(resolve, FETCH_ALL_DELAY_MS));
+            await new Promise((resolve) => setTimeout(resolve, FETCH_ALL_DELAY_MS));
           }
         }
 
         // Sort transactions by date descending
-        matchingTransactions.sort((a, b) =>
-          b.transaction_date.localeCompare(a.transaction_date) ||
-          b.voucher_number - a.voucher_number
+        matchingTransactions.sort(
+          (a, b) =>
+            b.transaction_date.localeCompare(a.transaction_date) ||
+            b.voucher_number - a.voucher_number
         );
 
         // Build output
-        const summaryArray = (params.include_summary ?? true)
-          ? Array.from(accountSummary.entries())
-              .map(([account, data]) => ({
-                account,
-                total_debit: data.debit,
-                total_credit: data.credit,
-                net_change: data.credit - data.debit,
-                transaction_count: data.count
-              }))
-              .sort((a, b) => a.account - b.account)
-          : undefined;
+        const summaryArray =
+          (params.include_summary ?? true)
+            ? Array.from(accountSummary.entries())
+                .map(([account, data]) => ({
+                  account,
+                  total_debit: data.debit,
+                  total_credit: data.credit,
+                  net_change: data.credit - data.debit,
+                  transaction_count: data.count
+                }))
+                .sort((a, b) => a.account - b.account)
+            : undefined;
 
         const output: Record<string, unknown> = {
           filter: {
@@ -585,16 +616,15 @@ Returns:
               ? `Accounts ${params.account_range.from}-${params.account_range.to}`
               : `Accounts ${Array.from(accountFilter).join(", ")}`;
 
-          const lines: string[] = [
-            `# Account Activity: ${accountDesc}`,
-            ""
-          ];
+          const lines: string[] = [`# Account Activity: ${accountDesc}`, ""];
 
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
           }
           lines.push(`**Financial Year**: ${params.financial_year}`);
-          lines.push(`**Vouchers Scanned**: ${voucherList.length} | **Matching Transactions**: ${matchingTransactions.length}`);
+          lines.push(
+            `**Vouchers Scanned**: ${voucherList.length} | **Matching Transactions**: ${matchingTransactions.length}`
+          );
 
           if (result.truncated) {
             lines.push("");
@@ -632,7 +662,9 @@ Returns:
             }
 
             if (matchingTransactions.length > displayLimit) {
-              lines.push(`| ... | ... | ... | *${matchingTransactions.length - displayLimit} more transactions* | ... | ... |`);
+              lines.push(
+                `| ... | ... | ... | *${matchingTransactions.length - displayLimit} more transactions* | ... | ... |`
+              );
             }
           } else {
             lines.push("");
@@ -698,16 +730,18 @@ Returns:
           queryParams,
           (r) => r.Vouchers || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0,
-          { maxResults: params.max_vouchers ?? 500, maxPages: Math.ceil((params.max_vouchers ?? 500) / 100) }
+          {
+            maxResults: params.max_vouchers ?? 500,
+            maxPages: Math.ceil((params.max_vouchers ?? 500) / 100)
+          }
         );
 
         const voucherList = result.items;
         const totalVouchers = result.total;
 
         // Prepare search
-        const searchText = (params.case_sensitive ?? false)
-          ? params.search_text
-          : params.search_text.toLowerCase();
+        const searchText =
+          (params.case_sensitive ?? false) ? params.search_text : params.search_text.toLowerCase();
 
         const textMatches = (text: string | undefined): boolean => {
           if (!text) return false;
@@ -716,7 +750,7 @@ Returns:
         };
 
         // First pass: filter by description in list
-        const candidateVouchers = voucherList.filter(v => textMatches(v.Description));
+        const candidateVouchers = voucherList.filter((v) => textMatches(v.Description));
 
         // If include_rows is true, we need to fetch details and also check row descriptions
         interface MatchingVoucher {
@@ -725,12 +759,14 @@ Returns:
           transaction_date: string;
           description: string;
           matched_in: "description" | "row";
-          rows?: Array<{
-            account: number;
-            description: string | null;
-            debit: number;
-            credit: number;
-          }> | undefined;
+          rows?:
+            | Array<{
+                account: number;
+                description: string | null;
+                debit: number;
+                credit: number;
+              }>
+            | undefined;
         }
 
         const matchingVouchers: MatchingVoucher[] = [];
@@ -747,7 +783,12 @@ Returns:
                 financialyear: params.financial_year
               };
               try {
-                const detail = await fortnoxRequest<VoucherResponse>(detailEndpoint, "GET", undefined, detailParams);
+                const detail = await fortnoxRequest<VoucherResponse>(
+                  detailEndpoint,
+                  "GET",
+                  undefined,
+                  detailParams
+                );
                 return detail.Voucher;
               } catch {
                 return null;
@@ -760,7 +801,7 @@ Returns:
               if (!voucher) continue;
 
               const descriptionMatch = textMatches(voucher.Description);
-              const rowMatch = voucher.VoucherRows?.some(row => textMatches(row.Description));
+              const rowMatch = voucher.VoucherRows?.some((row) => textMatches(row.Description));
 
               if (descriptionMatch || rowMatch) {
                 matchingVouchers.push({
@@ -769,7 +810,7 @@ Returns:
                   transaction_date: voucher.TransactionDate,
                   description: voucher.Description,
                   matched_in: descriptionMatch ? "description" : "row",
-                  rows: voucher.VoucherRows?.map(row => ({
+                  rows: voucher.VoucherRows?.map((row) => ({
                     account: row.Account,
                     description: row.Description || null,
                     debit: row.Debit || 0,
@@ -781,7 +822,7 @@ Returns:
 
             // Rate limit delay between batches
             if (i + batchSize < voucherList.length) {
-              await new Promise(resolve => setTimeout(resolve, FETCH_ALL_DELAY_MS));
+              await new Promise((resolve) => setTimeout(resolve, FETCH_ALL_DELAY_MS));
             }
           }
         } else {
@@ -798,9 +839,10 @@ Returns:
         }
 
         // Sort by date descending
-        matchingVouchers.sort((a, b) =>
-          b.transaction_date.localeCompare(a.transaction_date) ||
-          b.voucher_number - a.voucher_number
+        matchingVouchers.sort(
+          (a, b) =>
+            b.transaction_date.localeCompare(a.transaction_date) ||
+            b.voucher_number - a.voucher_number
         );
 
         // Build output
@@ -823,16 +865,15 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          const lines: string[] = [
-            `# Voucher Search: "${params.search_text}"`,
-            ""
-          ];
+          const lines: string[] = [`# Voucher Search: "${params.search_text}"`, ""];
 
           if (dateRangeDescription) {
             lines.push(`**Period**: ${dateRangeDescription}`);
           }
           lines.push(`**Financial Year**: ${params.financial_year}`);
-          lines.push(`**Vouchers Scanned**: ${voucherList.length} | **Matches**: ${matchingVouchers.length}`);
+          lines.push(
+            `**Vouchers Scanned**: ${voucherList.length} | **Matches**: ${matchingVouchers.length}`
+          );
 
           if (result.truncated) {
             lines.push("");
@@ -848,7 +889,9 @@ Returns:
             const displayVouchers = matchingVouchers.slice(0, displayLimit);
 
             for (const v of displayVouchers) {
-              lines.push(`### ${v.voucher_series}${v.voucher_number} (${formatDisplayDate(v.transaction_date)})`);
+              lines.push(
+                `### ${v.voucher_series}${v.voucher_number} (${formatDisplayDate(v.transaction_date)})`
+              );
               lines.push(`**Description**: ${v.description}`);
 
               if (v.rows && v.rows.length > 0) {
@@ -858,7 +901,9 @@ Returns:
                 for (const row of v.rows) {
                   const rowDesc = row.description || "-";
                   const highlight = textMatches(row.description || "") ? " **" : "";
-                  lines.push(`| ${row.account} | ${highlight}${rowDesc}${highlight} | ${formatMoney(row.debit)} | ${formatMoney(row.credit)} |`);
+                  lines.push(
+                    `| ${row.account} | ${highlight}${rowDesc}${highlight} | ${formatMoney(row.debit)} | ${formatMoney(row.credit)} |`
+                  );
                 }
               }
               lines.push("");

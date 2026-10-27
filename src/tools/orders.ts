@@ -10,10 +10,7 @@ import {
   formatListMarkdown,
   buildPaginationMeta
 } from "../services/formatters.js";
-import {
-  periodToDateRange,
-  getPeriodDescription
-} from "../services/dateHelpers.js";
+import { periodToDateRange, getPeriodDescription } from "../services/dateHelpers.js";
 import {
   ListOrdersSchema,
   ListOffersSchema,
@@ -164,7 +161,12 @@ export function registerOrderTools(server: McpServer): void {
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<OrderListResponse>(FORTNOX_PATHS.orders, "GET", undefined, queryParams);
+          const response = await fortnoxRequest<OrderListResponse>(
+            FORTNOX_PATHS.orders,
+            "GET",
+            undefined,
+            queryParams
+          );
           orders = response.Orders || [];
           total = response.MetaInformation?.["@TotalResources"] || orders.length;
         }
@@ -179,8 +181,16 @@ export function registerOrderTools(server: McpServer): void {
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, orders.length),
-              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
+              ...buildPaginationMeta(
+                total,
+                params.page ?? 1,
+                params.limit ?? DEFAULT_PAGE_SIZE,
+                orders.length
+              ),
+              next_offset:
+                (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total
+                  ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE)
+                  : undefined
             };
 
         const output = {
@@ -226,9 +236,13 @@ export function registerOrderTools(server: McpServer): void {
               const status = getOrderStatus(order);
               lines.push(`## Order #${order.DocumentNumber}`);
               lines.push(`- **Customer**: ${order.CustomerName || order.CustomerNumber}`);
-              lines.push(`- **Date**: ${formatDisplayDate(order.OrderDate)} | **Delivery**: ${formatDisplayDate(order.DeliveryDate)}`);
+              lines.push(
+                `- **Date**: ${formatDisplayDate(order.OrderDate)} | **Delivery**: ${formatDisplayDate(order.DeliveryDate)}`
+              );
               lines.push(`- **Total**: ${formatMoney(order.Total, order.Currency)}`);
-              lines.push(`- **Status**: ${status.toUpperCase()}${order.InvoiceReference ? ` (Invoice: ${order.InvoiceReference})` : ""}`);
+              lines.push(
+                `- **Status**: ${status.toUpperCase()}${order.InvoiceReference ? ` (Invoice: ${order.InvoiceReference})` : ""}`
+              );
               lines.push("");
             }
 
@@ -242,11 +256,13 @@ export function registerOrderTools(server: McpServer): void {
               params.limit ?? DEFAULT_PAGE_SIZE,
               (order) => {
                 const status = getOrderStatus(order);
-                return `## Order #${order.DocumentNumber}\n` +
+                return (
+                  `## Order #${order.DocumentNumber}\n` +
                   `- **Customer**: ${order.CustomerName || order.CustomerNumber}\n` +
                   `- **Date**: ${formatDisplayDate(order.OrderDate)} | **Delivery**: ${formatDisplayDate(order.DeliveryDate)}\n` +
                   `- **Total**: ${formatMoney(order.Total, order.Currency)}\n` +
-                  `- **Status**: ${status.toUpperCase()}${order.InvoiceReference ? ` (Invoice: ${order.InvoiceReference})` : ""}`;
+                  `- **Status**: ${status.toUpperCase()}${order.InvoiceReference ? ` (Invoice: ${order.InvoiceReference})` : ""}`
+                );
               }
             );
           }
@@ -317,7 +333,12 @@ export function registerOrderTools(server: McpServer): void {
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<OfferListResponse>(FORTNOX_PATHS.offers, "GET", undefined, queryParams);
+          const response = await fortnoxRequest<OfferListResponse>(
+            FORTNOX_PATHS.offers,
+            "GET",
+            undefined,
+            queryParams
+          );
           offers = response.Offers || [];
           total = response.MetaInformation?.["@TotalResources"] || offers.length;
         }
@@ -332,8 +353,16 @@ export function registerOrderTools(server: McpServer): void {
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, offers.length),
-              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
+              ...buildPaginationMeta(
+                total,
+                params.page ?? 1,
+                params.limit ?? DEFAULT_PAGE_SIZE,
+                offers.length
+              ),
+              next_offset:
+                (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total
+                  ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE)
+                  : undefined
             };
 
         const output = {
@@ -381,9 +410,13 @@ export function registerOrderTools(server: McpServer): void {
               const expired = isOfferExpired(offer);
               lines.push(`## Offer #${offer.DocumentNumber}`);
               lines.push(`- **Customer**: ${offer.CustomerName || offer.CustomerNumber}`);
-              lines.push(`- **Date**: ${formatDisplayDate(offer.OfferDate)} | **Expires**: ${formatDisplayDate(offer.ExpireDate)}${expired ? " (EXPIRED)" : ""}`);
+              lines.push(
+                `- **Date**: ${formatDisplayDate(offer.OfferDate)} | **Expires**: ${formatDisplayDate(offer.ExpireDate)}${expired ? " (EXPIRED)" : ""}`
+              );
               lines.push(`- **Total**: ${formatMoney(offer.Total, offer.Currency)}`);
-              lines.push(`- **Status**: ${status.toUpperCase()}${offer.OrderReference ? ` (Order: ${offer.OrderReference})` : ""}`);
+              lines.push(
+                `- **Status**: ${status.toUpperCase()}${offer.OrderReference ? ` (Order: ${offer.OrderReference})` : ""}`
+              );
               lines.push("");
             }
 
@@ -398,11 +431,13 @@ export function registerOrderTools(server: McpServer): void {
               (offer) => {
                 const status = getOfferStatus(offer);
                 const expired = isOfferExpired(offer);
-                return `## Offer #${offer.DocumentNumber}\n` +
+                return (
+                  `## Offer #${offer.DocumentNumber}\n` +
                   `- **Customer**: ${offer.CustomerName || offer.CustomerNumber}\n` +
                   `- **Date**: ${formatDisplayDate(offer.OfferDate)} | **Expires**: ${formatDisplayDate(offer.ExpireDate)}${expired ? " (EXPIRED)" : ""}\n` +
                   `- **Total**: ${formatMoney(offer.Total, offer.Currency)}\n` +
-                  `- **Status**: ${status.toUpperCase()}${offer.OrderReference ? ` (Order: ${offer.OrderReference})` : ""}`;
+                  `- **Status**: ${status.toUpperCase()}${offer.OrderReference ? ` (Order: ${offer.OrderReference})` : ""}`
+                );
               }
             );
           }

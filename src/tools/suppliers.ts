@@ -100,12 +100,22 @@ export function registerSupplierTools(server: McpServer): void {
         if (params.filter) queryParams.filter = params.filter;
         if (params.search_name) queryParams.name = params.search_name;
 
-        const response = await fortnoxRequest<SupplierListResponse>("/3/suppliers", "GET", undefined, queryParams);
+        const response = await fortnoxRequest<SupplierListResponse>(
+          "/3/suppliers",
+          "GET",
+          undefined,
+          queryParams
+        );
         const suppliers = response.Suppliers || [];
         const total = response.MetaInformation?.["@TotalResources"] || suppliers.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, suppliers.length),
+          ...buildPaginationMeta(
+            total,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
+            suppliers.length
+          ),
           suppliers: suppliers.map((s) => ({
             supplier_number: s.SupplierNumber,
             name: s.Name,
@@ -125,7 +135,8 @@ export function registerSupplierTools(server: McpServer): void {
             total,
             params.page ?? 1,
             params.limit ?? DEFAULT_PAGE_SIZE,
-            (s) => `## ${s.Name} (${s.SupplierNumber})\n` +
+            (s) =>
+              `## ${s.Name} (${s.SupplierNumber})\n` +
               (s.Email ? `- **Email**: ${s.Email}\n` : "") +
               (s.City ? `- **City**: ${s.City}\n` : "") +
               (s.OrganisationNumber ? `- **Org.nr**: ${s.OrganisationNumber}` : "")
@@ -198,8 +209,14 @@ Returns:
             { label: "Name", value: supplier.Name },
             { label: "Email", value: supplier.Email },
             { label: "Phone", value: supplier.Phone1 },
-            { label: "Address", value: [supplier.Address1, supplier.Address2].filter(Boolean).join(", ") },
-            { label: "ZIP/City", value: [supplier.ZipCode, supplier.City].filter(Boolean).join(" ") },
+            {
+              label: "Address",
+              value: [supplier.Address1, supplier.Address2].filter(Boolean).join(", ")
+            },
+            {
+              label: "ZIP/City",
+              value: [supplier.ZipCode, supplier.City].filter(Boolean).join(" ")
+            },
             { label: "Country", value: supplier.Country },
             { label: "Organisation Number", value: supplier.OrganisationNumber },
             { label: "VAT Number", value: supplier.VATNumber },
@@ -242,7 +259,8 @@ Returns:
         };
 
         if (params.supplier_number) supplierData.SupplierNumber = params.supplier_number;
-        if (params.organisation_number) supplierData.OrganisationNumber = params.organisation_number;
+        if (params.organisation_number)
+          supplierData.OrganisationNumber = params.organisation_number;
         if (params.email) supplierData.Email = params.email;
         if (params.phone) supplierData.Phone1 = params.phone;
         if (params.address1) supplierData.Address1 = params.address1;
@@ -259,11 +277,9 @@ Returns:
         if (params.terms_of_payment) supplierData.TermsOfPayment = params.terms_of_payment;
         if (params.comments) supplierData.Comments = params.comments;
 
-        const response = await fortnoxRequest<SupplierResponse>(
-          "/3/suppliers",
-          "POST",
-          { Supplier: supplierData }
-        );
+        const response = await fortnoxRequest<SupplierResponse>("/3/suppliers", "POST", {
+          Supplier: supplierData
+        });
         const supplier = response.Supplier;
 
         const output = {
@@ -277,7 +293,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Supplier Created\n\n` +
+          textContent =
+            `# Supplier Created\n\n` +
             `**Supplier Number**: ${supplier.SupplierNumber}\n` +
             `**Name**: ${supplier.Name}\n\n` +
             `Supplier has been successfully created in Fortnox.`;
@@ -317,7 +334,8 @@ Returns:
         const supplierData: Record<string, unknown> = {};
 
         if (params.name) supplierData.Name = params.name;
-        if (params.organisation_number) supplierData.OrganisationNumber = params.organisation_number;
+        if (params.organisation_number)
+          supplierData.OrganisationNumber = params.organisation_number;
         if (params.email) supplierData.Email = params.email;
         if (params.phone) supplierData.Phone1 = params.phone;
         if (params.address1) supplierData.Address1 = params.address1;
@@ -350,7 +368,8 @@ Returns:
         if (params.response_format === ResponseFormat.JSON) {
           textContent = JSON.stringify(output, null, 2);
         } else {
-          textContent = `# Supplier Updated\n\n` +
+          textContent =
+            `# Supplier Updated\n\n` +
             `**Supplier Number**: ${supplier.SupplierNumber}\n` +
             `**Name**: ${supplier.Name}\n\n` +
             `Supplier has been successfully updated.`;

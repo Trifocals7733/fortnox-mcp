@@ -22,9 +22,7 @@ export const optional = <S extends Schema.Constraint>(schema: S) => Schema.optio
 export const optionalValue = <S extends Schema.Constraint>(schema: S) => Schema.optional(schema);
 
 export const ResponseFormatSchema = optional(
-  Schema.Literals(["markdown", "json"]).pipe(
-    describe("markdown|json")
-  )
+  Schema.Literals(["markdown", "json"]).pipe(describe("markdown|json"))
 );
 
 export const ShortText = (max: number, description: string) =>
@@ -42,10 +40,7 @@ export const NullableString = Schema.NullOr(Schema.String);
 /** YYYY-MM-DD date argument (Fortnox accepts nothing else). */
 export const DateString = (description: string) =>
   optional(
-    Schema.String.pipe(
-      Schema.check(Schema.isPattern(/^\d{4}-\d{2}-\d{2}$/)),
-      describe(description)
-    )
+    Schema.String.pipe(Schema.check(Schema.isPattern(/^\d{4}-\d{2}-\d{2}$/)), describe(description))
   );
 
 /** Named periods the analytics tools understand. */
@@ -88,9 +83,6 @@ export const ListPaginationInput = {
     )
   ),
   page: optional(
-    Schema.Int.pipe(
-      Schema.check(Schema.isGreaterThanOrEqualTo(1)),
-      describe("starts at 1")
-    )
+    Schema.Int.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(1)), describe("starts at 1"))
   )
 };

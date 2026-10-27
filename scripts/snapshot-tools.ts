@@ -31,10 +31,7 @@ async function snapshotTools(): Promise<ToolSnapshot[]> {
   const client = new Client({ name: "snapshot", version: "0.0.0" });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
-  await Promise.all([
-    server.connect(serverTransport),
-    client.connect(clientTransport)
-  ]);
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
   try {
     const { tools } = await client.listTools();
@@ -54,10 +51,7 @@ async function snapshotTools(): Promise<ToolSnapshot[]> {
   }
 }
 
-function diff(
-  baseline: ToolSnapshot[],
-  current: ToolSnapshot[]
-): string[] {
+function diff(baseline: ToolSnapshot[], current: ToolSnapshot[]): string[] {
   const problems: string[] = [];
   const before = new Map(baseline.map((t) => [t.name, t]));
   const after = new Map(current.map((t) => [t.name, t]));

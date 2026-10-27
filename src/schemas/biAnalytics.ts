@@ -21,9 +21,7 @@ import {
  * yet, so a guess would only look correct while the array is empty.
  */
 
-const Period = optional(
-  DatePeriodSchema.pipe(describe("Named period, e.g. 'this_month'"))
-);
+const Period = optional(DatePeriodSchema.pipe(describe("Named period, e.g. 'this_month'")));
 const FromDate = DateString("YYYY-MM-DD; ignored if period set.");
 const ToDate = DateString("YYYY-MM-DD; ignored if period set.");
 const AccountRangeFrom = optional(
@@ -209,7 +207,10 @@ export const GrossMarginTrendSchema = Schema.Struct({
     )
   ),
   revenue_accounts: ShortText(20, "Revenue account range (e.g., '3000-3999'). Default: 3000-3999"),
-  cogs_accounts: ShortText(20, "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999"),
+  cogs_accounts: ShortText(
+    20,
+    "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999"
+  ),
   response_format: ResponseFormatSchema
 });
 

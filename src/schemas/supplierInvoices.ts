@@ -37,13 +37,7 @@ export const ListSupplierInvoicesSchema = Schema.Struct({
   supplier_number: ShortText(50, "Filter by supplier number"),
   from_date: DateString("Filter invoices from this date (YYYY-MM-DD)"),
   to_date: DateString("Filter invoices to this date (YYYY-MM-DD)"),
-  period: optional(
-    DatePeriodSchema.pipe(
-      describe(
-        "Named period; overrides from_date/to_date."
-      )
-    )
-  ),
+  period: optional(DatePeriodSchema.pipe(describe("Named period; overrides from_date/to_date."))),
   from_final_pay_date: DateString("Filter by due date from (YYYY-MM-DD)"),
   to_final_pay_date: DateString("Filter by due date to (YYYY-MM-DD)"),
   sortby: optional(
@@ -56,19 +50,15 @@ export const ListSupplierInvoicesSchema = Schema.Struct({
     ]).pipe(describe("Field to sort results by"))
   ),
   sortorder: optional(
-    Schema.Literals(["ascending", "descending"]).pipe(
-      describe("default 'ascending'")
-    )
+    Schema.Literals(["ascending", "descending"]).pipe(describe("default 'ascending'"))
   ),
-  fetch_all: optional(
-    Schema.Boolean.pipe(
-      describe(
-        "Auto-paginate up to 10,000 results."
-      )
-    )
+  fetch_all: optional(Schema.Boolean.pipe(describe("Auto-paginate up to 10,000 results."))),
+  min_amount: optional(
+    Amount.pipe(describe("Filter invoices with total >= this amount (client-side filter)"))
   ),
-  min_amount: optional(Amount.pipe(describe("Filter invoices with total >= this amount (client-side filter)"))),
-  max_amount: optional(Amount.pipe(describe("Filter invoices with total <= this amount (client-side filter)"))),
+  max_amount: optional(
+    Amount.pipe(describe("Filter invoices with total <= this amount (client-side filter)"))
+  ),
   response_format: ResponseFormatSchema
 });
 

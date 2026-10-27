@@ -47,7 +47,8 @@ export function buildToolResponse<T>(
   // Truncate if exceeds character limit
   let finalText = textContent;
   if (textContent.length > CHARACTER_LIMIT) {
-    finalText = textContent.substring(0, CHARACTER_LIMIT - 100) +
+    finalText =
+      textContent.substring(0, CHARACTER_LIMIT - 100) +
       "\n\n---\n*Response truncated. Use filters or pagination to see more results.*";
   }
 
@@ -154,9 +155,8 @@ export function formatDetailMarkdown(
 
   for (const field of fields) {
     if (field.value !== undefined && field.value !== null && field.value !== "") {
-      const displayValue = typeof field.value === "boolean"
-        ? formatBoolean(field.value)
-        : String(field.value);
+      const displayValue =
+        typeof field.value === "boolean" ? formatBoolean(field.value) : String(field.value);
       lines.push(`- **${field.label}**: ${displayValue}`);
     }
   }
@@ -202,7 +202,7 @@ export function formatComparisonRow(
   isCount = false
 ): string {
   const change = current - previous;
-  const percentChange = previous !== 0 ? (change / previous) * 100 : (current > 0 ? 100 : 0);
+  const percentChange = previous !== 0 ? (change / previous) * 100 : current > 0 ? 100 : 0;
 
   const currentStr = isCount ? current.toString() : formatMoney(current);
   const previousStr = isCount ? previous.toString() : formatMoney(previous);
@@ -214,10 +214,7 @@ export function formatComparisonRow(
 /**
  * Format a comparison table header
  */
-export function formatComparisonTableHeader(
-  currentLabel: string,
-  previousLabel: string
-): string[] {
+export function formatComparisonTableHeader(currentLabel: string, previousLabel: string): string[] {
   return [
     `| Metric | ${currentLabel} | ${previousLabel} | Change |`,
     "|--------|-------|----------|--------|"
@@ -240,12 +237,14 @@ export function formatFunnelStage(
 /**
  * Format a funnel visualization in markdown
  */
-export function formatFunnelVisualization(stages: Array<{
-  name: string;
-  count: number;
-  value: number;
-  conversionFromPrevious?: number | undefined;
-}>): string {
+export function formatFunnelVisualization(
+  stages: Array<{
+    name: string;
+    count: number;
+    value: number;
+    conversionFromPrevious?: number | undefined;
+  }>
+): string {
   const lines: string[] = [
     "## Sales Funnel",
     "",
@@ -254,10 +253,13 @@ export function formatFunnelVisualization(stages: Array<{
   ];
 
   for (const stage of stages) {
-    const conversionStr = stage.conversionFromPrevious !== undefined
-      ? `${stage.conversionFromPrevious.toFixed(1)}%`
-      : "-";
-    lines.push(`| ${stage.name} | ${stage.count} | ${formatMoney(stage.value)} | ${conversionStr} |`);
+    const conversionStr =
+      stage.conversionFromPrevious !== undefined
+        ? `${stage.conversionFromPrevious.toFixed(1)}%`
+        : "-";
+    lines.push(
+      `| ${stage.name} | ${stage.count} | ${formatMoney(stage.value)} | ${conversionStr} |`
+    );
   }
 
   return lines.join("\n");
@@ -266,13 +268,15 @@ export function formatFunnelVisualization(stages: Array<{
 /**
  * Format a cash flow projection table
  */
-export function formatCashFlowTable(periods: Array<{
-  period: string;
-  inflows: number;
-  outflows: number;
-  netFlow: number;
-  runningBalance: number;
-}>): string {
+export function formatCashFlowTable(
+  periods: Array<{
+    period: string;
+    inflows: number;
+    outflows: number;
+    netFlow: number;
+    runningBalance: number;
+  }>
+): string {
   const lines: string[] = [
     "| Period | Inflows | Outflows | Net Flow | Balance |",
     "|--------|---------|----------|----------|---------|"
@@ -298,10 +302,7 @@ export function formatPercent(value: number, decimals = 1): string {
 /**
  * Format a ranking table for top N items
  */
-export function formatRankingTable(
-  headers: string[],
-  rows: string[][]
-): string {
+export function formatRankingTable(headers: string[], rows: string[][]): string {
   const headerLine = `| ${headers.join(" | ")} |`;
   const separatorLine = `|${headers.map(() => "------").join("|")}|`;
 

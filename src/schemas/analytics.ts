@@ -28,9 +28,7 @@ const Stats = Schema.Struct({
 
 const Period = optional(
   DatePeriodSchema.pipe(
-    describe(
-      "Named period, e.g. 'this_month'. If not specified, analyzes all invoices."
-    )
+    describe("Named period, e.g. 'this_month'. If not specified, analyzes all invoices.")
   )
 );
 
@@ -67,7 +65,9 @@ export const InvoiceSummarySchema = Schema.Struct({
     )
   ),
   include_details: optional(
-    Schema.Boolean.pipe(describe("Include list of individual invoices in the response (default false)"))
+    Schema.Boolean.pipe(
+      describe("Include list of individual invoices in the response (default false)")
+    )
   ),
   response_format: ResponseFormatSchema
 });

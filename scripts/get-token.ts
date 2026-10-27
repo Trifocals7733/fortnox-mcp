@@ -101,7 +101,9 @@ async function getAuthorizationCode(): Promise<string> {
 
     server.on("error", (err) => {
       if ((err as NodeJS.ErrnoException).code === "EADDRINUSE") {
-        console.error(`Port ${REDIRECT_PORT} is already in use. Please close other applications using it.`);
+        console.error(
+          `Port ${REDIRECT_PORT} is already in use. Please close other applications using it.`
+        );
       }
       reject(err);
     });
@@ -119,7 +121,7 @@ async function exchangeCodeForTokens(code: string): Promise<{
   const response = await fetch("https://apps.fortnox.se/oauth-v1/token", {
     method: "POST",
     headers: {
-      "Authorization": `Basic ${auth}`,
+      Authorization: `Basic ${auth}`,
       "Content-Type": "application/x-www-form-urlencoded"
     },
     body: new URLSearchParams({
@@ -168,16 +170,21 @@ async function main() {
     console.log("─────────────────────────────────────────────────────────────\n");
 
     console.log("Or add to Claude Desktop config:\n");
-    console.log(JSON.stringify({
-      "env": {
-        "FORTNOX_CLIENT_ID": CLIENT_ID,
-        "FORTNOX_CLIENT_SECRET": CLIENT_SECRET,
-        "FORTNOX_REFRESH_TOKEN": tokens.refresh_token
-      }
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          env: {
+            FORTNOX_CLIENT_ID: CLIENT_ID,
+            FORTNOX_CLIENT_SECRET: CLIENT_SECRET,
+            FORTNOX_REFRESH_TOKEN: tokens.refresh_token
+          }
+        },
+        null,
+        2
+      )
+    );
 
     console.log("\n✓ Done! You can now use the Fortnox MCP server.\n");
-
   } catch (error) {
     console.error("\n✗ Error:", error instanceof Error ? error.message : error);
     process.exit(1);

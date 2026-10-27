@@ -112,7 +112,11 @@ function buildUrl(
   return url.toString();
 }
 
-function buildRequest(url: string, method: Method, data?: unknown): HttpClientRequest.HttpClientRequest {
+function buildRequest(
+  url: string,
+  method: Method,
+  data?: unknown
+): HttpClientRequest.HttpClientRequest {
   const base =
     method === "GET"
       ? HttpClientRequest.get(url)
@@ -122,9 +126,7 @@ function buildRequest(url: string, method: Method, data?: unknown): HttpClientRe
           ? HttpClientRequest.put(url)
           : HttpClientRequest.make("DELETE")(url);
 
-  return data === undefined
-    ? base
-    : HttpClientRequest.bodyJsonUnsafe(base, data);
+  return data === undefined ? base : HttpClientRequest.bodyJsonUnsafe(base, data);
 }
 
 /**
@@ -235,7 +237,7 @@ export interface FetchAllResult<T> {
  * Delay execution for specified milliseconds
  */
 function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**

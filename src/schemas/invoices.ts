@@ -33,19 +33,14 @@ export const InvoiceRowSchema = Schema.Struct({
       describe("Discount percentage (0-100)")
     )
   ),
-  account_number: optional(
-    Schema.Int.pipe(describe("Account number for bookkeeping"))
-  ),
+  account_number: optional(Schema.Int.pipe(describe("Account number for bookkeeping"))),
   vat: optional(Schema.Finite.pipe(describe("VAT percentage (e.g., 25, 12, 6, 0)")))
 });
 
 export type InvoiceRowInput = typeof InvoiceRowSchema.Type;
 
 const Amount = optional(
-  Schema.Finite.pipe(
-    Schema.check(Schema.isGreaterThanOrEqualTo(0)),
-    describe("Amount in SEK")
-  )
+  Schema.Finite.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)), describe("Amount in SEK"))
 );
 
 const InvoiceFilters = {
@@ -54,13 +49,7 @@ const InvoiceFilters = {
   to_date: DateString("Filter invoices to this date (YYYY-MM-DD)"),
   from_final_pay_date: DateString("Filter by due date from (YYYY-MM-DD)"),
   to_final_pay_date: DateString("Filter by due date to (YYYY-MM-DD)"),
-  period: optional(
-    DatePeriodSchema.pipe(
-      describe(
-        "Named period; overrides from_date/to_date."
-      )
-    )
-  )
+  period: optional(DatePeriodSchema.pipe(describe("Named period; overrides from_date/to_date.")))
 };
 
 export const ListInvoicesSchema = Schema.Struct({
@@ -72,32 +61,32 @@ export const ListInvoicesSchema = Schema.Struct({
   ),
   ...InvoiceFilters,
   sortby: optional(
-    Schema.Literals(["customername", "customernumber", "documentnumber", "invoicedate", "total"]).pipe(
-      describe("Field to sort results by")
-    )
+    Schema.Literals([
+      "customername",
+      "customernumber",
+      "documentnumber",
+      "invoicedate",
+      "total"
+    ]).pipe(describe("Field to sort results by"))
   ),
   sortorder: optional(
-    Schema.Literals(["ascending", "descending"]).pipe(
-      describe("default 'ascending'")
-    )
+    Schema.Literals(["ascending", "descending"]).pipe(describe("default 'ascending'"))
   ),
-  fetch_all: optional(
-    Schema.Boolean.pipe(
-      describe(
-        "Auto-paginate up to 10,000 results."
-      )
-    )
-  ),
+  fetch_all: optional(Schema.Boolean.pipe(describe("Auto-paginate up to 10,000 results."))),
   min_amount: optional(
     Schema.Finite.pipe(
       Schema.check(Schema.isGreaterThanOrEqualTo(0)),
-      describe("Filter invoices with total >= this amount (client-side filter, applied after fetching)")
+      describe(
+        "Filter invoices with total >= this amount (client-side filter, applied after fetching)"
+      )
     )
   ),
   max_amount: optional(
     Schema.Finite.pipe(
       Schema.check(Schema.isGreaterThanOrEqualTo(0)),
-      describe("Filter invoices with total <= this amount (client-side filter, applied after fetching)")
+      describe(
+        "Filter invoices with total <= this amount (client-side filter, applied after fetching)"
+      )
     )
   ),
   response_format: ResponseFormatSchema

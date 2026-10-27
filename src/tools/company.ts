@@ -115,9 +115,17 @@ Returns:
             { label: "Company Name", value: company.CompanyName },
             { label: "Organisation Number", value: company.OrganizationNumber },
             { label: "Database Number", value: company.DatabaseNumber },
-            { label: "Postal Address", value: [company.Address, company.ZipCode, company.City].filter(Boolean).join(", ") },
+            {
+              label: "Postal Address",
+              value: [company.Address, company.ZipCode, company.City].filter(Boolean).join(", ")
+            },
             { label: "Country", value: company.Country },
-            { label: "Visit Address", value: [company.VisitAddress, company.VisitZipCode, company.VisitCity].filter(Boolean).join(", ") },
+            {
+              label: "Visit Address",
+              value: [company.VisitAddress, company.VisitZipCode, company.VisitCity]
+                .filter(Boolean)
+                .join(", ")
+            },
             { label: "Email", value: company.Email },
             { label: "Phone", value: company.Phone1 },
             { label: "Phone 2", value: company.Phone2 },
@@ -177,7 +185,9 @@ Returns:
           ];
 
           for (const fy of financialYears) {
-            lines.push(`| ${fy.Id} | ${fy.FromDate} | ${fy.ToDate} | ${fy.AccountingMethod || "-"} |`);
+            lines.push(
+              `| ${fy.Id} | ${fy.FromDate} | ${fy.ToDate} | ${fy.AccountingMethod || "-"} |`
+            );
           }
 
           textContent = lines.join("\n");

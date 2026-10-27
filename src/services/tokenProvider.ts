@@ -19,9 +19,7 @@ export interface TokenProviderService {
   readonly accessToken: (userId?: string) => Effect.Effect<string, Error>;
 }
 
-export const TokenProviderService = Context.Service<TokenProviderService>(
-  "fortnox/TokenProvider"
-);
+export const TokenProviderService = Context.Service<TokenProviderService>("fortnox/TokenProvider");
 
 export const tokenProviderLayer: Layer.Layer<TokenProviderService> = Layer.succeed(
   TokenProviderService,

@@ -56,4 +56,3 @@ export const ListFinancialYearsOutput = Schema.Struct({
 });
 
 export type ListFinancialYearsOutput = typeof ListFinancialYearsOutput.Type;
-

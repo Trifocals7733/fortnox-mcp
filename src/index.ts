@@ -103,7 +103,7 @@ async function main(): Promise<void> {
         serverUrl: config.serverUrl!,
         jwtSecret: config.jwtSecret!,
         tokenStorage,
-        port: config.port,
+        port: config.port
       });
     } else if (config.transport === "http") {
       // Local HTTP mode (no OAuth, uses env vars)

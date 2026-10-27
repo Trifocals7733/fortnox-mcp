@@ -15,9 +15,7 @@ import { MutationResult } from "./shared.js";
 const optional = <S extends Schema.Constraint>(schema: S) => Schema.optionalKey(schema);
 
 const ResponseFormatSchema = optional(
-  Schema.Literals(["markdown", "json"]).pipe(
-    describe("markdown|json")
-  )
+  Schema.Literals(["markdown", "json"]).pipe(describe("markdown|json"))
 );
 
 const ShortText = (max: number, description: string) =>
