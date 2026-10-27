@@ -12,7 +12,14 @@ import { describe } from "../services/mcpSchema.js";
  *   `Number` admits Infinity/NaN and advertises an anyOf union.
  */
 
+/** Input field: the key may be absent. Handlers apply defaults. */
 export const optional = <S extends Schema.Constraint>(schema: S) => Schema.optionalKey(schema);
+
+/**
+ * Output field: the key may be absent OR explicitly `undefined`. Handlers
+ * build plain objects, so conditional fields arrive as `key: undefined`.
+ */
+export const optionalValue = <S extends Schema.Constraint>(schema: S) => Schema.optional(schema);
 
 export const ResponseFormatSchema = optional(
   Schema.Literals(["markdown", "json"]).pipe(
@@ -31,6 +38,31 @@ export const Email = optional(
 );
 
 export const NullableString = Schema.NullOr(Schema.String);
+
+/** YYYY-MM-DD date argument (Fortnox accepts nothing else). */
+export const DateString = (description: string) =>
+  optional(
+    Schema.String.pipe(
+      Schema.check(Schema.isPattern(/^\d{4}-\d{2}-\d{2}$/)),
+      describe(description)
+    )
+  );
+
+/** Named periods the analytics tools understand. */
+export const DATE_PERIODS = [
+  "today",
+  "yesterday",
+  "this_week",
+  "last_week",
+  "this_month",
+  "last_month",
+  "this_quarter",
+  "last_quarter",
+  "this_year",
+  "last_year"
+] as const;
+
+export const DatePeriodSchema = Schema.Literals(DATE_PERIODS);
 
 export const MutationResult = Schema.Struct({
   success: Schema.Boolean.pipe(describe("Whether the operation succeeded")),

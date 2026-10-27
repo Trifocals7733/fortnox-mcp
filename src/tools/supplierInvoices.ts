@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -23,7 +24,11 @@ import {
   type ListSupplierInvoicesInput,
   type GetSupplierInvoiceInput,
   type ApproveSupplierInvoiceInput,
-  type PayablesReportInput
+  type PayablesReportInput,
+  ListSupplierInvoicesOutput,
+  SupplierInvoiceDetailSchema,
+  ApproveSupplierInvoiceOutput,
+  PayablesReportOutput
 } from "../schemas/supplierInvoices.js";
 
 // API response types
@@ -134,7 +139,8 @@ Examples:
   - List unpaid supplier invoices: filter="unpaid"
   - Last month's supplier invoices: period="last_month"
   - Supplier invoices this year: supplier_number="1", period="this_year"`,
-      inputSchema: ListSupplierInvoicesSchema,
+      inputSchema: mcpSchema(ListSupplierInvoicesSchema),
+      outputSchema: mcpSchema(ListSupplierInvoicesOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -188,8 +194,8 @@ Examples:
           truncationReason = result.truncationReason;
         } else {
           // Single page request
-          queryParams.limit = params.limit;
-          queryParams.page = params.page;
+          queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
+          queryParams.page = params.page ?? 1;
 
           const response = await fortnoxRequest<SupplierInvoiceListResponse>("/3/supplierinvoices", "GET", undefined, queryParams);
           invoices = response.SupplierInvoices || [];
@@ -215,8 +221,8 @@ Examples:
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page, params.limit, invoices.length),
-              next_offset: params.page * params.limit < total ? params.page * params.limit : undefined
+              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, invoices.length),
+              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
             };
 
         const output = {
@@ -278,8 +284,8 @@ Examples:
               title,
               invoices,
               total,
-              params.page,
-              params.limit,
+              params.page ?? 1,
+              params.limit ?? DEFAULT_PAGE_SIZE,
               (inv) => {
                 const status = getSupplierInvoiceStatus(inv);
                 return `## Supplier Invoice #${inv.GivenNumber}\n` +
@@ -313,7 +319,8 @@ Args:
 
 Returns:
   Complete supplier invoice details including supplier info, dates, amounts, line items, and payment status.`,
-      inputSchema: GetSupplierInvoiceSchema,
+      inputSchema: mcpSchema(GetSupplierInvoiceSchema),
+      outputSchema: mcpSchema(SupplierInvoiceDetailSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -425,7 +432,8 @@ Args:
 
 Returns:
   Confirmation that the invoice has been approved for payment.`,
-      inputSchema: ApproveSupplierInvoiceSchema,
+      inputSchema: mcpSchema(ApproveSupplierInvoiceSchema),
+      outputSchema: mcpSchema(ApproveSupplierInvoiceOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -502,7 +510,8 @@ Examples:
   - Full payables report: (use defaults)
   - Large unpaid invoices: min_amount=50000
   - Specific supplier: supplier_number="1"`,
-      inputSchema: PayablesReportSchema,
+      inputSchema: mcpSchema(PayablesReportSchema),
+      outputSchema: mcpSchema(PayablesReportOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -574,7 +583,7 @@ Examples:
         };
 
         // Add groupings based on params
-        if (params.group_by === "age_bucket" || params.group_by === "both") {
+        if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
           output.by_age_bucket = ageBucketOrder.map(bucket => {
             const items = byAgeBucket.get(bucket)!;
             return {
@@ -585,7 +594,7 @@ Examples:
           });
         }
 
-        if (params.group_by === "supplier" || params.group_by === "both") {
+        if ((params.group_by ?? "both") === "supplier" || (params.group_by ?? "both") === "both") {
           output.by_supplier = Array.from(bySupplier.entries())
             .map(([supplier, items]) => ({
               supplier,
@@ -595,7 +604,7 @@ Examples:
             .sort((a, b) => b.total_balance - a.total_balance);
         }
 
-        if (params.include_details) {
+        if (params.include_details ?? true) {
           output.invoices = invoices
             .sort((a, b) => (b.Balance || 0) - (a.Balance || 0))
             .map(inv => ({
@@ -635,7 +644,7 @@ Examples:
           lines.push(`| **Total Payable** | **${formatMoney(totalPayable)}** |`);
           lines.push(`| Unique Suppliers | ${bySupplier.size} |`);
 
-          if (params.group_by === "age_bucket" || params.group_by === "both") {
+          if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
             lines.push("");
             lines.push("## Aging Breakdown");
             lines.push("");
@@ -651,7 +660,7 @@ Examples:
             }
           }
 
-          if (params.group_by === "supplier" || params.group_by === "both") {
+          if ((params.group_by ?? "both") === "supplier" || (params.group_by ?? "both") === "both") {
             lines.push("");
             lines.push("## By Supplier");
             lines.push("");
@@ -676,7 +685,7 @@ Examples:
             }
           }
 
-          if (params.include_details && invoices.length > 0) {
+          if ((params.include_details ?? true) && invoices.length > 0) {
             lines.push("");
             lines.push("## Invoice Details");
             lines.push("");

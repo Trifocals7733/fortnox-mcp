@@ -1,128 +1,224 @@
-import { z } from "zod";
-import { ResponseFormat, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "../constants.js";
-import { DatePeriodEnum } from "./invoices.js";
+import { Schema } from "effect";
+import { describe } from "../services/mcpSchema.js";
+import {
+  DatePeriodSchema,
+  DateString,
+  ListPaginationInput,
+  MutationResult,
+  NullableString,
+  PaginationFields,
+  ResponseFormatSchema,
+  ShortText,
+  optional,
+  optionalValue
+} from "./shared.js";
 
 /**
- * Schema for listing supplier invoices
+ * Input and output schemas for the supplier-invoice tools.
  */
-export const ListSupplierInvoicesSchema = z.object({
-  limit: z.number()
-    .int()
-    .min(1)
-    .max(MAX_PAGE_SIZE)
-    .default(DEFAULT_PAGE_SIZE)
-    .describe("Maximum number of results to return (1-100)"),
-  page: z.number()
-    .int()
-    .min(1)
-    .default(1)
-    .describe("Page number for pagination"),
-  filter: z.enum([
-    "cancelled",
-    "fullypaid",
-    "unpaid",
-    "unpaidoverdue",
-    "unbooked",
-    "pendingpayment"
-  ])
-    .optional()
-    .describe("Filter supplier invoices by status"),
-  supplier_number: z.string()
-    .max(50)
-    .optional()
-    .describe("Filter by supplier number"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter invoices from this date (YYYY-MM-DD)"),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter invoices to this date (YYYY-MM-DD)"),
-  period: DatePeriodEnum
-    .optional()
-    .describe("Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."),
-  from_final_pay_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter by due date from (YYYY-MM-DD)"),
-  to_final_pay_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Filter by due date to (YYYY-MM-DD)"),
-  sortby: z.enum(["suppliername", "suppliernumber", "invoicenumber", "invoicedate", "total"])
-    .optional()
-    .describe("Field to sort results by"),
-  sortorder: z.enum(["ascending", "descending"])
-    .default("ascending")
-    .describe("Sort order for results"),
-  fetch_all: z.boolean()
-    .default(false)
-    .describe("Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."),
-  min_amount: z.number()
-    .min(0)
-    .optional()
-    .describe("Filter invoices with total >= this amount (client-side filter)"),
-  max_amount: z.number()
-    .min(0)
-    .optional()
-    .describe("Filter invoices with total <= this amount (client-side filter)"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
 
-export type ListSupplierInvoicesInput = z.infer<typeof ListSupplierInvoicesSchema>;
+const Amount = Schema.Finite.pipe(
+  Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+  describe("Amount in SEK")
+);
 
-/**
- * Schema for getting a single supplier invoice
- */
-export const GetSupplierInvoiceSchema = z.object({
-  given_number: z.string()
-    .min(1)
-    .describe("The supplier invoice given number to retrieve"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const ListSupplierInvoicesSchema = Schema.Struct({
+  ...ListPaginationInput,
+  filter: optional(
+    Schema.Literals([
+      "cancelled",
+      "fullypaid",
+      "unpaid",
+      "unpaidoverdue",
+      "unbooked",
+      "pendingpayment"
+    ]).pipe(describe("Filter supplier invoices by status"))
+  ),
+  supplier_number: ShortText(50, "Filter by supplier number"),
+  from_date: DateString("Filter invoices from this date (YYYY-MM-DD)"),
+  to_date: DateString("Filter invoices to this date (YYYY-MM-DD)"),
+  period: optional(
+    DatePeriodSchema.pipe(
+      describe(
+        "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+      )
+    )
+  ),
+  from_final_pay_date: DateString("Filter by due date from (YYYY-MM-DD)"),
+  to_final_pay_date: DateString("Filter by due date to (YYYY-MM-DD)"),
+  sortby: optional(
+    Schema.Literals([
+      "suppliername",
+      "suppliernumber",
+      "invoicenumber",
+      "invoicedate",
+      "total"
+    ]).pipe(describe("Field to sort results by"))
+  ),
+  sortorder: optional(
+    Schema.Literals(["ascending", "descending"]).pipe(
+      describe("Sort order for results (default 'ascending')")
+    )
+  ),
+  fetch_all: optional(
+    Schema.Boolean.pipe(
+      describe(
+        "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+      )
+    )
+  ),
+  min_amount: optional(Amount.pipe(describe("Filter invoices with total >= this amount (client-side filter)"))),
+  max_amount: optional(Amount.pipe(describe("Filter invoices with total <= this amount (client-side filter)"))),
+  response_format: ResponseFormatSchema
+});
 
-export type GetSupplierInvoiceInput = z.infer<typeof GetSupplierInvoiceSchema>;
+export type ListSupplierInvoicesInput = typeof ListSupplierInvoicesSchema.Type;
 
-/**
- * Schema for approving a supplier invoice
- */
-export const ApproveSupplierInvoiceSchema = z.object({
-  given_number: z.string()
-    .min(1)
-    .describe("The supplier invoice given number to approve"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const GetSupplierInvoiceSchema = Schema.Struct({
+  given_number: Schema.String.pipe(
+    Schema.check(Schema.isMinLength(1)),
+    describe("The supplier invoice given number to retrieve")
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type ApproveSupplierInvoiceInput = z.infer<typeof ApproveSupplierInvoiceSchema>;
+export type GetSupplierInvoiceInput = typeof GetSupplierInvoiceSchema.Type;
 
-/**
- * Schema for payables aging report
- */
-export const PayablesReportSchema = z.object({
-  min_amount: z.number()
-    .min(0)
-    .optional()
-    .describe("Only include invoices with balance >= this amount"),
-  supplier_number: z.string()
-    .max(50)
-    .optional()
-    .describe("Filter by specific supplier number"),
-  group_by: z.enum(["supplier", "age_bucket", "both"])
-    .default("both")
-    .describe("How to group unpaid supplier invoices in the report"),
-  include_details: z.boolean()
-    .default(true)
-    .describe("Include list of individual unpaid invoices"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const ApproveSupplierInvoiceSchema = Schema.Struct({
+  given_number: Schema.String.pipe(
+    Schema.check(Schema.isMinLength(1)),
+    describe("The supplier invoice given number to approve")
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type PayablesReportInput = z.infer<typeof PayablesReportSchema>;
+export type ApproveSupplierInvoiceInput = typeof ApproveSupplierInvoiceSchema.Type;
+
+export const PayablesReportSchema = Schema.Struct({
+  min_amount: optional(Amount.pipe(describe("Only include invoices with balance >= this amount"))),
+  supplier_number: ShortText(50, "Filter by specific supplier number"),
+  group_by: optional(
+    Schema.Literals(["supplier", "age_bucket", "both"]).pipe(
+      describe("How to group unpaid supplier invoices in the report (default 'both')")
+    )
+  ),
+  include_details: optional(
+    Schema.Boolean.pipe(describe("Include list of individual unpaid invoices (default true)"))
+  ),
+  response_format: ResponseFormatSchema
+});
+
+export type PayablesReportInput = typeof PayablesReportSchema.Type;
+
+/* ------------------------------- outputs ------------------------------- */
+
+export const SupplierInvoiceListItemSchema = Schema.Struct({
+  given_number: Schema.Finite,
+  supplier_number: NullableString,
+  supplier_name: NullableString,
+  invoice_number: NullableString,
+  invoice_date: NullableString,
+  due_date: NullableString,
+  total: Schema.Finite,
+  balance: Schema.Finite,
+  currency: Schema.String,
+  booked: Schema.Boolean,
+  cancelled: Schema.Boolean,
+  status: Schema.String.pipe(describe("Derived status label"))
+});
+
+export const ListSupplierInvoicesOutput = Schema.Struct({
+  ...PaginationFields,
+  period_description: optionalValue(Schema.String),
+  next_offset: optionalValue(Schema.Finite),
+  invoices: Schema.Array(SupplierInvoiceListItemSchema)
+});
+
+export const SupplierInvoiceRowSchema = Schema.Struct({
+  article_number: NullableString,
+  account: Schema.NullOr(Schema.Finite),
+  account_description: NullableString,
+  debit: Schema.Finite,
+  credit: Schema.Finite,
+  total: Schema.Finite,
+  project: NullableString,
+  cost_center: NullableString
+});
+
+export const SupplierInvoiceDetailSchema = Schema.Struct({
+  given_number: Schema.Finite,
+  supplier_number: NullableString,
+  supplier_name: NullableString,
+  invoice_number: NullableString,
+  invoice_date: NullableString,
+  due_date: NullableString,
+  total: Schema.Finite,
+  balance: Schema.Finite,
+  currency: Schema.String,
+  ocr: NullableString,
+  booked: Schema.Boolean,
+  cancelled: Schema.Boolean,
+  credit: Schema.Boolean,
+  payment_pending: Schema.Boolean,
+  comments: NullableString,
+  rows: Schema.Array(SupplierInvoiceRowSchema)
+});
+
+export type SupplierInvoiceDetail = typeof SupplierInvoiceDetailSchema.Type;
+
+export const ApproveSupplierInvoiceOutput = Schema.Struct({
+  ...MutationResult.fields,
+  given_number: Schema.Finite,
+  supplier_name: NullableString,
+  total: Schema.Finite,
+  payment_pending: Schema.Boolean
+});
+
+const GroupTotalSchema = Schema.Struct({
+  count: Schema.Finite,
+  total_balance: Schema.Finite
+});
+
+export const PayablesReportOutput = Schema.Struct({
+  summary: Schema.Struct({
+    total_invoices: Schema.Finite,
+    total_invoice_amount: Schema.Finite,
+    total_payable_balance: Schema.Finite,
+    unique_suppliers: Schema.Finite
+  }),
+  truncated: Schema.Boolean,
+  truncation_reason: optionalValue(NullableString),
+  by_age_bucket: optionalValue(
+    Schema.Array(
+      Schema.Struct({
+        bucket: Schema.String,
+        ...GroupTotalSchema.fields
+      })
+    )
+  ),
+  by_supplier: optionalValue(
+    Schema.Array(
+      Schema.Struct({
+        supplier: Schema.String,
+        ...GroupTotalSchema.fields
+      })
+    )
+  ),
+  invoices: optionalValue(
+    Schema.Array(
+      Schema.Struct({
+        given_number: Schema.Finite,
+        supplier_number: NullableString,
+        supplier_name: NullableString,
+        invoice_number: NullableString,
+        invoice_date: NullableString,
+        due_date: NullableString,
+        total: Schema.Finite,
+        balance: Schema.Finite,
+        age_bucket: Schema.String
+      })
+    )
+  )
+});
+
+export type PayablesReportOutput = typeof PayablesReportOutput.Type;
