@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "../constants.js";
 import { describe } from "../services/mcpSchema.js";
+import { MutationResult } from "./shared.js";
 
 /**
  * Input and output schemas for the customer tools.
@@ -188,7 +189,10 @@ export const CustomerDetailSchema = Schema.Struct({
 
 export type CustomerDetail = typeof CustomerDetailSchema.Type;
 
-export const DeleteCustomerOutput = Schema.Struct({
+export const CustomerMutationOutput = Schema.Struct({
+  ...MutationResult.fields,
   customer_number: Schema.String,
-  deleted: Schema.Boolean
+  name: Schema.String
 });
+
+export const DeleteCustomerOutput = MutationResult;

@@ -790,170 +790,26 @@
     "outputSchema": {
       "type": "object",
       "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
         "customer_number": {
           "type": "string"
         },
         "name": {
           "type": "string"
-        },
-        "email": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "phone": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "address1": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "address2": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "zip_code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "city": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "country": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "country_code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "organisation_number": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "vat_number": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "currency": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "active": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "terms_of_payment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "comments": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "required": [
+        "success",
+        "message",
         "customer_number",
-        "name",
-        "email",
-        "phone",
-        "address1",
-        "address2",
-        "zip_code",
-        "city",
-        "country",
-        "country_code",
-        "organisation_number",
-        "vat_number",
-        "currency",
-        "active",
-        "terms_of_payment",
-        "comments"
+        "name"
       ],
       "additionalProperties": true
     },
@@ -1590,16 +1446,18 @@
     "outputSchema": {
       "type": "object",
       "properties": {
-        "customer_number": {
-          "type": "string"
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
         },
-        "deleted": {
-          "type": "boolean"
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
         }
       },
       "required": [
-        "customer_number",
-        "deleted"
+        "success",
+        "message"
       ],
       "additionalProperties": true
     },
@@ -5799,170 +5657,26 @@
     "outputSchema": {
       "type": "object",
       "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
         "customer_number": {
           "type": "string"
         },
         "name": {
           "type": "string"
-        },
-        "email": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "phone": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "address1": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "address2": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "zip_code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "city": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "country": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "country_code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "organisation_number": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "vat_number": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "currency": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "active": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "terms_of_payment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "comments": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "required": [
+        "success",
+        "message",
         "customer_number",
-        "name",
-        "email",
-        "phone",
-        "address1",
-        "address2",
-        "zip_code",
-        "city",
-        "country",
-        "country_code",
-        "organisation_number",
-        "vat_number",
-        "currency",
-        "active",
-        "terms_of_payment",
-        "comments"
+        "name"
       ],
       "additionalProperties": true
     },

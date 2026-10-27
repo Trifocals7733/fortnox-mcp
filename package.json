@@ -18,7 +18,8 @@
     "check:tools": "tsx scripts/snapshot-tools.ts --check",
     "build": "tsc",
     "clean": "rm -rf dist",
-    "smoke": "tsx --env-file-if-exists=.env scripts/smoke.ts"
+    "smoke": "tsx --env-file-if-exists=.env scripts/smoke.ts",
+    "company": "tsx scripts/company.ts"
   },
   "engines": {
     "node": ">=22"

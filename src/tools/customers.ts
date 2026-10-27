@@ -24,6 +24,7 @@ import {
   type DeleteCustomerInput,
   ListCustomersOutput,
   CustomerDetailSchema,
+  CustomerMutationOutput,
   DeleteCustomerOutput
 } from "../schemas/customers.js";
 
@@ -38,6 +39,7 @@ interface FortnoxCustomer {
   ZipCode?: string;
   City?: string;
   Country?: string;
+  CountryCode?: string;
   OrganisationNumber?: string;
   VATNumber?: string;
   Currency?: string;
@@ -205,6 +207,7 @@ Returns:
           zip_code: customer.ZipCode || null,
           city: customer.City || null,
           country: customer.Country || null,
+          country_code: customer.CountryCode || null,
           organisation_number: customer.OrganisationNumber || null,
           vat_number: customer.VATNumber || null,
           currency: customer.Currency || null,
@@ -265,7 +268,7 @@ Args:
 Returns:
   The created customer with assigned customer number.`,
       inputSchema: mcpSchema(CreateCustomerSchema),
-      outputSchema: mcpSchema(CustomerDetailSchema),
+      outputSchema: mcpSchema(CustomerMutationOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -341,7 +344,7 @@ Args:
 Returns:
   The updated customer details.`,
       inputSchema: mcpSchema(UpdateCustomerSchema),
-      outputSchema: mcpSchema(CustomerDetailSchema),
+      outputSchema: mcpSchema(CustomerMutationOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
