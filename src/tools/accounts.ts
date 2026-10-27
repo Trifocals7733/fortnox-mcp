@@ -71,24 +71,7 @@ export function registerAccountTools(server: McpServer): void {
     "fortnox_list_accounts",
     {
       title: "List Fortnox Accounts",
-      description: `List accounts from the chart of accounts in Fortnox.
-
-Retrieves a paginated list of accounts with optional filtering.
-
-Args:
-  - limit (number): Max results per page, 1-100 (default: 20)
-  - page (number): Page number for pagination (default: 1)
-  - search_description (string): Search accounts by description
-  - from_account (number): Filter accounts from this number (1000-9999)
-  - to_account (number): Filter accounts to this number (1000-9999)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of accounts with account number, description, and active status.
-
-Examples:
-  - List revenue accounts: from_account=3000, to_account=3999
-  - List expense accounts: from_account=4000, to_account=8999`,
+      description: `Chart of accounts, filterable by description or an account-number range.`,
       inputSchema: mcpSchema(ListAccountsSchema),
       outputSchema: mcpSchema(ListAccountsOutput),
       annotations: {
@@ -214,19 +197,7 @@ Returns:
     "fortnox_create_account",
     {
       title: "Create Fortnox Account",
-      description: `Create a new account in the chart of accounts.
-
-Args:
-  - account_number (number): Account number 1000-9999 (required)
-  - description (string): Account description (required)
-  - vat_code (string): VAT code for the account
-  - active (boolean): Whether the account is active (default: true)
-  - cost_center_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Cost center settings
-  - project_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Project settings
-  - sru_code (number): SRU code for tax reporting
-
-Returns:
-  The created account details.`,
+      description: `Create an account in the chart of accounts. Account numbers are 1000-9999 and a description is required; fails if the number already exists.`,
       inputSchema: mcpSchema(CreateAccountSchema),
       outputSchema: mcpSchema(AccountMutationOutput),
       annotations: {
@@ -285,18 +256,7 @@ Returns:
     "fortnox_update_account",
     {
       title: "Update Fortnox Account",
-      description: `Update an existing account in the chart of accounts.
-
-Args:
-  - account_number (number): Account number to update (required)
-  - description (string): Account description
-  - vat_code (string): VAT code
-  - active (boolean): Whether the account is active
-  - cost_center_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Cost center settings
-  - project_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Project settings
-
-Returns:
-  The updated account details.`,
+      description: `Update an account's description, VAT code, active flag, cost-centre/project settings or SRU code.`,
       inputSchema: mcpSchema(UpdateAccountSchema),
       outputSchema: mcpSchema(AccountMutationOutput),
       annotations: {

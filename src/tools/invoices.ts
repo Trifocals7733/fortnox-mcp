@@ -106,42 +106,7 @@ export function registerInvoiceTools(server: McpServer): void {
     "fortnox_list_invoices",
     {
       title: "List Fortnox Invoices",
-      description: `List invoices from Fortnox accounting system.
-
-Retrieves a paginated list of invoices with optional filtering by status, customer, date range, or amount.
-Supports convenience period filters and can fetch all results for large datasets.
-
-Args:
-  - limit (number): Max results per page, 1-100 (default: 20)
-  - page (number): Page number for pagination (default: 1)
-  - filter ('cancelled' | 'fullypaid' | 'unpaid' | 'unpaidoverdue' | 'unbooked'): Filter by invoice status
-  - customer_number (string): Filter by customer number
-  - from_date (string): Filter invoices from this date (YYYY-MM-DD)
-  - to_date (string): Filter invoices to this date (YYYY-MM-DD)
-  - period ('today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_quarter' | 'last_quarter' | 'this_year' | 'last_year'): Convenience date period, overrides from_date/to_date
-  - from_final_pay_date (string): Filter by due date from (YYYY-MM-DD)
-  - to_final_pay_date (string): Filter by due date to (YYYY-MM-DD)
-  - sortby ('customername' | 'customernumber' | 'documentnumber' | 'invoicedate' | 'total'): Field to sort by
-  - sortorder ('ascending' | 'descending'): Sort order (default: ascending)
-  - fetch_all (boolean): Fetch all results by auto-paginating (max 10,000 results)
-  - min_amount (number): Filter invoices >= this amount (client-side)
-  - max_amount (number): Filter invoices <= this amount (client-side)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  For JSON: { total, page, limit, count, has_more, total_pages, next_offset?, truncated?, invoices: [...] }
-  For Markdown: Formatted list with pagination info
-
-Examples:
-  - List unpaid invoices: filter="unpaid"
-  - Last month's invoices: period="last_month"
-  - Top invoices by amount: sortby="total", sortorder="descending"
-  - All invoices over 10000: fetch_all=true, min_amount=10000
-  - Customer invoices this year: customer_number="1001", period="this_year"
-
-Error Handling:
-  - Returns "Error: Rate limit exceeded..." if API limit hit
-  - Returns truncation info if fetch_all hits safety limits`,
+      description: `Invoices, filterable by status, customer, date/period, due date and amount. fetch_all auto-paginates up to 10,000; min_amount/max_amount filter client-side after fetching.`,
       inputSchema: mcpSchema(ListInvoicesSchema),
       outputSchema: mcpSchema(ListInvoicesOutput),
       annotations: {
@@ -431,30 +396,7 @@ Returns:
     "fortnox_create_invoice",
     {
       title: "Create Fortnox Invoice",
-      description: `Create a new invoice in Fortnox.
-
-Args:
-  - customer_number (string): Customer number (required)
-  - rows (array): Invoice line items (at least one required)
-    - Each row: { description, quantity?, price?, article_number?, unit?, discount?, vat?, account_number? }
-  - invoice_date (string): Invoice date YYYY-MM-DD (defaults to today)
-  - due_date (string): Due date YYYY-MM-DD
-  - our_reference (string): Our reference person
-  - your_reference (string): Customer's reference
-  - invoice_type ('INVOICE' | 'CASH' | 'CARD' | 'UNDEFINED'): Invoice type
-  - currency (string): 3-letter currency code
-  - terms_of_payment (string): Payment terms code
-  - comments (string): Internal comments
-  - remarks (string): Remarks printed on invoice
-  - freight (number): Shipping cost
-  - administration_fee (number): Admin fee
-  - send_type ('EMAIL' | 'PRINT' | 'EINVOICE'): How to send
-
-Returns:
-  The created invoice with assigned document number.
-
-Example rows:
-  [{ "description": "Consulting services", "quantity": 10, "price": 1000 }]`,
+      description: `Create an invoice as a draft with at least one row. Bookkeep it afterwards with fortnox_bookkeep_invoice to post it. The customer number must exist.`,
       inputSchema: mcpSchema(CreateInvoiceSchema),
       outputSchema: mcpSchema(CreateInvoiceOutput),
       annotations: {

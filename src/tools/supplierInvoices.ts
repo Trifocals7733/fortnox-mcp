@@ -111,34 +111,7 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
     "fortnox_list_supplier_invoices",
     {
       title: "List Fortnox Supplier Invoices",
-      description: `List supplier invoices (accounts payable) from Fortnox.
-
-Retrieves a paginated list of supplier invoices with optional filtering by status, supplier, date range, or amount.
-
-Args:
-  - limit (number): Max results per page, 1-100 (default: 20)
-  - page (number): Page number for pagination (default: 1)
-  - filter ('cancelled' | 'fullypaid' | 'unpaid' | 'unpaidoverdue' | 'unbooked' | 'pendingpayment'): Filter by invoice status
-  - supplier_number (string): Filter by supplier number
-  - from_date (string): Filter invoices from this date (YYYY-MM-DD)
-  - to_date (string): Filter invoices to this date (YYYY-MM-DD)
-  - period ('today' | 'yesterday' | ... | 'last_year'): Convenience date period, overrides from_date/to_date
-  - from_final_pay_date (string): Filter by due date from (YYYY-MM-DD)
-  - to_final_pay_date (string): Filter by due date to (YYYY-MM-DD)
-  - sortby ('suppliername' | 'suppliernumber' | 'invoicenumber' | 'invoicedate' | 'total'): Field to sort by
-  - sortorder ('ascending' | 'descending'): Sort order (default: ascending)
-  - fetch_all (boolean): Fetch all results by auto-paginating (max 10,000 results)
-  - min_amount (number): Filter invoices >= this amount (client-side)
-  - max_amount (number): Filter invoices <= this amount (client-side)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of supplier invoices with supplier, dates, amounts, and status.
-
-Examples:
-  - List unpaid supplier invoices: filter="unpaid"
-  - Last month's supplier invoices: period="last_month"
-  - Supplier invoices this year: supplier_number="1", period="this_year"`,
+      description: `Supplier invoices (accounts payable), filterable by status, supplier, date/period, due date and amount. fetch_all auto-paginates up to 10,000; min/max_amount filter client-side.`,
       inputSchema: mcpSchema(ListSupplierInvoicesSchema),
       outputSchema: mcpSchema(ListSupplierInvoicesOutput),
       annotations: {
@@ -481,35 +454,7 @@ Returns:
     "fortnox_payables_report",
     {
       title: "Accounts Payable Aging Report",
-      description: `Generate an accounts payable aging report for unpaid supplier invoices.
-
-Answers questions like:
-- "What supplier invoices are overdue?"
-- "How much do we owe each supplier?"
-- "Show me aging breakdown of payables"
-- "Which supplier invoices over 10,000 SEK are unpaid?"
-
-Args:
-  - min_amount (number): Only include invoices >= this amount
-  - supplier_number (string): Filter by specific supplier
-  - group_by ('supplier' | 'age_bucket' | 'both'): How to group report (default: both)
-  - include_details (boolean): Include individual invoice list (default: true)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Aging report with summary, breakdowns by supplier and age bucket.
-
-Age Buckets:
-  - not_due: Due date is in the future
-  - 1-30 days: Overdue 1-30 days
-  - 31-60 days: Overdue 31-60 days
-  - 61-90 days: Overdue 61-90 days
-  - 90+ days: Overdue more than 90 days
-
-Examples:
-  - Full payables report: (use defaults)
-  - Large unpaid invoices: min_amount=50000
-  - Specific supplier: supplier_number="1"`,
+      description: `Accounts-payable aging: unpaid supplier invoices grouped by age bucket and/or supplier, with balances and an optional per-invoice list.`,
       inputSchema: mcpSchema(PayablesReportSchema),
       outputSchema: mcpSchema(PayablesReportOutput),
       annotations: {

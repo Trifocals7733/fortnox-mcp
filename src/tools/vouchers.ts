@@ -93,29 +93,7 @@ export function registerVoucherTools(server: McpServer): void {
     "fortnox_list_vouchers",
     {
       title: "List Fortnox Vouchers",
-      description: `List vouchers (accounting entries) from Fortnox.
-
-Retrieves a paginated list of vouchers with optional filtering.
-
-IMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.
-Use fortnox_list_financial_years first to find the correct ID for your target year.
-
-Args:
-  - limit (number): Max results per page, 1-100 (default: 20)
-  - page (number): Page number for pagination (default: 1)
-  - voucher_series (string): Filter by voucher series (e.g., 'A', 'B')
-  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)
-  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)
-  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of vouchers with series, number, description, and date.
-
-Examples:
-  - First call fortnox_list_financial_years to find that ID 4 = 2025
-  - List vouchers for 2025: financial_year=4
-  - List manual vouchers: voucher_series="A", financial_year=4`,
+      description: `Vouchers (accounting entries), filterable by series, financial year and date. financial_year is Fortnox's sequential ID, not a calendar year.`,
       inputSchema: mcpSchema(ListVouchersSchema),
       outputSchema: mcpSchema(ListVouchersOutput),
       annotations: {
@@ -182,19 +160,7 @@ Examples:
     "fortnox_get_voucher",
     {
       title: "Get Fortnox Voucher",
-      description: `Retrieve detailed information about a specific voucher including all accounting rows.
-
-IMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.
-Use fortnox_list_financial_years first to find the correct ID for your target year.
-
-Args:
-  - voucher_series (string): Voucher series (e.g., 'A') (required)
-  - voucher_number (number): Voucher number within the series (required)
-  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Complete voucher details including all debit/credit rows.`,
+      description: `One voucher with all of its accounting rows. financial_year is Fortnox's sequential ID (1, 2, 3...), not a calendar year.`,
       inputSchema: mcpSchema(GetVoucherSchema),
       outputSchema: mcpSchema(VoucherDetailSchema),
       annotations: {
@@ -277,33 +243,7 @@ Returns:
     "fortnox_create_voucher",
     {
       title: "Create Fortnox Voucher",
-      description: `Create a new voucher (manual accounting entry) in Fortnox.
-
-IMPORTANT: The sum of debits must equal the sum of credits (balanced entry).
-
-Args:
-  - voucher_series (string): Voucher series (e.g., 'A', 'B') (required)
-  - description (string): Voucher description (required)
-  - transaction_date (string): Transaction date YYYY-MM-DD (required)
-  - rows (array): Accounting rows, minimum 2 (required)
-    - Each row: { account_number, debit?, credit?, description?, cost_center?, project? }
-  - cost_center (string): Default cost center for all rows
-  - project (string): Default project for all rows
-
-Returns:
-  The created voucher with assigned voucher number.
-
-Example:
-  Create a cash payment voucher:
-  {
-    "voucher_series": "A",
-    "description": "Office supplies payment",
-    "transaction_date": "2025-01-24",
-    "rows": [
-      { "account_number": 6110, "debit": 500, "description": "Office supplies" },
-      { "account_number": 1910, "credit": 500, "description": "Cash" }
-    ]
-  }`,
+      description: `Create a manual voucher (journal entry). Debits must equal credits and at least two rows are required; the financial year must exist.`,
       inputSchema: mcpSchema(CreateVoucherSchema),
       outputSchema: mcpSchema(CreateVoucherOutput),
       annotations: {
@@ -454,41 +394,7 @@ Returns:
     "fortnox_account_activity",
     {
       title: "Account Activity Report",
-      description: `Show all voucher transactions affecting specific account(s).
-
-IMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.
-Use fortnox_list_financial_years first to find the correct ID for your target year.
-
-Common use cases:
-- Rent expenses: account_number=5010 (or 5010-5099 range)
-- Salary costs: account_range={ from: 7000, to: 7999 }
-- Bank transactions: account_number=1930
-- Revenue analysis: account_range={ from: 3000, to: 3999 }
-
-Note: This tool fetches voucher details and filters client-side since the Fortnox API
-doesn't support native account filtering. Use date ranges to limit the scan.
-
-Args:
-  - account_number (number): Single account number to filter by (1000-9999)
-  - account_numbers (array): Multiple account numbers to filter by (max 20)
-  - account_range (object): Account range { from: 3000, to: 3999 }
-  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)
-  - period ('today' | ... | 'last_year'): Convenience date period filter
-  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)
-  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)
-  - voucher_series (string): Filter by voucher series (e.g., 'A')
-  - include_summary (boolean): Include totals per account (default: true)
-  - max_vouchers (number): Max vouchers to scan, 10-500 (default: 500)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Transactions matching the account criteria with optional summary.
-
-Examples:
-  - First call fortnox_list_financial_years to find that ID 4 = 2025
-  - Bank transactions this month: account_number=1930, financial_year=4, period="this_month"
-  - Salary costs: account_range={ from: 7000, to: 7999 }, financial_year=4
-  - Rent expenses: account_number=5010, financial_year=4`,
+      description: `Voucher transactions touching one or more accounts, with per-account totals. Needs account_number, account_numbers or account_range. financial_year is Fortnox's sequential ID (1, 2, 3...), not a calendar year - call fortnox_list_financial_years first.`,
       inputSchema: mcpSchema(AccountActivitySchema),
       outputSchema: mcpSchema(AccountActivityOutput),
       annotations: {
@@ -748,32 +654,7 @@ Examples:
     "fortnox_search_vouchers",
     {
       title: "Search Vouchers",
-      description: `Search vouchers by description text.
-
-IMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.
-Use fortnox_list_financial_years first to find the correct ID for your target year.
-
-Performs client-side text search across voucher descriptions.
-
-Args:
-  - search_text (string): Text to search for in voucher descriptions (min 2 chars)
-  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)
-  - period ('today' | ... | 'last_year'): Convenience date period filter
-  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)
-  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)
-  - voucher_series (string): Filter by voucher series (e.g., 'A')
-  - case_sensitive (boolean): Case-sensitive search (default: false)
-  - include_rows (boolean): Include voucher row details (default: false)
-  - max_vouchers (number): Max vouchers to scan, 10-500 (default: 500)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Vouchers with descriptions matching the search text.
-
-Examples:
-  - First call fortnox_list_financial_years to find that ID 4 = 2025
-  - Find salary vouchers: search_text="salary", financial_year=4, period="this_year"
-  - Find rent payments: search_text="rent", financial_year=4, voucher_series="B"`,
+      description: `Search voucher descriptions for text, optionally limited by series, financial year or dates. include_rows adds the accounting rows.`,
       inputSchema: mcpSchema(SearchVouchersSchema),
       outputSchema: mcpSchema(SearchVouchersOutput),
       annotations: {

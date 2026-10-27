@@ -80,19 +80,7 @@ export function registerSupplierTools(server: McpServer): void {
     "fortnox_list_suppliers",
     {
       title: "List Fortnox Suppliers",
-      description: `List suppliers from Fortnox accounting system.
-
-Retrieves a paginated list of suppliers with optional filtering.
-
-Args:
-  - limit (number): Max results per page, 1-100 (default: 20)
-  - page (number): Page number for pagination (default: 1)
-  - filter ('active' | 'inactive'): Filter by supplier status
-  - search_name (string): Search suppliers by name (partial match)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of suppliers with supplier number, name, email, city, and organisation number.`,
+      description: `Suppliers, filterable by status or name.`,
       inputSchema: mcpSchema(ListSuppliersSchema),
       outputSchema: mcpSchema(ListSuppliersOutput),
       annotations: {
@@ -237,25 +225,7 @@ Returns:
     "fortnox_create_supplier",
     {
       title: "Create Fortnox Supplier",
-      description: `Create a new supplier in Fortnox.
-
-Args:
-  - name (string): Supplier name (required)
-  - supplier_number (string): Supplier number (auto-generated if not provided)
-  - organisation_number (string): Company registration number
-  - email (string): Email address
-  - phone (string): Phone number
-  - address1, address2, zip_code, city, country, country_code: Address fields
-  - currency (string): 3-letter currency code
-  - vat_number (string): VAT registration number
-  - bank_account (string): Bank account number
-  - bg_number (string): Bankgiro number
-  - pg_number (string): Plusgiro number
-  - terms_of_payment (string): Payment terms code
-  - comments (string): Internal comments
-
-Returns:
-  The created supplier with assigned supplier number.`,
+      description: `Create a supplier. Only the name is required; the supplier number is auto-generated when omitted.`,
       inputSchema: mcpSchema(CreateSupplierSchema),
       outputSchema: mcpSchema(SupplierMutationOutput),
       annotations: {

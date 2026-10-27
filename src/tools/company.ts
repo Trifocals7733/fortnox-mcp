@@ -138,19 +138,7 @@ Returns:
     "fortnox_list_financial_years",
     {
       title: "List Financial Years",
-      description: `List all financial years configured in Fortnox.
-
-IMPORTANT: Voucher tools (fortnox_list_vouchers, fortnox_account_activity, etc.)
-use Fortnox sequential IDs (1, 2, 3...) NOT calendar years. Use this tool first
-to find the correct ID.
-
-Example: If ID 4 maps to 2025-01-01 to 2025-12-31, use financial_year=4 in voucher tools.
-
-Args:
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of financial years with ID, date range, and accounting method.`,
+      description: `Financial years as Fortnox IDs (1, 2, 3...). Voucher and account-activity tools take those IDs, not calendar years - call this first.`,
       inputSchema: mcpSchema(ListFinancialYearsSchema),
       outputSchema: mcpSchema(ListFinancialYearsOutput),
       annotations: {

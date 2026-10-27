@@ -80,26 +80,7 @@ export function registerCustomerTools(server: McpServer): void {
     "fortnox_list_customers",
     {
       title: "List Fortnox Customers",
-      description: `List customers from Fortnox accounting system.
-
-Retrieves a paginated list of customers with optional filtering by status, name, or customer number.
-
-Args:
-  - limit (number): Max results per page, 1-100 (default: 20)
-  - page (number): Page number for pagination (default: 1)
-  - filter ('active' | 'inactive'): Filter by customer status
-  - search_name (string): Search customers by name (partial match)
-  - customer_number (string): Filter by specific customer number
-  - organisation_number (string): Filter by organisation number
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of customers with customer number, name, email, city, and organisation number.
-
-Examples:
-  - List all active customers: filter="active"
-  - Search by name: search_name="Acme"
-  - Get specific customer: customer_number="1001"`,
+      description: `Customers, filterable by status, name or customer number.`,
       inputSchema: mcpSchema(ListCustomersSchema),
       outputSchema: mcpSchema(ListCustomersOutput),
       annotations: {
@@ -249,24 +230,7 @@ Returns:
     "fortnox_create_customer",
     {
       title: "Create Fortnox Customer",
-      description: `Create a new customer in Fortnox.
-
-Args:
-  - name (string): Customer name (required)
-  - customer_number (string): Customer number (auto-generated if not provided)
-  - organisation_number (string): Company registration number
-  - email (string): Primary email address
-  - phone (string): Primary phone number
-  - address1, address2, zip_code, city, country, country_code: Address fields
-  - currency (string): 3-letter currency code (e.g., 'SEK')
-  - vat_number (string): VAT registration number
-  - vat_type ('SEVAT' | 'EUVAT' | 'EUREVERSEDVAT' | 'EXPORT'): VAT type
-  - terms_of_payment (string): Payment terms code
-  - price_list (string): Price list code
-  - comments (string): Internal comments
-
-Returns:
-  The created customer with assigned customer number.`,
+      description: `Create a customer. Only the name is required; the customer number is auto-generated when omitted.`,
       inputSchema: mcpSchema(CreateCustomerSchema),
       outputSchema: mcpSchema(CustomerMutationOutput),
       annotations: {

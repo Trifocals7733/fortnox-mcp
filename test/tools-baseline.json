@@ -2,7 +2,7 @@
   {
     "name": "fortnox_account_activity",
     "title": "Account Activity Report",
-    "description": "Show all voucher transactions affecting specific account(s).\n\nIMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.\nUse fortnox_list_financial_years first to find the correct ID for your target year.\n\nCommon use cases:\n- Rent expenses: account_number=5010 (or 5010-5099 range)\n- Salary costs: account_range={ from: 7000, to: 7999 }\n- Bank transactions: account_number=1930\n- Revenue analysis: account_range={ from: 3000, to: 3999 }\n\nNote: This tool fetches voucher details and filters client-side since the Fortnox API\ndoesn't support native account filtering. Use date ranges to limit the scan.\n\nArgs:\n  - account_number (number): Single account number to filter by (1000-9999)\n  - account_numbers (array): Multiple account numbers to filter by (max 20)\n  - account_range (object): Account range { from: 3000, to: 3999 }\n  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)\n  - period ('today' | ... | 'last_year'): Convenience date period filter\n  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)\n  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)\n  - voucher_series (string): Filter by voucher series (e.g., 'A')\n  - include_summary (boolean): Include totals per account (default: true)\n  - max_vouchers (number): Max vouchers to scan, 10-500 (default: 500)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Transactions matching the account criteria with optional summary.\n\nExamples:\n  - First call fortnox_list_financial_years to find that ID 4 = 2025\n  - Bank transactions this month: account_number=1930, financial_year=4, period=\"this_month\"\n  - Salary costs: account_range={ from: 7000, to: 7999 }, financial_year=4\n  - Rent expenses: account_number=5010, financial_year=4",
+    "description": "Voucher transactions touching one or more accounts, with per-account totals. Needs account_number, account_numbers or account_range. financial_year is Fortnox's sequential ID (1, 2, 3...), not a calendar year - call fortnox_list_financial_years first.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -814,7 +814,7 @@
   {
     "name": "fortnox_create_account",
     "title": "Create Fortnox Account",
-    "description": "Create a new account in the chart of accounts.\n\nArgs:\n  - account_number (number): Account number 1000-9999 (required)\n  - description (string): Account description (required)\n  - vat_code (string): VAT code for the account\n  - active (boolean): Whether the account is active (default: true)\n  - cost_center_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Cost center settings\n  - project_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Project settings\n  - sru_code (number): SRU code for tax reporting\n\nReturns:\n  The created account details.",
+    "description": "Create an account in the chart of accounts. Account numbers are 1000-9999 and a description is required; fails if the number already exists.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -914,7 +914,7 @@
   {
     "name": "fortnox_create_customer",
     "title": "Create Fortnox Customer",
-    "description": "Create a new customer in Fortnox.\n\nArgs:\n  - name (string): Customer name (required)\n  - customer_number (string): Customer number (auto-generated if not provided)\n  - organisation_number (string): Company registration number\n  - email (string): Primary email address\n  - phone (string): Primary phone number\n  - address1, address2, zip_code, city, country, country_code: Address fields\n  - currency (string): 3-letter currency code (e.g., 'SEK')\n  - vat_number (string): VAT registration number\n  - vat_type ('SEVAT' | 'EUVAT' | 'EUREVERSEDVAT' | 'EXPORT'): VAT type\n  - terms_of_payment (string): Payment terms code\n  - price_list (string): Price list code\n  - comments (string): Internal comments\n\nReturns:\n  The created customer with assigned customer number.",
+    "description": "Create a customer. Only the name is required; the customer number is auto-generated when omitted.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1058,7 +1058,7 @@
   {
     "name": "fortnox_create_invoice",
     "title": "Create Fortnox Invoice",
-    "description": "Create a new invoice in Fortnox.\n\nArgs:\n  - customer_number (string): Customer number (required)\n  - rows (array): Invoice line items (at least one required)\n    - Each row: { description, quantity?, price?, article_number?, unit?, discount?, vat?, account_number? }\n  - invoice_date (string): Invoice date YYYY-MM-DD (defaults to today)\n  - due_date (string): Due date YYYY-MM-DD\n  - our_reference (string): Our reference person\n  - your_reference (string): Customer's reference\n  - invoice_type ('INVOICE' | 'CASH' | 'CARD' | 'UNDEFINED'): Invoice type\n  - currency (string): 3-letter currency code\n  - terms_of_payment (string): Payment terms code\n  - comments (string): Internal comments\n  - remarks (string): Remarks printed on invoice\n  - freight (number): Shipping cost\n  - administration_fee (number): Admin fee\n  - send_type ('EMAIL' | 'PRINT' | 'EINVOICE'): How to send\n\nReturns:\n  The created invoice with assigned document number.\n\nExample rows:\n  [{ \"description\": \"Consulting services\", \"quantity\": 10, \"price\": 1000 }]",
+    "description": "Create an invoice as a draft with at least one row. Bookkeep it afterwards with fortnox_bookkeep_invoice to post it. The customer number must exist.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1264,7 +1264,7 @@
   {
     "name": "fortnox_create_supplier",
     "title": "Create Fortnox Supplier",
-    "description": "Create a new supplier in Fortnox.\n\nArgs:\n  - name (string): Supplier name (required)\n  - supplier_number (string): Supplier number (auto-generated if not provided)\n  - organisation_number (string): Company registration number\n  - email (string): Email address\n  - phone (string): Phone number\n  - address1, address2, zip_code, city, country, country_code: Address fields\n  - currency (string): 3-letter currency code\n  - vat_number (string): VAT registration number\n  - bank_account (string): Bank account number\n  - bg_number (string): Bankgiro number\n  - pg_number (string): Plusgiro number\n  - terms_of_payment (string): Payment terms code\n  - comments (string): Internal comments\n\nReturns:\n  The created supplier with assigned supplier number.",
+    "description": "Create a supplier. Only the name is required; the supplier number is auto-generated when omitted.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1408,7 +1408,7 @@
   {
     "name": "fortnox_create_voucher",
     "title": "Create Fortnox Voucher",
-    "description": "Create a new voucher (manual accounting entry) in Fortnox.\n\nIMPORTANT: The sum of debits must equal the sum of credits (balanced entry).\n\nArgs:\n  - voucher_series (string): Voucher series (e.g., 'A', 'B') (required)\n  - description (string): Voucher description (required)\n  - transaction_date (string): Transaction date YYYY-MM-DD (required)\n  - rows (array): Accounting rows, minimum 2 (required)\n    - Each row: { account_number, debit?, credit?, description?, cost_center?, project? }\n  - cost_center (string): Default cost center for all rows\n  - project (string): Default project for all rows\n\nReturns:\n  The created voucher with assigned voucher number.\n\nExample:\n  Create a cash payment voucher:\n  {\n    \"voucher_series\": \"A\",\n    \"description\": \"Office supplies payment\",\n    \"transaction_date\": \"2025-01-24\",\n    \"rows\": [\n      { \"account_number\": 6110, \"debit\": 500, \"description\": \"Office supplies\" },\n      { \"account_number\": 1910, \"credit\": 500, \"description\": \"Cash\" }\n    ]\n  }",
+    "description": "Create a manual voucher (journal entry). Debits must equal credits and at least two rows are required; the financial year must exist.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3265,7 +3265,7 @@
   {
     "name": "fortnox_get_voucher",
     "title": "Get Fortnox Voucher",
-    "description": "Retrieve detailed information about a specific voucher including all accounting rows.\n\nIMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.\nUse fortnox_list_financial_years first to find the correct ID for your target year.\n\nArgs:\n  - voucher_series (string): Voucher series (e.g., 'A') (required)\n  - voucher_number (number): Voucher number within the series (required)\n  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Complete voucher details including all debit/credit rows.",
+    "description": "One voucher with all of its accounting rows. financial_year is Fortnox's sequential ID (1, 2, 3...), not a calendar year.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3557,7 +3557,7 @@
   {
     "name": "fortnox_invoice_summary",
     "title": "Invoice Summary Analytics",
-    "description": "Calculate summary statistics for invoices over a period.\n\nAnswers questions like:\n- \"What was my total revenue this month?\"\n- \"How many invoices did we send last quarter?\"\n- \"What's the average invoice amount this year?\"\n- \"Show me revenue breakdown by customer\"\n\nArgs:\n  - period ('today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_quarter' | 'last_quarter' | 'this_year' | 'last_year'): Date period to analyze\n  - from_date (string): Start date YYYY-MM-DD (ignored if period specified)\n  - to_date (string): End date YYYY-MM-DD (ignored if period specified)\n  - filter ('cancelled' | 'fullypaid' | 'unpaid' | 'unpaidoverdue' | 'unbooked'): Filter by invoice status\n  - customer_number (string): Filter by specific customer\n  - group_by ('customer' | 'month' | 'status'): Group statistics by dimension\n  - include_details (boolean): Include individual invoice list (default: false)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  For JSON: { period, date_range, summary: { count, total, average, min, max, ... }, groups?: [...], invoices?: [...] }\n  For Markdown: Formatted summary with totals and optional breakdown\n\nExamples:\n  - Monthly revenue: period=\"this_month\"\n  - Revenue by customer this year: period=\"this_year\", group_by=\"customer\"\n  - Unpaid invoice totals: filter=\"unpaid\"\n\nError Handling:\n  - Returns truncation warning if >10,000 invoices\n  - Returns \"Error: ...\" if API call fails",
+    "description": "Invoice statistics for a period: count, total, average, min/max and outstanding balance. Add group_by to break it down by customer, month or status.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3861,7 +3861,7 @@
   {
     "name": "fortnox_list_accounts",
     "title": "List Fortnox Accounts",
-    "description": "List accounts from the chart of accounts in Fortnox.\n\nRetrieves a paginated list of accounts with optional filtering.\n\nArgs:\n  - limit (number): Max results per page, 1-100 (default: 20)\n  - page (number): Page number for pagination (default: 1)\n  - search_description (string): Search accounts by description\n  - from_account (number): Filter accounts from this number (1000-9999)\n  - to_account (number): Filter accounts to this number (1000-9999)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of accounts with account number, description, and active status.\n\nExamples:\n  - List revenue accounts: from_account=3000, to_account=3999\n  - List expense accounts: from_account=4000, to_account=8999",
+    "description": "Chart of accounts, filterable by description or an account-number range.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3977,7 +3977,7 @@
   {
     "name": "fortnox_list_customers",
     "title": "List Fortnox Customers",
-    "description": "List customers from Fortnox accounting system.\n\nRetrieves a paginated list of customers with optional filtering by status, name, or customer number.\n\nArgs:\n  - limit (number): Max results per page, 1-100 (default: 20)\n  - page (number): Page number for pagination (default: 1)\n  - filter ('active' | 'inactive'): Filter by customer status\n  - search_name (string): Search customers by name (partial match)\n  - customer_number (string): Filter by specific customer number\n  - organisation_number (string): Filter by organisation number\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of customers with customer number, name, email, city, and organisation number.\n\nExamples:\n  - List all active customers: filter=\"active\"\n  - Search by name: search_name=\"Acme\"\n  - Get specific customer: customer_number=\"1001\"",
+    "description": "Customers, filterable by status, name or customer number.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -4130,7 +4130,7 @@
   {
     "name": "fortnox_list_financial_years",
     "title": "List Financial Years",
-    "description": "List all financial years configured in Fortnox.\n\nIMPORTANT: Voucher tools (fortnox_list_vouchers, fortnox_account_activity, etc.)\nuse Fortnox sequential IDs (1, 2, 3...) NOT calendar years. Use this tool first\nto find the correct ID.\n\nExample: If ID 4 maps to 2025-01-01 to 2025-12-31, use financial_year=4 in voucher tools.\n\nArgs:\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of financial years with ID, date range, and accounting method.",
+    "description": "Financial years as Fortnox IDs (1, 2, 3...). Voucher and account-activity tools take those IDs, not calendar years - call this first.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -4203,7 +4203,7 @@
   {
     "name": "fortnox_list_invoices",
     "title": "List Fortnox Invoices",
-    "description": "List invoices from Fortnox accounting system.\n\nRetrieves a paginated list of invoices with optional filtering by status, customer, date range, or amount.\nSupports convenience period filters and can fetch all results for large datasets.\n\nArgs:\n  - limit (number): Max results per page, 1-100 (default: 20)\n  - page (number): Page number for pagination (default: 1)\n  - filter ('cancelled' | 'fullypaid' | 'unpaid' | 'unpaidoverdue' | 'unbooked'): Filter by invoice status\n  - customer_number (string): Filter by customer number\n  - from_date (string): Filter invoices from this date (YYYY-MM-DD)\n  - to_date (string): Filter invoices to this date (YYYY-MM-DD)\n  - period ('today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_quarter' | 'last_quarter' | 'this_year' | 'last_year'): Convenience date period, overrides from_date/to_date\n  - from_final_pay_date (string): Filter by due date from (YYYY-MM-DD)\n  - to_final_pay_date (string): Filter by due date to (YYYY-MM-DD)\n  - sortby ('customername' | 'customernumber' | 'documentnumber' | 'invoicedate' | 'total'): Field to sort by\n  - sortorder ('ascending' | 'descending'): Sort order (default: ascending)\n  - fetch_all (boolean): Fetch all results by auto-paginating (max 10,000 results)\n  - min_amount (number): Filter invoices >= this amount (client-side)\n  - max_amount (number): Filter invoices <= this amount (client-side)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  For JSON: { total, page, limit, count, has_more, total_pages, next_offset?, truncated?, invoices: [...] }\n  For Markdown: Formatted list with pagination info\n\nExamples:\n  - List unpaid invoices: filter=\"unpaid\"\n  - Last month's invoices: period=\"last_month\"\n  - Top invoices by amount: sortby=\"total\", sortorder=\"descending\"\n  - All invoices over 10000: fetch_all=true, min_amount=10000\n  - Customer invoices this year: customer_number=\"1001\", period=\"this_year\"\n\nError Handling:\n  - Returns \"Error: Rate limit exceeded...\" if API limit hit\n  - Returns truncation info if fetch_all hits safety limits",
+    "description": "Invoices, filterable by status, customer, date/period, due date and amount. fetch_all auto-paginates up to 10,000; min_amount/max_amount filter client-side after fetching.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -5374,7 +5374,7 @@
   {
     "name": "fortnox_list_supplier_invoices",
     "title": "List Fortnox Supplier Invoices",
-    "description": "List supplier invoices (accounts payable) from Fortnox.\n\nRetrieves a paginated list of supplier invoices with optional filtering by status, supplier, date range, or amount.\n\nArgs:\n  - limit (number): Max results per page, 1-100 (default: 20)\n  - page (number): Page number for pagination (default: 1)\n  - filter ('cancelled' | 'fullypaid' | 'unpaid' | 'unpaidoverdue' | 'unbooked' | 'pendingpayment'): Filter by invoice status\n  - supplier_number (string): Filter by supplier number\n  - from_date (string): Filter invoices from this date (YYYY-MM-DD)\n  - to_date (string): Filter invoices to this date (YYYY-MM-DD)\n  - period ('today' | 'yesterday' | ... | 'last_year'): Convenience date period, overrides from_date/to_date\n  - from_final_pay_date (string): Filter by due date from (YYYY-MM-DD)\n  - to_final_pay_date (string): Filter by due date to (YYYY-MM-DD)\n  - sortby ('suppliername' | 'suppliernumber' | 'invoicenumber' | 'invoicedate' | 'total'): Field to sort by\n  - sortorder ('ascending' | 'descending'): Sort order (default: ascending)\n  - fetch_all (boolean): Fetch all results by auto-paginating (max 10,000 results)\n  - min_amount (number): Filter invoices >= this amount (client-side)\n  - max_amount (number): Filter invoices <= this amount (client-side)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of supplier invoices with supplier, dates, amounts, and status.\n\nExamples:\n  - List unpaid supplier invoices: filter=\"unpaid\"\n  - Last month's supplier invoices: period=\"last_month\"\n  - Supplier invoices this year: supplier_number=\"1\", period=\"this_year\"",
+    "description": "Supplier invoices (accounts payable), filterable by status, supplier, date/period, due date and amount. fetch_all auto-paginates up to 10,000; min/max_amount filter client-side.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -5647,7 +5647,7 @@
   {
     "name": "fortnox_list_suppliers",
     "title": "List Fortnox Suppliers",
-    "description": "List suppliers from Fortnox accounting system.\n\nRetrieves a paginated list of suppliers with optional filtering.\n\nArgs:\n  - limit (number): Max results per page, 1-100 (default: 20)\n  - page (number): Page number for pagination (default: 1)\n  - filter ('active' | 'inactive'): Filter by supplier status\n  - search_name (string): Search suppliers by name (partial match)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of suppliers with supplier number, name, email, city, and organisation number.",
+    "description": "Suppliers, filterable by status or name.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -5851,7 +5851,7 @@
   {
     "name": "fortnox_list_vouchers",
     "title": "List Fortnox Vouchers",
-    "description": "List vouchers (accounting entries) from Fortnox.\n\nRetrieves a paginated list of vouchers with optional filtering.\n\nIMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.\nUse fortnox_list_financial_years first to find the correct ID for your target year.\n\nArgs:\n  - limit (number): Max results per page, 1-100 (default: 20)\n  - page (number): Page number for pagination (default: 1)\n  - voucher_series (string): Filter by voucher series (e.g., 'A', 'B')\n  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)\n  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)\n  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of vouchers with series, number, description, and date.\n\nExamples:\n  - First call fortnox_list_financial_years to find that ID 4 = 2025\n  - List vouchers for 2025: financial_year=4\n  - List manual vouchers: voucher_series=\"A\", financial_year=4",
+    "description": "Vouchers (accounting entries), filterable by series, financial year and date. financial_year is Fortnox's sequential ID, not a calendar year.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -6149,7 +6149,7 @@
   {
     "name": "fortnox_payables_report",
     "title": "Accounts Payable Aging Report",
-    "description": "Generate an accounts payable aging report for unpaid supplier invoices.\n\nAnswers questions like:\n- \"What supplier invoices are overdue?\"\n- \"How much do we owe each supplier?\"\n- \"Show me aging breakdown of payables\"\n- \"Which supplier invoices over 10,000 SEK are unpaid?\"\n\nArgs:\n  - min_amount (number): Only include invoices >= this amount\n  - supplier_number (string): Filter by specific supplier\n  - group_by ('supplier' | 'age_bucket' | 'both'): How to group report (default: both)\n  - include_details (boolean): Include individual invoice list (default: true)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Aging report with summary, breakdowns by supplier and age bucket.\n\nAge Buckets:\n  - not_due: Due date is in the future\n  - 1-30 days: Overdue 1-30 days\n  - 31-60 days: Overdue 31-60 days\n  - 61-90 days: Overdue 61-90 days\n  - 90+ days: Overdue more than 90 days\n\nExamples:\n  - Full payables report: (use defaults)\n  - Large unpaid invoices: min_amount=50000\n  - Specific supplier: supplier_number=\"1\"",
+    "description": "Accounts-payable aging: unpaid supplier invoices grouped by age bucket and/or supplier, with balances and an optional per-invoice list.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7071,7 +7071,7 @@
   {
     "name": "fortnox_search_vouchers",
     "title": "Search Vouchers",
-    "description": "Search vouchers by description text.\n\nIMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.\nUse fortnox_list_financial_years first to find the correct ID for your target year.\n\nPerforms client-side text search across voucher descriptions.\n\nArgs:\n  - search_text (string): Text to search for in voucher descriptions (min 2 chars)\n  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)\n  - period ('today' | ... | 'last_year'): Convenience date period filter\n  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)\n  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)\n  - voucher_series (string): Filter by voucher series (e.g., 'A')\n  - case_sensitive (boolean): Case-sensitive search (default: false)\n  - include_rows (boolean): Include voucher row details (default: false)\n  - max_vouchers (number): Max vouchers to scan, 10-500 (default: 500)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Vouchers with descriptions matching the search text.\n\nExamples:\n  - First call fortnox_list_financial_years to find that ID 4 = 2025\n  - Find salary vouchers: search_text=\"salary\", financial_year=4, period=\"this_year\"\n  - Find rent payments: search_text=\"rent\", financial_year=4, voucher_series=\"B\"",
+    "description": "Search voucher descriptions for text, optionally limited by series, financial year or dates. include_rows adds the accounting rows.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7301,7 +7301,7 @@
   {
     "name": "fortnox_top_customers",
     "title": "Top Customers Analytics",
-    "description": "Identify top customers by various metrics.\n\nAnswers questions like:\n- \"Who are my top 10 customers by revenue?\"\n- \"Which customers have the most invoices?\"\n- \"Who has the highest unpaid balance?\"\n- \"What's the average invoice size per customer?\"\n\nArgs:\n  - metric ('total_amount' | 'invoice_count' | 'unpaid_amount' | 'average_invoice'): How to rank customers (default: total_amount)\n  - period ('today' | ... | 'last_year'): Date period to analyze\n  - from_date (string): Start date YYYY-MM-DD (ignored if period specified)\n  - to_date (string): End date YYYY-MM-DD (ignored if period specified)\n  - top_n (number): Number of customers to return, 1-50 (default: 10)\n  - include_details (boolean): Include invoice breakdown per customer (default: false)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  For JSON: { metric, period, customers: [{ rank, customer_number, customer_name, value, invoice_count, ... }] }\n  For Markdown: Ranked table of top customers\n\nExamples:\n  - Top 10 by revenue this year: period=\"this_year\", top_n=10\n  - Customers with most unpaid: metric=\"unpaid_amount\"\n  - Top 5 by invoice count last month: metric=\"invoice_count\", period=\"last_month\", top_n=5\n\nError Handling:\n  - Returns truncation warning if >10,000 invoices analyzed\n  - Returns \"Error: ...\" if API call fails",
+    "description": "Rank customers by revenue, invoice count, unpaid amount or average invoice over a period.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7524,7 +7524,7 @@
   {
     "name": "fortnox_unpaid_report",
     "title": "Unpaid Invoices Report",
-    "description": "Generate an accounts receivable aging report for unpaid invoices.\n\nAnswers questions like:\n- \"What invoices are overdue?\"\n- \"How much is owed by each customer?\"\n- \"Show me aging breakdown of receivables\"\n- \"Which invoices over 10,000 SEK are unpaid?\"\n\nArgs:\n  - min_amount (number): Only include invoices >= this amount\n  - customer_number (string): Filter by specific customer\n  - group_by ('customer' | 'age_bucket' | 'both'): How to group report (default: both)\n  - include_details (boolean): Include individual invoice list (default: true)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  For JSON: { summary, by_customer?, by_age_bucket?, invoices? }\n  For Markdown: Formatted aging report with totals\n\nAge Buckets:\n  - not_due: Due date is in the future\n  - 1-30 days: Overdue 1-30 days\n  - 31-60 days: Overdue 31-60 days\n  - 61-90 days: Overdue 61-90 days\n  - 90+ days: Overdue more than 90 days\n\nExamples:\n  - Full aging report: (use defaults)\n  - Large unpaid invoices: min_amount=50000\n  - Specific customer aging: customer_number=\"1001\"\n\nError Handling:\n  - Returns truncation warning if >10,000 invoices\n  - Returns \"Error: ...\" if API call fails",
+    "description": "Accounts-receivable aging: unpaid invoices bucketed by due date (1-30, 31-60, 61-90, 90+), grouped by customer and/or bucket.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7760,7 +7760,7 @@
   {
     "name": "fortnox_update_account",
     "title": "Update Fortnox Account",
-    "description": "Update an existing account in the chart of accounts.\n\nArgs:\n  - account_number (number): Account number to update (required)\n  - description (string): Account description\n  - vat_code (string): VAT code\n  - active (boolean): Whether the account is active\n  - cost_center_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Cost center settings\n  - project_settings ('ALLOWED' | 'MANDATORY' | 'NOTALLOWED'): Project settings\n\nReturns:\n  The updated account details.",
+    "description": "Update an account's description, VAT code, active flag, cost-centre/project settings or SRU code.",
     "inputSchema": {
       "type": "object",
       "properties": {

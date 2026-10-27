@@ -119,36 +119,7 @@ export function registerAnalyticsTools(server: McpServer): void {
     "fortnox_invoice_summary",
     {
       title: "Invoice Summary Analytics",
-      description: `Calculate summary statistics for invoices over a period.
-
-Answers questions like:
-- "What was my total revenue this month?"
-- "How many invoices did we send last quarter?"
-- "What's the average invoice amount this year?"
-- "Show me revenue breakdown by customer"
-
-Args:
-  - period ('today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_quarter' | 'last_quarter' | 'this_year' | 'last_year'): Date period to analyze
-  - from_date (string): Start date YYYY-MM-DD (ignored if period specified)
-  - to_date (string): End date YYYY-MM-DD (ignored if period specified)
-  - filter ('cancelled' | 'fullypaid' | 'unpaid' | 'unpaidoverdue' | 'unbooked'): Filter by invoice status
-  - customer_number (string): Filter by specific customer
-  - group_by ('customer' | 'month' | 'status'): Group statistics by dimension
-  - include_details (boolean): Include individual invoice list (default: false)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  For JSON: { period, date_range, summary: { count, total, average, min, max, ... }, groups?: [...], invoices?: [...] }
-  For Markdown: Formatted summary with totals and optional breakdown
-
-Examples:
-  - Monthly revenue: period="this_month"
-  - Revenue by customer this year: period="this_year", group_by="customer"
-  - Unpaid invoice totals: filter="unpaid"
-
-Error Handling:
-  - Returns truncation warning if >10,000 invoices
-  - Returns "Error: ..." if API call fails`,
+      description: `Invoice statistics for a period: count, total, average, min/max and outstanding balance. Add group_by to break it down by customer, month or status.`,
       inputSchema: mcpSchema(InvoiceSummarySchema),
       outputSchema: mcpSchema(InvoiceSummaryOutput),
       annotations: {
@@ -310,35 +281,7 @@ Error Handling:
     "fortnox_top_customers",
     {
       title: "Top Customers Analytics",
-      description: `Identify top customers by various metrics.
-
-Answers questions like:
-- "Who are my top 10 customers by revenue?"
-- "Which customers have the most invoices?"
-- "Who has the highest unpaid balance?"
-- "What's the average invoice size per customer?"
-
-Args:
-  - metric ('total_amount' | 'invoice_count' | 'unpaid_amount' | 'average_invoice'): How to rank customers (default: total_amount)
-  - period ('today' | ... | 'last_year'): Date period to analyze
-  - from_date (string): Start date YYYY-MM-DD (ignored if period specified)
-  - to_date (string): End date YYYY-MM-DD (ignored if period specified)
-  - top_n (number): Number of customers to return, 1-50 (default: 10)
-  - include_details (boolean): Include invoice breakdown per customer (default: false)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  For JSON: { metric, period, customers: [{ rank, customer_number, customer_name, value, invoice_count, ... }] }
-  For Markdown: Ranked table of top customers
-
-Examples:
-  - Top 10 by revenue this year: period="this_year", top_n=10
-  - Customers with most unpaid: metric="unpaid_amount"
-  - Top 5 by invoice count last month: metric="invoice_count", period="last_month", top_n=5
-
-Error Handling:
-  - Returns truncation warning if >10,000 invoices analyzed
-  - Returns "Error: ..." if API call fails`,
+      description: `Rank customers by revenue, invoice count, unpaid amount or average invoice over a period.`,
       inputSchema: mcpSchema(TopCustomersSchema),
       outputSchema: mcpSchema(TopCustomersOutput),
       annotations: {
@@ -514,40 +457,7 @@ Error Handling:
     "fortnox_unpaid_report",
     {
       title: "Unpaid Invoices Report",
-      description: `Generate an accounts receivable aging report for unpaid invoices.
-
-Answers questions like:
-- "What invoices are overdue?"
-- "How much is owed by each customer?"
-- "Show me aging breakdown of receivables"
-- "Which invoices over 10,000 SEK are unpaid?"
-
-Args:
-  - min_amount (number): Only include invoices >= this amount
-  - customer_number (string): Filter by specific customer
-  - group_by ('customer' | 'age_bucket' | 'both'): How to group report (default: both)
-  - include_details (boolean): Include individual invoice list (default: true)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  For JSON: { summary, by_customer?, by_age_bucket?, invoices? }
-  For Markdown: Formatted aging report with totals
-
-Age Buckets:
-  - not_due: Due date is in the future
-  - 1-30 days: Overdue 1-30 days
-  - 31-60 days: Overdue 31-60 days
-  - 61-90 days: Overdue 61-90 days
-  - 90+ days: Overdue more than 90 days
-
-Examples:
-  - Full aging report: (use defaults)
-  - Large unpaid invoices: min_amount=50000
-  - Specific customer aging: customer_number="1001"
-
-Error Handling:
-  - Returns truncation warning if >10,000 invoices
-  - Returns "Error: ..." if API call fails`,
+      description: `Accounts-receivable aging: unpaid invoices bucketed by due date (1-30, 31-60, 61-90, 90+), grouped by customer and/or bucket.`,
       inputSchema: mcpSchema(UnpaidReportSchema),
       outputSchema: mcpSchema(UnpaidReportOutput),
       annotations: {
