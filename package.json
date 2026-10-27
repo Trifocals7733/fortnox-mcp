@@ -29,11 +29,14 @@
   },
   "homepage": "https://github.com/Trifocals7733/fortnox-mcp#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.6.1",
     "axios": "^1.7.9",
     "express": "^4.21.0",
     "jose": "^5.9.6",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7",
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@modelcontextprotocol/node": "^2.1.2",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "@modelcontextprotocol/server-legacy": "^2.4.0"
   },
   "optionalDependencies": {
     "@upstash/redis": "^1.34.3"

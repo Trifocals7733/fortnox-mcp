@@ -1,17 +1,8 @@
 import { Response } from "express";
 import * as jose from "jose";
 import crypto from "crypto";
-import {
-  OAuthServerProvider,
-  AuthorizationParams,
-} from "@modelcontextprotocol/sdk/server/auth/provider.js";
-import { OAuthRegisteredClientsStore } from "@modelcontextprotocol/sdk/server/auth/clients.js";
-import {
-  OAuthClientInformationFull,
-  OAuthTokens,
-  OAuthTokenRevocationRequest,
-} from "@modelcontextprotocol/sdk/shared/auth.js";
-import { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import { OAuthClientInformationFull, OAuthTokens, OAuthTokenRevocationRequest, AuthInfo } from "@modelcontextprotocol/server";
+import { OAuthServerProvider, AuthorizationParams, OAuthRegisteredClientsStore } from "@modelcontextprotocol/server-legacy/auth";
 import { ITokenStorage } from "./storage/types.js";
 import { DatabaseTokenProvider } from "./databaseProvider.js";
 import { FORTNOX_SCOPES } from "./credentials.js";

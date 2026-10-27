@@ -24,9 +24,9 @@
  *   - UPSTASH_REDIS_REST_TOKEN: Redis token
  */
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { McpServer } from "@modelcontextprotocol/server";
 import express from "express";
 
 import { loadConfig, validateEnvironment, logConfig } from "./config.js";
@@ -74,7 +74,7 @@ async function runLocalHTTP(): Promise<void> {
   // MCP endpoint
   app.post("/mcp", async (req, res) => {
     // Create new transport for each request (stateless)
-    const transport = new StreamableHTTPServerTransport({
+    const transport = new NodeStreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true
     });

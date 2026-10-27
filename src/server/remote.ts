@@ -1,8 +1,6 @@
 import express, { Express, Request, Response, NextFunction } from "express";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
-import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
-
+import { mcpAuthRouter, requireBearerAuth } from "@modelcontextprotocol/server-legacy/auth";
+import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import {
   FortnoxProxyOAuthProvider,
   getUserIdFromAuth,
@@ -94,6 +92,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
   // Protected MCP endpoint
   app.post(
     "/mcp",
+    /* @mcp-codemod-error requireBearerAuth: resource-server auth helpers routed to the frozen @modelcontextprotocol/server-legacy/auth copy. The maintained v2 home is @modelcontextprotocol/express — when re-pointing, verifiers must throw the v2 OAuthError (the express middleware does not recognize the legacy error classes). See the migration guide's server auth split section. */
     requireBearerAuth({
       verifier: oauthProvider,
       resourceMetadataUrl: `${serverUrl}/.well-known/oauth-protected-resource`,
@@ -107,7 +106,7 @@ export function createRemoteServer(options: RemoteServerOptions): Express {
           return;
         }
 
-        const transport = new StreamableHTTPServerTransport({
+        const transport = new NodeStreamableHTTPServerTransport({
           sessionIdGenerator: undefined,
           enableJsonResponse: true,
         });

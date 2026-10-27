@@ -1,4 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
 import { ResponseFormat, FETCH_ALL_DELAY_MS } from "../constants.js";
 import {

@@ -1,5 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
+import { McpServer } from "@modelcontextprotocol/server";
 import { registerCustomerTools } from "../tools/customers.js";
 import { registerInvoiceTools } from "../tools/invoices.js";
 import { registerSupplierTools } from "../tools/suppliers.js";

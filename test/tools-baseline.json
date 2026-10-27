@@ -5,7 +5,104 @@
     "description": "Show all voucher transactions affecting specific account(s).\n\nIMPORTANT: The financial_year parameter uses Fortnox sequential IDs (1, 2, 3...), NOT calendar years.\nUse fortnox_list_financial_years first to find the correct ID for your target year.\n\nCommon use cases:\n- Rent expenses: account_number=5010 (or 5010-5099 range)\n- Salary costs: account_range={ from: 7000, to: 7999 }\n- Bank transactions: account_number=1930\n- Revenue analysis: account_range={ from: 3000, to: 3999 }\n\nNote: This tool fetches voucher details and filters client-side since the Fortnox API\ndoesn't support native account filtering. Use date ranges to limit the scan.\n\nArgs:\n  - account_number (number): Single account number to filter by (1000-9999)\n  - account_numbers (array): Multiple account numbers to filter by (max 20)\n  - account_range (object): Account range { from: 3000, to: 3999 }\n  - financial_year (number): Fortnox financial year ID (use fortnox_list_financial_years to find)\n  - period ('today' | ... | 'last_year'): Convenience date period filter\n  - from_date (string): Filter vouchers from this date (YYYY-MM-DD)\n  - to_date (string): Filter vouchers to this date (YYYY-MM-DD)\n  - voucher_series (string): Filter by voucher series (e.g., 'A')\n  - include_summary (boolean): Include totals per account (default: true)\n  - max_vouchers (number): Max vouchers to scan, 10-500 (default: 500)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Transactions matching the account criteria with optional summary.\n\nExamples:\n  - First call fortnox_list_financial_years to find that ID 4 = 2025\n  - Bank transactions this month: account_number=1930, financial_year=4, period=\"this_month\"\n  - Salary costs: account_range={ from: 7000, to: 7999 }, financial_year=4\n  - Rent expenses: account_number=5010, financial_year=4",
     "inputSchema": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "account_number": {
+          "description": "Single account number to filter by (1000-9999)",
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 9999
+        },
+        "account_numbers": {
+          "description": "Multiple account numbers to filter by (max 20)",
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 9999
+          }
+        },
+        "account_range": {
+          "description": "Account number range (e.g., 3000-3999 for revenue accounts)",
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 9999
+            },
+            "to": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 9999
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ]
+        },
+        "financial_year": {
+          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID.",
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "period": {
+          "description": "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date.",
+          "type": "string",
+          "enum": [
+            "today",
+            "yesterday",
+            "this_week",
+            "last_week",
+            "this_month",
+            "last_month",
+            "this_quarter",
+            "last_quarter",
+            "this_year",
+            "last_year"
+          ]
+        },
+        "from_date": {
+          "description": "Filter vouchers from this date (YYYY-MM-DD)",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "to_date": {
+          "description": "Filter vouchers to this date (YYYY-MM-DD)",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "voucher_series": {
+          "description": "Filter by voucher series (e.g., 'A', 'B')",
+          "type": "string",
+          "maxLength": 2
+        },
+        "include_summary": {
+          "default": true,
+          "description": "Include totals and summary per account",
+          "type": "boolean"
+        },
+        "max_vouchers": {
+          "default": 500,
+          "description": "Maximum vouchers to scan (10-500). Use date filtering for larger datasets.",
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 500
+        },
+        "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
+          "type": "string",
+          "enum": [
+            "markdown",
+            "json"
+          ]
+        }
+      },
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -28,20 +125,20 @@
           "description": "The supplier invoice given number to approve"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "given_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -64,20 +161,20 @@
           "description": "Invoice document number"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "document_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -100,20 +197,20 @@
           "description": "Invoice document number"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "document_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -131,42 +228,42 @@
       "type": "object",
       "properties": {
         "horizon_days": {
+          "default": 90,
+          "description": "Number of days to forecast ahead (1-365, default: 90)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 365,
-          "default": 90,
-          "description": "Number of days to forecast ahead (1-365, default: 90)"
+          "maximum": 365
         },
         "group_by": {
+          "default": "week",
+          "description": "How to group the forecast: 'week' or 'month'",
           "type": "string",
           "enum": [
             "week",
             "month"
-          ],
-          "default": "week",
-          "description": "How to group the forecast: 'week' or 'month'"
+          ]
         },
         "include_overdue": {
-          "type": "boolean",
           "default": true,
-          "description": "Include overdue receivables and payables in the forecast"
+          "description": "Include overdue receivables and payables in the forecast",
+          "type": "boolean"
         },
         "starting_balance": {
-          "type": "number",
-          "description": "Optional starting cash balance to use for projection"
+          "description": "Optional starting cash balance to use for projection",
+          "type": "number"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -184,6 +281,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze",
           "type": "string",
           "enum": [
             "today",
@@ -196,43 +294,46 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "cost_center": {
-          "type": "string",
-          "description": "Filter to a specific cost center code"
+          "description": "Filter to a specific cost center code",
+          "type": "string"
         },
         "account_range_from": {
+          "description": "Start of account range to include (default: all accounts)",
           "type": "integer",
-          "description": "Start of account range to include (default: all accounts)"
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "account_range_to": {
+          "description": "End of account range to include (default: all accounts)",
           "type": "integer",
-          "description": "End of account range to include (default: all accounts)"
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -262,53 +363,55 @@
           "description": "Account description (required)"
         },
         "vat_code": {
+          "description": "VAT code for the account",
           "type": "string",
-          "maxLength": 10,
-          "description": "VAT code for the account"
+          "maxLength": 10
         },
         "active": {
-          "type": "boolean",
           "default": true,
-          "description": "Whether the account is active"
+          "description": "Whether the account is active",
+          "type": "boolean"
         },
         "cost_center_settings": {
+          "description": "Cost center settings for the account",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ],
-          "description": "Cost center settings for the account"
+          ]
         },
         "project_settings": {
+          "description": "Project settings for the account",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ],
-          "description": "Project settings for the account"
+          ]
         },
         "sru_code": {
+          "description": "SRU code for tax reporting",
           "type": "integer",
-          "description": "SRU code for tax reporting"
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "account_number",
         "description"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -332,107 +435,108 @@
           "description": "Customer name (required)"
         },
         "customer_number": {
+          "description": "Customer number (auto-generated if not provided)",
           "type": "string",
-          "maxLength": 50,
-          "description": "Customer number (auto-generated if not provided)"
+          "maxLength": 50
         },
         "organisation_number": {
+          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30,
-          "description": "Organisation/company number"
+          "maxLength": 30
         },
         "email": {
+          "description": "Primary email address",
           "type": "string",
           "format": "email",
-          "description": "Primary email address"
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
         },
         "phone": {
+          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Primary phone number"
+          "maxLength": 50
         },
         "address1": {
+          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 1"
+          "maxLength": 1024
         },
         "address2": {
+          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 2"
+          "maxLength": 1024
         },
         "zip_code": {
+          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10,
-          "description": "Postal/ZIP code"
+          "maxLength": 10
         },
         "city": {
+          "description": "City",
           "type": "string",
-          "maxLength": 1024,
-          "description": "City"
+          "maxLength": 1024
         },
         "country": {
+          "description": "Country name",
           "type": "string",
-          "maxLength": 50,
-          "description": "Country name"
+          "maxLength": 50
         },
         "country_code": {
+          "description": "Two-letter country code (e.g., 'SE' for Sweden)",
           "type": "string",
           "minLength": 2,
-          "maxLength": 2,
-          "description": "Two-letter country code (e.g., 'SE' for Sweden)"
+          "maxLength": 2
         },
         "currency": {
+          "description": "Currency code (e.g., 'SEK', 'EUR')",
           "type": "string",
           "minLength": 3,
-          "maxLength": 3,
-          "description": "Currency code (e.g., 'SEK', 'EUR')"
+          "maxLength": 3
         },
         "vat_number": {
+          "description": "VAT registration number",
           "type": "string",
-          "maxLength": 50,
-          "description": "VAT registration number"
+          "maxLength": 50
         },
         "vat_type": {
+          "description": "VAT type for the customer",
           "type": "string",
           "enum": [
             "SEVAT",
             "EUVAT",
             "EUREVERSEDVAT",
             "EXPORT"
-          ],
-          "description": "VAT type for the customer"
+          ]
         },
         "terms_of_payment": {
+          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50,
-          "description": "Payment terms code"
+          "maxLength": 50
         },
         "price_list": {
+          "description": "Price list code",
           "type": "string",
-          "maxLength": 50,
-          "description": "Price list code"
+          "maxLength": 50
         },
         "comments": {
+          "description": "Internal comments about the customer",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Internal comments about the customer"
+          "maxLength": 1024
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "name"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -455,14 +559,15 @@
           "description": "Customer number (required)"
         },
         "rows": {
+          "minItems": 1,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "article_number": {
+                "description": "Article number from article register",
                 "type": "string",
-                "maxLength": 50,
-                "description": "Article number from article register"
+                "maxLength": 50
               },
               "description": {
                 "type": "string",
@@ -470,31 +575,33 @@
                 "description": "Description of the invoice row"
               },
               "quantity": {
-                "type": "number",
-                "description": "Quantity (default: 1)"
+                "description": "Quantity (default: 1)",
+                "type": "number"
               },
               "unit": {
+                "description": "Unit code (e.g., 'st', 'h', 'kg')",
                 "type": "string",
-                "maxLength": 8,
-                "description": "Unit code (e.g., 'st', 'h', 'kg')"
+                "maxLength": 8
               },
               "price": {
-                "type": "number",
-                "description": "Unit price excluding VAT"
+                "description": "Unit price excluding VAT",
+                "type": "number"
               },
               "discount": {
+                "description": "Discount percentage (0-100)",
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100,
-                "description": "Discount percentage (0-100)"
+                "maximum": 100
               },
               "account_number": {
+                "description": "Account number for bookkeeping",
                 "type": "integer",
-                "description": "Account number for bookkeeping"
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               },
               "vat": {
-                "type": "number",
-                "description": "VAT percentage (e.g., 25, 12, 6, 0)"
+                "description": "VAT percentage (e.g., 25, 12, 6, 0)",
+                "type": "number"
               }
             },
             "required": [
@@ -502,95 +609,94 @@
             ],
             "additionalProperties": false
           },
-          "minItems": 1,
           "description": "Invoice rows/lines (at least one required)"
         },
         "invoice_date": {
+          "description": "Invoice date (YYYY-MM-DD, defaults to today)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Invoice date (YYYY-MM-DD, defaults to today)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "due_date": {
+          "description": "Due date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Due date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "our_reference": {
+          "description": "Our reference person",
           "type": "string",
-          "maxLength": 50,
-          "description": "Our reference person"
+          "maxLength": 50
         },
         "your_reference": {
+          "description": "Customer's reference person",
           "type": "string",
-          "maxLength": 50,
-          "description": "Customer's reference person"
+          "maxLength": 50
         },
         "invoice_type": {
+          "description": "Type of invoice",
           "type": "string",
           "enum": [
             "INVOICE",
             "CASH",
             "CARD",
             "UNDEFINED"
-          ],
-          "description": "Type of invoice"
+          ]
         },
         "currency": {
+          "description": "Currency code (e.g., 'SEK')",
           "type": "string",
           "minLength": 3,
-          "maxLength": 3,
-          "description": "Currency code (e.g., 'SEK')"
+          "maxLength": 3
         },
         "terms_of_payment": {
+          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50,
-          "description": "Payment terms code"
+          "maxLength": 50
         },
         "comments": {
+          "description": "Comments on the invoice",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Comments on the invoice"
+          "maxLength": 1024
         },
         "remarks": {
+          "description": "Remarks printed on the invoice",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Remarks printed on the invoice"
+          "maxLength": 1024
         },
         "freight": {
+          "description": "Freight/shipping cost",
           "type": "number",
-          "minimum": 0,
-          "description": "Freight/shipping cost"
+          "minimum": 0
         },
         "administration_fee": {
+          "description": "Administration fee",
           "type": "number",
-          "minimum": 0,
-          "description": "Administration fee"
+          "minimum": 0
         },
         "send_type": {
+          "description": "How to send the invoice",
           "type": "string",
           "enum": [
             "EMAIL",
             "PRINT",
             "EINVOICE"
-          ],
-          "description": "How to send the invoice"
+          ]
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "customer_number",
         "rows"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -614,107 +720,108 @@
           "description": "Supplier name (required)"
         },
         "supplier_number": {
+          "description": "Supplier number (auto-generated if not provided)",
           "type": "string",
-          "maxLength": 50,
-          "description": "Supplier number (auto-generated if not provided)"
+          "maxLength": 50
         },
         "organisation_number": {
+          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30,
-          "description": "Organisation/company number"
+          "maxLength": 30
         },
         "email": {
+          "description": "Primary email address",
           "type": "string",
           "format": "email",
-          "description": "Primary email address"
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
         },
         "phone": {
+          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Primary phone number"
+          "maxLength": 50
         },
         "address1": {
+          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 1"
+          "maxLength": 1024
         },
         "address2": {
+          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 2"
+          "maxLength": 1024
         },
         "zip_code": {
+          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10,
-          "description": "Postal/ZIP code"
+          "maxLength": 10
         },
         "city": {
+          "description": "City",
           "type": "string",
-          "maxLength": 1024,
-          "description": "City"
+          "maxLength": 1024
         },
         "country": {
+          "description": "Country name",
           "type": "string",
-          "maxLength": 50,
-          "description": "Country name"
+          "maxLength": 50
         },
         "country_code": {
+          "description": "Two-letter country code (e.g., 'SE' for Sweden)",
           "type": "string",
           "minLength": 2,
-          "maxLength": 2,
-          "description": "Two-letter country code (e.g., 'SE' for Sweden)"
+          "maxLength": 2
         },
         "currency": {
+          "description": "Currency code (e.g., 'SEK', 'EUR')",
           "type": "string",
           "minLength": 3,
-          "maxLength": 3,
-          "description": "Currency code (e.g., 'SEK', 'EUR')"
+          "maxLength": 3
         },
         "vat_number": {
+          "description": "VAT registration number",
           "type": "string",
-          "maxLength": 50,
-          "description": "VAT registration number"
+          "maxLength": 50
         },
         "bank_account": {
+          "description": "Bank account number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Bank account number"
+          "maxLength": 50
         },
         "bg_number": {
+          "description": "Bankgiro number",
           "type": "string",
-          "maxLength": 20,
-          "description": "Bankgiro number"
+          "maxLength": 20
         },
         "pg_number": {
+          "description": "Plusgiro number",
           "type": "string",
-          "maxLength": 20,
-          "description": "Plusgiro number"
+          "maxLength": 20
         },
         "terms_of_payment": {
+          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50,
-          "description": "Payment terms code"
+          "maxLength": 50
         },
         "comments": {
+          "description": "Internal comments about the supplier",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Internal comments about the supplier"
+          "maxLength": 1024
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "name"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -749,6 +856,7 @@
           "description": "Transaction date (YYYY-MM-DD, required)"
         },
         "rows": {
+          "minItems": 2,
           "type": "array",
           "items": {
             "type": "object",
@@ -760,29 +868,29 @@
                 "description": "Account number (1000-9999, required)"
               },
               "debit": {
+                "description": "Debit amount (use either debit or credit, not both)",
                 "type": "number",
-                "minimum": 0,
-                "description": "Debit amount (use either debit or credit, not both)"
+                "minimum": 0
               },
               "credit": {
+                "description": "Credit amount (use either debit or credit, not both)",
                 "type": "number",
-                "minimum": 0,
-                "description": "Credit amount (use either debit or credit, not both)"
+                "minimum": 0
               },
               "description": {
+                "description": "Description for this row",
                 "type": "string",
-                "maxLength": 200,
-                "description": "Description for this row"
+                "maxLength": 200
               },
               "cost_center": {
+                "description": "Cost center code",
                 "type": "string",
-                "maxLength": 20,
-                "description": "Cost center code"
+                "maxLength": 20
               },
               "project": {
+                "description": "Project code",
                 "type": "string",
-                "maxLength": 20,
-                "description": "Project code"
+                "maxLength": 20
               }
             },
             "required": [
@@ -790,27 +898,26 @@
             ],
             "additionalProperties": false
           },
-          "minItems": 2,
           "description": "Voucher rows (minimum 2 rows required, debit must equal credit)"
         },
         "cost_center": {
+          "description": "Default cost center for all rows",
           "type": "string",
-          "maxLength": 20,
-          "description": "Default cost center for all rows"
+          "maxLength": 20
         },
         "project": {
+          "description": "Default project for all rows",
           "type": "string",
-          "maxLength": 20,
-          "description": "Default project for all rows"
+          "maxLength": 20
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
@@ -819,8 +926,8 @@
         "transaction_date",
         "rows"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -843,20 +950,20 @@
           "description": "Invoice document number"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "document_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -890,6 +997,7 @@
           "description": "Current period to analyze (e.g., 'this_quarter', 'this_year')"
         },
         "compare_to": {
+          "description": "Period to compare against. If not specified, compares to the previous equivalent period.",
           "type": "string",
           "enum": [
             "today",
@@ -902,46 +1010,45 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Period to compare against. If not specified, compares to the previous equivalent period."
+          ]
         },
         "min_revenue": {
+          "description": "Only include customers with at least this much revenue in either period",
           "type": "number",
-          "minimum": 0,
-          "description": "Only include customers with at least this much revenue in either period"
+          "minimum": 0
         },
         "top_n": {
+          "default": 20,
+          "description": "Number of customers to return (1-100, default: 20)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Number of customers to return (1-100, default: 20)"
+          "maximum": 100
         },
         "show": {
+          "default": "all",
+          "description": "Filter to show only growing, declining, or all customers",
           "type": "string",
           "enum": [
             "growing",
             "declining",
             "all"
-          ],
-          "default": "all",
-          "description": "Filter to show only growing, declining, or all customers"
+          ]
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "current_period"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -968,8 +1075,8 @@
       "required": [
         "account_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -995,8 +1102,8 @@
       "required": [
         "customer_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1022,8 +1129,8 @@
       "required": [
         "supplier_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1041,6 +1148,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze",
           "type": "string",
           "enum": [
             "today",
@@ -1053,54 +1161,69 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "account_range_from": {
-          "type": "integer",
           "default": 4000,
-          "description": "Start of expense account range (default: 4000)"
+          "description": "Start of expense account range (default: 4000)",
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "account_range_to": {
-          "type": "integer",
           "default": 8999,
-          "description": "End of expense account range (default: 8999)"
+          "description": "End of expense account range (default: 8999)",
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "group_by": {
+          "default": "account_class",
+          "description": "Group expenses by individual account or account class (e.g., 4xxx, 5xxx)",
           "type": "string",
           "enum": [
             "account",
             "account_class"
-          ],
-          "default": "account_class",
-          "description": "Group expenses by individual account or account class (e.g., 4xxx, 5xxx)"
+          ]
         },
         "compare_to": {
-          "$ref": "#/properties/period",
-          "description": "Optional period to compare against"
+          "description": "Optional period to compare against",
+          "type": "string",
+          "enum": [
+            "today",
+            "yesterday",
+            "this_week",
+            "last_week",
+            "this_month",
+            "last_month",
+            "this_quarter",
+            "last_quarter",
+            "this_year",
+            "last_year"
+          ]
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1124,20 +1247,20 @@
           "description": "The account number to retrieve (1000-9999)"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "account_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1155,17 +1278,17 @@
       "type": "object",
       "properties": {
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1188,20 +1311,20 @@
           "description": "The customer number to retrieve"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "customer_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1224,20 +1347,20 @@
           "description": "The invoice document number to retrieve"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "document_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1260,20 +1383,20 @@
           "description": "The supplier number to retrieve"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "supplier_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1296,20 +1419,20 @@
           "description": "The supplier invoice given number to retrieve"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "given_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1335,28 +1458,31 @@
         "voucher_number": {
           "type": "integer",
           "minimum": 1,
+          "maximum": 9007199254740991,
           "description": "Voucher number within the series"
         },
         "financial_year": {
+          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID.",
           "type": "integer",
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "voucher_series",
         "voucher_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1374,6 +1500,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze (e.g., 'this_year', 'last_year')",
           "type": "string",
           "enum": [
             "today",
@@ -1386,48 +1513,47 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze (e.g., 'this_year', 'last_year')"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "group_by": {
+          "default": "month",
+          "description": "How to group the margin trend: 'month' or 'quarter'",
           "type": "string",
           "enum": [
             "month",
             "quarter"
-          ],
-          "default": "month",
-          "description": "How to group the margin trend: 'month' or 'quarter'"
+          ]
         },
         "revenue_accounts": {
-          "type": "string",
-          "description": "Revenue account range (e.g., '3000-3999'). Default: 3000-3999"
+          "description": "Revenue account range (e.g., '3000-3999'). Default: 3000-3999",
+          "type": "string"
         },
         "cogs_accounts": {
-          "type": "string",
-          "description": "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999"
+          "description": "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999",
+          "type": "string"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1445,6 +1571,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices.",
           "type": "string",
           "enum": [
             "today",
@@ -1457,20 +1584,20 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices."
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "filter": {
+          "description": "Filter invoices by status before calculating summary",
           "type": "string",
           "enum": [
             "cancelled",
@@ -1478,40 +1605,39 @@
             "unpaid",
             "unpaidoverdue",
             "unbooked"
-          ],
-          "description": "Filter invoices by status before calculating summary"
+          ]
         },
         "customer_number": {
+          "description": "Filter by specific customer number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by specific customer number"
+          "maxLength": 50
         },
         "group_by": {
+          "description": "Group summary statistics by this dimension",
           "type": "string",
           "enum": [
             "customer",
             "month",
             "status"
-          ],
-          "description": "Group summary statistics by this dimension"
+          ]
         },
         "include_details": {
-          "type": "boolean",
           "default": false,
-          "description": "Include list of individual invoices in the response"
+          "description": "Include list of individual invoices in the response",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1529,47 +1655,48 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "search_description": {
+          "description": "Search accounts by description",
           "type": "string",
-          "maxLength": 100,
-          "description": "Search accounts by description"
+          "maxLength": 100
         },
         "from_account": {
+          "description": "Filter accounts from this account number",
           "type": "integer",
           "minimum": 1000,
-          "maximum": 9999,
-          "description": "Filter accounts from this account number"
+          "maximum": 9999
         },
         "to_account": {
+          "description": "Filter accounts to this account number",
           "type": "integer",
           "minimum": 1000,
-          "maximum": 9999,
-          "description": "Filter accounts to this account number"
+          "maximum": 9999
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1587,53 +1714,54 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "filter": {
+          "description": "Filter by customer status",
           "type": "string",
           "enum": [
             "active",
             "inactive"
-          ],
-          "description": "Filter by customer status"
+          ]
         },
         "search_name": {
+          "description": "Search customers by name (partial match)",
           "type": "string",
-          "maxLength": 100,
-          "description": "Search customers by name (partial match)"
+          "maxLength": 100
         },
         "customer_number": {
+          "description": "Filter by specific customer number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by specific customer number"
+          "maxLength": 50
         },
         "organisation_number": {
+          "description": "Filter by organisation number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by organisation number"
+          "maxLength": 50
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1651,17 +1779,17 @@
       "type": "object",
       "properties": {
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1679,19 +1807,21 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "filter": {
+          "description": "Filter invoices by status",
           "type": "string",
           "enum": [
             "cancelled",
@@ -1699,35 +1829,35 @@
             "unpaid",
             "unpaidoverdue",
             "unbooked"
-          ],
-          "description": "Filter invoices by status"
+          ]
         },
         "customer_number": {
+          "description": "Filter by customer number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by customer number"
+          "maxLength": 50
         },
         "from_date": {
+          "description": "Filter invoices from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter invoices from this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "Filter invoices to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter invoices to this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "from_final_pay_date": {
+          "description": "Filter by due date from (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter by due date from (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_final_pay_date": {
+          "description": "Filter by due date to (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter by due date to (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "period": {
+          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided.",
           "type": "string",
           "enum": [
             "today",
@@ -1740,10 +1870,10 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          ]
         },
         "sortby": {
+          "description": "Field to sort results by",
           "type": "string",
           "enum": [
             "customername",
@@ -1751,45 +1881,44 @@
             "documentnumber",
             "invoicedate",
             "total"
-          ],
-          "description": "Field to sort results by"
+          ]
         },
         "sortorder": {
+          "default": "ascending",
+          "description": "Sort order for results",
           "type": "string",
           "enum": [
             "ascending",
             "descending"
-          ],
-          "default": "ascending",
-          "description": "Sort order for results"
+          ]
         },
         "fetch_all": {
-          "type": "boolean",
           "default": false,
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results).",
+          "type": "boolean"
         },
         "min_amount": {
+          "description": "Filter invoices with total >= this amount (client-side filter, applied after fetching)",
           "type": "number",
-          "minimum": 0,
-          "description": "Filter invoices with total >= this amount (client-side filter, applied after fetching)"
+          "minimum": 0
         },
         "max_amount": {
+          "description": "Filter invoices with total <= this amount (client-side filter, applied after fetching)",
           "type": "number",
-          "minimum": 0,
-          "description": "Filter invoices with total <= this amount (client-side filter, applied after fetching)"
+          "minimum": 0
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1807,44 +1936,46 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "filter": {
+          "description": "Filter offers by status: 'cancelled', 'expired', 'ordercreated', 'ordernotcreated'",
           "type": "string",
           "enum": [
             "cancelled",
             "expired",
             "ordercreated",
             "ordernotcreated"
-          ],
-          "description": "Filter offers by status: 'cancelled', 'expired', 'ordercreated', 'ordernotcreated'"
+          ]
         },
         "customer_number": {
+          "description": "Filter by customer number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by customer number"
+          "maxLength": 50
         },
         "from_date": {
+          "description": "Filter offers from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter offers from this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "Filter offers to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter offers to this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "period": {
+          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided.",
           "type": "string",
           "enum": [
             "today",
@@ -1857,10 +1988,10 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          ]
         },
         "sortby": {
+          "description": "Field to sort results by",
           "type": "string",
           "enum": [
             "customername",
@@ -1868,35 +1999,34 @@
             "documentnumber",
             "offerdate",
             "total"
-          ],
-          "description": "Field to sort results by"
+          ]
         },
         "sortorder": {
+          "default": "ascending",
+          "description": "Sort order for results",
           "type": "string",
           "enum": [
             "ascending",
             "descending"
-          ],
-          "default": "ascending",
-          "description": "Sort order for results"
+          ]
         },
         "fetch_all": {
-          "type": "boolean",
           "default": false,
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results).",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -1914,44 +2044,46 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "filter": {
+          "description": "Filter orders by status: 'cancelled', 'expired', 'invoicecreated', 'invoicenotcreated'",
           "type": "string",
           "enum": [
             "cancelled",
             "expired",
             "invoicecreated",
             "invoicenotcreated"
-          ],
-          "description": "Filter orders by status: 'cancelled', 'expired', 'invoicecreated', 'invoicenotcreated'"
+          ]
         },
         "customer_number": {
+          "description": "Filter by customer number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by customer number"
+          "maxLength": 50
         },
         "from_date": {
+          "description": "Filter orders from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter orders from this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "Filter orders to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter orders to this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "period": {
+          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided.",
           "type": "string",
           "enum": [
             "today",
@@ -1964,10 +2096,10 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          ]
         },
         "sortby": {
+          "description": "Field to sort results by",
           "type": "string",
           "enum": [
             "customername",
@@ -1975,35 +2107,34 @@
             "documentnumber",
             "orderdate",
             "total"
-          ],
-          "description": "Field to sort results by"
+          ]
         },
         "sortorder": {
+          "default": "ascending",
+          "description": "Sort order for results",
           "type": "string",
           "enum": [
             "ascending",
             "descending"
-          ],
-          "default": "ascending",
-          "description": "Sort order for results"
+          ]
         },
         "fetch_all": {
-          "type": "boolean",
           "default": false,
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results).",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2021,19 +2152,21 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "filter": {
+          "description": "Filter supplier invoices by status",
           "type": "string",
           "enum": [
             "cancelled",
@@ -2042,25 +2175,25 @@
             "unpaidoverdue",
             "unbooked",
             "pendingpayment"
-          ],
-          "description": "Filter supplier invoices by status"
+          ]
         },
         "supplier_number": {
+          "description": "Filter by supplier number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by supplier number"
+          "maxLength": 50
         },
         "from_date": {
+          "description": "Filter invoices from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter invoices from this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "Filter invoices to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter invoices to this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "period": {
+          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided.",
           "type": "string",
           "enum": [
             "today",
@@ -2073,20 +2206,20 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          ]
         },
         "from_final_pay_date": {
+          "description": "Filter by due date from (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter by due date from (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_final_pay_date": {
+          "description": "Filter by due date to (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter by due date to (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "sortby": {
+          "description": "Field to sort results by",
           "type": "string",
           "enum": [
             "suppliername",
@@ -2094,45 +2227,44 @@
             "invoicenumber",
             "invoicedate",
             "total"
-          ],
-          "description": "Field to sort results by"
+          ]
         },
         "sortorder": {
+          "default": "ascending",
+          "description": "Sort order for results",
           "type": "string",
           "enum": [
             "ascending",
             "descending"
-          ],
-          "default": "ascending",
-          "description": "Sort order for results"
+          ]
         },
         "fetch_all": {
-          "type": "boolean",
           "default": false,
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results).",
+          "type": "boolean"
         },
         "min_amount": {
+          "description": "Filter invoices with total >= this amount (client-side filter)",
           "type": "number",
-          "minimum": 0,
-          "description": "Filter invoices with total >= this amount (client-side filter)"
+          "minimum": 0
         },
         "max_amount": {
+          "description": "Filter invoices with total <= this amount (client-side filter)",
           "type": "number",
-          "minimum": 0,
-          "description": "Filter invoices with total <= this amount (client-side filter)"
+          "minimum": 0
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2150,43 +2282,44 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "filter": {
+          "description": "Filter by supplier status",
           "type": "string",
           "enum": [
             "active",
             "inactive"
-          ],
-          "description": "Filter by supplier status"
+          ]
         },
         "search_name": {
+          "description": "Search suppliers by name (partial match)",
           "type": "string",
-          "maxLength": 100,
-          "description": "Search suppliers by name (partial match)"
+          "maxLength": 100
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2204,17 +2337,17 @@
       "type": "object",
       "properties": {
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2232,49 +2365,52 @@
       "type": "object",
       "properties": {
         "limit": {
+          "default": 20,
+          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)"
+          "maximum": 100
         },
         "page": {
+          "default": 1,
+          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "default": 1,
-          "description": "Page number for pagination"
+          "maximum": 9007199254740991
         },
         "voucher_series": {
+          "description": "Filter by voucher series (e.g., 'A', 'B')",
           "type": "string",
-          "maxLength": 2,
-          "description": "Filter by voucher series (e.g., 'A', 'B')"
+          "maxLength": 2
         },
         "financial_year": {
+          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID.",
           "type": "integer",
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "from_date": {
+          "description": "Filter vouchers from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter vouchers from this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "Filter vouchers to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter vouchers to this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2292,6 +2428,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze (e.g., 'this_month', 'this_year')",
           "type": "string",
           "enum": [
             "today",
@@ -2304,41 +2441,40 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze (e.g., 'this_month', 'this_year')"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "group_by": {
+          "default": "status",
+          "description": "How to group order pipeline statistics",
           "type": "string",
           "enum": [
             "customer",
             "month",
             "status"
-          ],
-          "default": "status",
-          "description": "How to group order pipeline statistics"
+          ]
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2356,42 +2492,42 @@
       "type": "object",
       "properties": {
         "min_amount": {
+          "description": "Only include invoices with balance >= this amount",
           "type": "number",
-          "minimum": 0,
-          "description": "Only include invoices with balance >= this amount"
+          "minimum": 0
         },
         "supplier_number": {
+          "description": "Filter by specific supplier number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by specific supplier number"
+          "maxLength": 50
         },
         "group_by": {
+          "default": "both",
+          "description": "How to group unpaid supplier invoices in the report",
           "type": "string",
           "enum": [
             "supplier",
             "age_bucket",
             "both"
-          ],
-          "default": "both",
-          "description": "How to group unpaid supplier invoices in the report"
+          ]
         },
         "include_details": {
-          "type": "boolean",
           "default": true,
-          "description": "Include list of individual unpaid invoices"
+          "description": "Include list of individual unpaid invoices",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2425,6 +2561,7 @@
           "description": "Current period to analyze (e.g., 'this_month', 'this_quarter')"
         },
         "compare_to": {
+          "description": "Period to compare against. If not specified, compares to the previous equivalent period.",
           "type": "string",
           "enum": [
             "today",
@@ -2437,10 +2574,15 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Period to compare against. If not specified, compares to the previous equivalent period."
+          ]
         },
         "metrics": {
+          "default": [
+            "revenue",
+            "invoice_count",
+            "average_invoice"
+          ],
+          "description": "Metrics to compare between periods",
           "type": "array",
           "items": {
             "type": "string",
@@ -2450,29 +2592,23 @@
               "average_invoice",
               "new_customers"
             ]
-          },
-          "default": [
-            "revenue",
-            "invoice_count",
-            "average_invoice"
-          ],
-          "description": "Metrics to compare between periods"
+          }
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "current_period"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2490,6 +2626,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze (e.g., 'this_year', 'last_quarter')",
           "type": "string",
           "enum": [
             "today",
@@ -2502,53 +2639,52 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze (e.g., 'this_year', 'last_quarter')"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "metric": {
+          "default": "revenue",
+          "description": "Metric to rank products by: 'revenue', 'quantity', or 'invoice_count'",
           "type": "string",
           "enum": [
             "revenue",
             "quantity",
             "invoice_count"
-          ],
-          "default": "revenue",
-          "description": "Metric to rank products by: 'revenue', 'quantity', or 'invoice_count'"
+          ]
         },
         "top_n": {
+          "default": 20,
+          "description": "Number of top products to return (1-100, default: 20)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "default": 20,
-          "description": "Number of top products to return (1-100, default: 20)"
+          "maximum": 100
         },
         "include_trends": {
-          "type": "boolean",
           "default": false,
-          "description": "Compare to previous period to show trends"
+          "description": "Compare to previous period to show trends",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2566,10 +2702,11 @@
       "type": "object",
       "properties": {
         "project_number": {
-          "type": "string",
-          "description": "Filter to a specific project number"
+          "description": "Filter to a specific project number",
+          "type": "string"
         },
         "period": {
+          "description": "Date period to analyze",
           "type": "string",
           "enum": [
             "today",
@@ -2582,36 +2719,35 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "include_details": {
-          "type": "boolean",
           "default": false,
-          "description": "Include detailed breakdown of revenue and costs per project"
+          "description": "Include detailed breakdown of revenue and costs per project",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2629,6 +2765,7 @@
       "type": "object",
       "properties": {
         "period": {
+          "description": "Date period to analyze (e.g., 'this_quarter', 'this_year')",
           "type": "string",
           "enum": [
             "today",
@@ -2641,31 +2778,30 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze (e.g., 'this_quarter', 'this_year')"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2689,10 +2825,13 @@
           "description": "Text to search for in voucher descriptions (min 2 chars)"
         },
         "financial_year": {
+          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID.",
           "type": "integer",
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
         },
         "period": {
+          "description": "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date.",
           "type": "string",
           "enum": [
             "today",
@@ -2705,56 +2844,55 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."
+          ]
         },
         "from_date": {
+          "description": "Filter vouchers from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter vouchers from this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "Filter vouchers to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Filter vouchers to this date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "voucher_series": {
+          "description": "Filter by voucher series (e.g., 'A', 'B')",
           "type": "string",
-          "maxLength": 2,
-          "description": "Filter by voucher series (e.g., 'A', 'B')"
+          "maxLength": 2
         },
         "case_sensitive": {
-          "type": "boolean",
           "default": false,
-          "description": "Whether search should be case-sensitive"
+          "description": "Whether search should be case-sensitive",
+          "type": "boolean"
         },
         "include_rows": {
-          "type": "boolean",
           "default": false,
-          "description": "Include full voucher row details in results"
+          "description": "Include full voucher row details in results",
+          "type": "boolean"
         },
         "max_vouchers": {
+          "default": 500,
+          "description": "Maximum vouchers to scan (10-500). Use date filtering for larger datasets.",
           "type": "integer",
           "minimum": 10,
-          "maximum": 500,
-          "default": 500,
-          "description": "Maximum vouchers to scan (10-500). Use date filtering for larger datasets."
+          "maximum": 500
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "search_text"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2777,20 +2915,20 @@
           "description": "Invoice document number"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "document_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2808,17 +2946,18 @@
       "type": "object",
       "properties": {
         "metric": {
+          "default": "total_amount",
+          "description": "Metric to rank customers by",
           "type": "string",
           "enum": [
             "total_amount",
             "invoice_count",
             "unpaid_amount",
             "average_invoice"
-          ],
-          "default": "total_amount",
-          "description": "Metric to rank customers by"
+          ]
         },
         "period": {
+          "description": "Date period to analyze (e.g., 'this_year', 'last_month')",
           "type": "string",
           "enum": [
             "today",
@@ -2831,43 +2970,42 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ],
-          "description": "Date period to analyze (e.g., 'this_year', 'last_month')"
+          ]
         },
         "from_date": {
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "to_date": {
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "top_n": {
+          "default": 10,
+          "description": "Number of top customers to return (1-50)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 50,
-          "default": 10,
-          "description": "Number of top customers to return (1-50)"
+          "maximum": 50
         },
         "include_details": {
-          "type": "boolean",
           "default": false,
-          "description": "Include invoice breakdown for each customer"
+          "description": "Include invoice breakdown for each customer",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2885,42 +3023,42 @@
       "type": "object",
       "properties": {
         "min_amount": {
+          "description": "Only include invoices with balance >= this amount",
           "type": "number",
-          "minimum": 0,
-          "description": "Only include invoices with balance >= this amount"
+          "minimum": 0
         },
         "customer_number": {
+          "description": "Filter by specific customer number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Filter by specific customer number"
+          "maxLength": 50
         },
         "group_by": {
+          "default": "both",
+          "description": "How to group unpaid invoices in the report",
           "type": "string",
           "enum": [
             "customer",
             "age_bucket",
             "both"
-          ],
-          "default": "both",
-          "description": "How to group unpaid invoices in the report"
+          ]
         },
         "include_details": {
-          "type": "boolean",
           "default": true,
-          "description": "Include list of individual unpaid invoices"
+          "description": "Include list of individual unpaid invoices",
+          "type": "boolean"
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -2944,53 +3082,53 @@
           "description": "Account number to update (required)"
         },
         "description": {
+          "description": "Account description",
           "type": "string",
           "minLength": 1,
-          "maxLength": 200,
-          "description": "Account description"
+          "maxLength": 200
         },
         "vat_code": {
+          "description": "VAT code for the account",
           "type": "string",
-          "maxLength": 10,
-          "description": "VAT code for the account"
+          "maxLength": 10
         },
         "active": {
-          "type": "boolean",
-          "description": "Whether the account is active"
+          "description": "Whether the account is active",
+          "type": "boolean"
         },
         "cost_center_settings": {
+          "description": "Cost center settings",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ],
-          "description": "Cost center settings"
+          ]
         },
         "project_settings": {
+          "description": "Project settings",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ],
-          "description": "Project settings"
+          ]
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "account_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -3013,97 +3151,98 @@
           "description": "Customer number to update (required)"
         },
         "name": {
+          "description": "Customer name",
           "type": "string",
           "minLength": 1,
-          "maxLength": 1024,
-          "description": "Customer name"
+          "maxLength": 1024
         },
         "organisation_number": {
+          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30,
-          "description": "Organisation/company number"
+          "maxLength": 30
         },
         "email": {
+          "description": "Primary email address",
           "type": "string",
           "format": "email",
-          "description": "Primary email address"
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
         },
         "phone": {
+          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Primary phone number"
+          "maxLength": 50
         },
         "address1": {
+          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 1"
+          "maxLength": 1024
         },
         "address2": {
+          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 2"
+          "maxLength": 1024
         },
         "zip_code": {
+          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10,
-          "description": "Postal/ZIP code"
+          "maxLength": 10
         },
         "city": {
+          "description": "City",
           "type": "string",
-          "maxLength": 1024,
-          "description": "City"
+          "maxLength": 1024
         },
         "country": {
+          "description": "Country name",
           "type": "string",
-          "maxLength": 50,
-          "description": "Country name"
+          "maxLength": 50
         },
         "country_code": {
+          "description": "Two-letter country code",
           "type": "string",
           "minLength": 2,
-          "maxLength": 2,
-          "description": "Two-letter country code"
+          "maxLength": 2
         },
         "currency": {
+          "description": "Currency code",
           "type": "string",
           "minLength": 3,
-          "maxLength": 3,
-          "description": "Currency code"
+          "maxLength": 3
         },
         "vat_number": {
+          "description": "VAT registration number",
           "type": "string",
-          "maxLength": 50,
-          "description": "VAT registration number"
+          "maxLength": 50
         },
         "active": {
-          "type": "boolean",
-          "description": "Whether the customer is active"
+          "description": "Whether the customer is active",
+          "type": "boolean"
         },
         "terms_of_payment": {
+          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50,
-          "description": "Payment terms code"
+          "maxLength": 50
         },
         "comments": {
+          "description": "Internal comments",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Internal comments"
+          "maxLength": 1024
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "customer_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -3126,14 +3265,16 @@
           "description": "Invoice document number to update (required)"
         },
         "rows": {
+          "description": "Updated invoice rows (replaces all existing rows)",
+          "minItems": 1,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "article_number": {
+                "description": "Article number from article register",
                 "type": "string",
-                "maxLength": 50,
-                "description": "Article number from article register"
+                "maxLength": 50
               },
               "description": {
                 "type": "string",
@@ -3141,96 +3282,96 @@
                 "description": "Description of the invoice row"
               },
               "quantity": {
-                "type": "number",
-                "description": "Quantity (default: 1)"
+                "description": "Quantity (default: 1)",
+                "type": "number"
               },
               "unit": {
+                "description": "Unit code (e.g., 'st', 'h', 'kg')",
                 "type": "string",
-                "maxLength": 8,
-                "description": "Unit code (e.g., 'st', 'h', 'kg')"
+                "maxLength": 8
               },
               "price": {
-                "type": "number",
-                "description": "Unit price excluding VAT"
+                "description": "Unit price excluding VAT",
+                "type": "number"
               },
               "discount": {
+                "description": "Discount percentage (0-100)",
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100,
-                "description": "Discount percentage (0-100)"
+                "maximum": 100
               },
               "account_number": {
+                "description": "Account number for bookkeeping",
                 "type": "integer",
-                "description": "Account number for bookkeeping"
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               },
               "vat": {
-                "type": "number",
-                "description": "VAT percentage (e.g., 25, 12, 6, 0)"
+                "description": "VAT percentage (e.g., 25, 12, 6, 0)",
+                "type": "number"
               }
             },
             "required": [
               "description"
             ],
             "additionalProperties": false
-          },
-          "minItems": 1,
-          "description": "Updated invoice rows (replaces all existing rows)"
+          }
         },
         "invoice_date": {
+          "description": "Invoice date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Invoice date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "due_date": {
+          "description": "Due date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-          "description": "Due date (YYYY-MM-DD)"
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
         "our_reference": {
+          "description": "Our reference person",
           "type": "string",
-          "maxLength": 50,
-          "description": "Our reference person"
+          "maxLength": 50
         },
         "your_reference": {
+          "description": "Customer's reference person",
           "type": "string",
-          "maxLength": 50,
-          "description": "Customer's reference person"
+          "maxLength": 50
         },
         "comments": {
+          "description": "Comments on the invoice",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Comments on the invoice"
+          "maxLength": 1024
         },
         "remarks": {
+          "description": "Remarks printed on the invoice",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Remarks printed on the invoice"
+          "maxLength": 1024
         },
         "freight": {
+          "description": "Freight/shipping cost",
           "type": "number",
-          "minimum": 0,
-          "description": "Freight/shipping cost"
+          "minimum": 0
         },
         "administration_fee": {
+          "description": "Administration fee",
           "type": "number",
-          "minimum": 0,
-          "description": "Administration fee"
+          "minimum": 0
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "document_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -3253,95 +3394,96 @@
           "description": "Supplier number to update (required)"
         },
         "name": {
+          "description": "Supplier name",
           "type": "string",
           "minLength": 1,
-          "maxLength": 1024,
-          "description": "Supplier name"
+          "maxLength": 1024
         },
         "organisation_number": {
+          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30,
-          "description": "Organisation/company number"
+          "maxLength": 30
         },
         "email": {
+          "description": "Primary email address",
           "type": "string",
           "format": "email",
-          "description": "Primary email address"
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
         },
         "phone": {
+          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Primary phone number"
+          "maxLength": 50
         },
         "address1": {
+          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 1"
+          "maxLength": 1024
         },
         "address2": {
+          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Street address line 2"
+          "maxLength": 1024
         },
         "zip_code": {
+          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10,
-          "description": "Postal/ZIP code"
+          "maxLength": 10
         },
         "city": {
+          "description": "City",
           "type": "string",
-          "maxLength": 1024,
-          "description": "City"
+          "maxLength": 1024
         },
         "country": {
+          "description": "Country name",
           "type": "string",
-          "maxLength": 50,
-          "description": "Country name"
+          "maxLength": 50
         },
         "active": {
-          "type": "boolean",
-          "description": "Whether the supplier is active"
+          "description": "Whether the supplier is active",
+          "type": "boolean"
         },
         "bank_account": {
+          "description": "Bank account number",
           "type": "string",
-          "maxLength": 50,
-          "description": "Bank account number"
+          "maxLength": 50
         },
         "bg_number": {
+          "description": "Bankgiro number",
           "type": "string",
-          "maxLength": 20,
-          "description": "Bankgiro number"
+          "maxLength": 20
         },
         "pg_number": {
+          "description": "Plusgiro number",
           "type": "string",
-          "maxLength": 20,
-          "description": "Plusgiro number"
+          "maxLength": 20
         },
         "terms_of_payment": {
+          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50,
-          "description": "Payment terms code"
+          "maxLength": 50
         },
         "comments": {
+          "description": "Internal comments",
           "type": "string",
-          "maxLength": 1024,
-          "description": "Internal comments"
+          "maxLength": 1024
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
       "required": [
         "supplier_number"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
@@ -3359,13 +3501,18 @@
       "type": "object",
       "properties": {
         "years": {
+          "default": 3,
+          "description": "Number of years to compare (2-5, default: 3)",
           "type": "integer",
           "minimum": 2,
-          "maximum": 5,
-          "default": 3,
-          "description": "Number of years to compare (2-5, default: 3)"
+          "maximum": 5
         },
         "metrics": {
+          "default": [
+            "revenue",
+            "invoice_count"
+          ],
+          "description": "Metrics to compare across years",
           "type": "array",
           "items": {
             "type": "string",
@@ -3375,25 +3522,20 @@
               "average_invoice",
               "customer_count"
             ]
-          },
-          "default": [
-            "revenue",
-            "invoice_count"
-          ],
-          "description": "Metrics to compare across years"
+          }
         },
         "response_format": {
+          "default": "markdown",
+          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ],
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'"
+          ]
         }
       },
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false
     },
     "outputSchema": null,
     "annotations": {
