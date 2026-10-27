@@ -70,7 +70,7 @@ export function registerAccountTools(server: McpServer): void {
     "fortnox_list_accounts",
     {
       title: "List Fortnox Accounts",
-      description: `Chart of accounts, filterable by description or an account-number range.`,
+      description: `Chart of accounts, filterable by description or an account-number range; paginated.`,
       inputSchema: mcpSchema(ListAccountsSchema),
       outputSchema: mcpSchema(ListAccountsOutput),
       annotations: {
@@ -140,14 +140,7 @@ export function registerAccountTools(server: McpServer): void {
     "fortnox_get_account",
     {
       title: "Get Fortnox Account",
-      description: `Retrieve detailed information about a specific account.
-
-Args:
-  - account_number (number): The account number to retrieve (1000-9999, required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Complete account details including description, VAT settings, and balances.`,
+      description: `One account from the chart of accounts: description, VAT code, cost-centre and project settings, SRU code and balances.`,
       inputSchema: mcpSchema(GetAccountSchema),
       outputSchema: mcpSchema(AccountDetailSchema),
       annotations: {
@@ -323,15 +316,7 @@ Returns:
     "fortnox_delete_account",
     {
       title: "Delete Fortnox Account",
-      description: `Delete an account from the chart of accounts.
-
-WARNING: This action cannot be undone. The account must not have any transactions.
-
-Args:
-  - account_number (number): Account number to delete (required)
-
-Returns:
-  Confirmation of deletion.`,
+      description: `Delete an account from the chart of accounts. Cannot be undone, and only accounts without transactions can be removed.`,
       inputSchema: mcpSchema(DeleteAccountSchema),
       outputSchema: mcpSchema(DeleteAccountOutput),
       annotations: {

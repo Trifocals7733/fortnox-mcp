@@ -76,7 +76,6 @@ const VoucherRowSchema = Schema.Struct({
   )
 );
 
-
 export const ListVouchersSchema = Schema.Struct({
   ...ListPaginationInput,
   ...VoucherFilters,

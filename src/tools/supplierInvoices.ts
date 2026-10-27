@@ -306,14 +306,7 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
     "fortnox_get_supplier_invoice",
     {
       title: "Get Fortnox Supplier Invoice",
-      description: `Retrieve detailed information about a specific supplier invoice including all line items.
-
-Args:
-  - given_number (string): The supplier invoice given number to retrieve (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Complete supplier invoice details including supplier info, dates, amounts, line items, and payment status.`,
+      description: `One supplier invoice with its line items, amounts and payment status. given_number is a string identifier, not a number.`,
       inputSchema: mcpSchema(GetSupplierInvoiceSchema),
       outputSchema: mcpSchema(SupplierInvoiceDetailSchema),
       annotations: {
@@ -421,16 +414,7 @@ Returns:
     "fortnox_approve_supplier_invoice",
     {
       title: "Approve Supplier Invoice for Payment",
-      description: `Approve a supplier invoice for payment.
-
-This approves the invoice and marks it ready for payment processing.
-
-Args:
-  - given_number (string): The supplier invoice given number to approve (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Confirmation that the invoice has been approved for payment.`,
+      description: `Approve a supplier invoice so it can be paid. The invoice must not be cancelled, and payment approval has to be enabled on the company.`,
       inputSchema: mcpSchema(ApproveSupplierInvoiceSchema),
       outputSchema: mcpSchema(ApproveSupplierInvoiceOutput),
       annotations: {

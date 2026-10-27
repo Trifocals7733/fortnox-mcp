@@ -80,7 +80,7 @@ export function registerSupplierTools(server: McpServer): void {
     "fortnox_list_suppliers",
     {
       title: "List Fortnox Suppliers",
-      description: `Suppliers, filterable by status or name.`,
+      description: `Suppliers, filterable by status or name; paginated.`,
       inputSchema: mcpSchema(ListSuppliersSchema),
       outputSchema: mcpSchema(ListSuppliersOutput),
       annotations: {
@@ -155,14 +155,7 @@ export function registerSupplierTools(server: McpServer): void {
     "fortnox_get_supplier",
     {
       title: "Get Fortnox Supplier",
-      description: `Retrieve detailed information about a specific supplier.
-
-Args:
-  - supplier_number (string): The supplier number to retrieve (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Complete supplier details including contact info, addresses, bank details, and payment terms.`,
+      description: `One supplier: contact details, addresses, bank details and payment terms.`,
       inputSchema: mcpSchema(GetSupplierSchema),
       outputSchema: mcpSchema(SupplierDetailSchema),
       annotations: {
@@ -312,14 +305,7 @@ Returns:
     "fortnox_update_supplier",
     {
       title: "Update Fortnox Supplier",
-      description: `Update an existing supplier in Fortnox.
-
-Args:
-  - supplier_number (string): Supplier number to update (required)
-  - All other fields from create_supplier (only provided fields are updated)
-
-Returns:
-  The updated supplier details.`,
+      description: `Update a supplier. Only the fields you pass change.`,
       inputSchema: mcpSchema(UpdateSupplierSchema),
       outputSchema: mcpSchema(SupplierMutationOutput),
       annotations: {
@@ -387,15 +373,7 @@ Returns:
     "fortnox_delete_supplier",
     {
       title: "Delete Fortnox Supplier",
-      description: `Delete a supplier from Fortnox.
-
-WARNING: This action cannot be undone. The supplier must not have any invoices.
-
-Args:
-  - supplier_number (string): Supplier number to delete (required)
-
-Returns:
-  Confirmation of deletion.`,
+      description: `Delete a supplier. Cannot be undone, and fails while the supplier still has supplier invoices - cancel or settle them first.`,
       inputSchema: mcpSchema(DeleteSupplierSchema),
       outputSchema: mcpSchema(DeleteSupplierOutput),
       annotations: {

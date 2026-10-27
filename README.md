@@ -118,7 +118,6 @@ npm run build          # tsc -> dist/
 npm run clean          # rm -rf dist
 npm run snapshot:tools # rewrite test/tools-baseline.json from the server
 npm run check:tools    # diff the advertised tool surface, exit 1 on drift
-npm run smoke          # live read-only calls against the real Fortnox account
 npm run test           # unit/structure tests: no credentials, no network
 npm run test:live      # lifecycle tests that WRITE; needs FORTNOX_TEST_COMPANY
 npm run lint           # biome check (format + lint)
@@ -138,13 +137,14 @@ npm run company -- use 1865351   # make an archive active
 
 `npm run check` is the gate: it compiles, lints, runs the test suite and diffs the advertised tool surface against `test/tools-baseline.json`, so a refactor that drops a tool, an argument or a description fails.
 
-Three layers of verification, in increasing cost:
+Two layers of verification:
 
 - `npm run test` — structure only, no credentials: the tool surface, that every tool has schemas and annotations, that the Effect→MCP bridge validates, that list outputs accept both response shapes, and that the rate limiter throttles.
-- `npm run smoke` — a dozen read-only tools against whatever company the token points at.
-- `npm run test:live` — the only suite that **writes**. It needs `FORTNOX_TEST_COMPANY` and refuses to run unless the connected company matches, then exercises customer/supplier/account/voucher/invoice lifecycles (bookkeep and credit included) on that company.
+- `npm run test:live` — everything that needs the API. It requires `FORTNOX_TEST_COMPANY` and refuses to run unless the connected company matches, then drives all 51 tools: the read-only ones as a matrix with per-tool assertions, and the lifecycle ones (customer, supplier, account, voucher, invoice) through create → read → update → bookkeep/credit/cancel with real assertions.
 
-`npm run wipe` doesn't exist — live tests clean up after themselves, but invoices cannot be deleted, only cancelled or credited.
+CI runs `npm run check` on every push; `test:live` is deliberately manual because it needs a token and writes to a company.
+
+Live tests clean up after themselves, but invoices cannot be deleted — only cancelled or credited — so a test company accumulates a few per run.
 
 Adding tools: see [AGENTS.md](./AGENTS.md) for the codebase map and the conventions to follow.
 

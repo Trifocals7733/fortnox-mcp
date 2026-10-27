@@ -305,14 +305,7 @@ export function registerInvoiceTools(server: McpServer): void {
     "fortnox_get_invoice",
     {
       title: "Get Fortnox Invoice",
-      description: `Retrieve detailed information about a specific invoice including all line items.
-
-Args:
-  - document_number (string): The invoice document number to retrieve (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Complete invoice details including customer info, dates, amounts, line items, and payment status.`,
+      description: `One invoice with its line items, amounts and payment status.`,
       inputSchema: mcpSchema(GetInvoiceSchema),
       outputSchema: mcpSchema(InvoiceDetailSchema),
       annotations: {
@@ -505,15 +498,7 @@ Returns:
     "fortnox_update_invoice",
     {
       title: "Update Fortnox Invoice",
-      description: `Update an existing invoice in Fortnox. Only unbooked invoices can be updated.
-
-Args:
-  - document_number (string): Invoice document number to update (required)
-  - rows (array): Updated line items (replaces all existing rows)
-  - Other fields: Same as create_invoice
-
-Returns:
-  The updated invoice details.`,
+      description: `Update a draft invoice. Only unbooked invoices can be edited, and rows replaces all existing rows.`,
       inputSchema: mcpSchema(UpdateInvoiceSchema),
       outputSchema: mcpSchema(UpdateInvoiceOutput),
       annotations: {
@@ -589,14 +574,7 @@ Returns:
     "fortnox_bookkeep_invoice",
     {
       title: "Bookkeep Fortnox Invoice",
-      description: `Bookkeep an invoice, creating the accounting entries. Once booked, the invoice cannot be edited.
-
-Args:
-  - document_number (string): Invoice document number to bookkeep (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Confirmation of bookkeeping with the created voucher reference.`,
+      description: `Bookkeep an invoice, creating the accounting entries. A booked invoice is locked - it cannot be edited or cancelled, only credited.`,
       inputSchema: mcpSchema(InvoiceActionSchema),
       outputSchema: mcpSchema(BookkeepInvoiceOutput),
       annotations: {
@@ -643,14 +621,7 @@ Returns:
     "fortnox_cancel_invoice",
     {
       title: "Cancel Fortnox Invoice",
-      description: `Cancel an invoice. Booked invoices will have reversal entries created.
-
-Args:
-  - document_number (string): Invoice document number to cancel (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Confirmation of cancellation.`,
+      description: `Cancel an invoice. If it is already booked the cancellation creates reversal entries rather than removing it.`,
       inputSchema: mcpSchema(InvoiceActionSchema),
       outputSchema: mcpSchema(CancelInvoiceOutput),
       annotations: {
@@ -696,14 +667,7 @@ Returns:
     "fortnox_credit_invoice",
     {
       title: "Credit Fortnox Invoice",
-      description: `Create a credit note for an invoice. This creates a new credit invoice referencing the original.
-
-Args:
-  - document_number (string): Invoice document number to credit (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  The created credit invoice details.`,
+      description: `Create a credit note for an invoice. Returns a new credit invoice referencing the original; the original stays as it is.`,
       inputSchema: mcpSchema(InvoiceActionSchema),
       outputSchema: mcpSchema(CreditInvoiceOutput),
       annotations: {
@@ -752,16 +716,7 @@ Returns:
     "fortnox_send_invoice_email",
     {
       title: "Send Fortnox Invoice by Email",
-      description: `Send an invoice to the customer via email.
-
-The invoice will be sent to the email address configured for the customer.
-
-Args:
-  - document_number (string): Invoice document number to send (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Confirmation that the email was sent.`,
+      description: `Email the invoice to the address on the customer record. The company needs bank details on its transaction accounts or this fails before sending.`,
       inputSchema: mcpSchema(SendInvoiceEmailSchema),
       outputSchema: mcpSchema(SendInvoiceEmailOutput),
       annotations: {

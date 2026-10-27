@@ -310,7 +310,7 @@
   {
     "name": "fortnox_approve_supplier_invoice",
     "title": "Approve Supplier Invoice for Payment",
-    "description": "Approve a supplier invoice for payment.\n\nThis approves the invoice and marks it ready for payment processing.\n\nArgs:\n  - given_number (string): The supplier invoice given number to approve (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Confirmation that the invoice has been approved for payment.",
+    "description": "Approve a supplier invoice so it can be paid. The invoice must not be cancelled, and payment approval has to be enabled on the company.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -383,7 +383,7 @@
   {
     "name": "fortnox_bookkeep_invoice",
     "title": "Bookkeep Fortnox Invoice",
-    "description": "Bookkeep an invoice, creating the accounting entries. Once booked, the invoice cannot be edited.\n\nArgs:\n  - document_number (string): Invoice document number to bookkeep (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Confirmation of bookkeeping with the created voucher reference.",
+    "description": "Bookkeep an invoice, creating the accounting entries. A booked invoice is locked - it cannot be edited or cancelled, only credited.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -440,7 +440,7 @@
   {
     "name": "fortnox_cancel_invoice",
     "title": "Cancel Fortnox Invoice",
-    "description": "Cancel an invoice. Booked invoices will have reversal entries created.\n\nArgs:\n  - document_number (string): Invoice document number to cancel (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Confirmation of cancellation.",
+    "description": "Cancel an invoice. If it is already booked the cancellation creates reversal entries rather than removing it.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1529,7 +1529,7 @@
   {
     "name": "fortnox_credit_invoice",
     "title": "Credit Fortnox Invoice",
-    "description": "Create a credit note for an invoice. This creates a new credit invoice referencing the original.\n\nArgs:\n  - document_number (string): Invoice document number to credit (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  The created credit invoice details.",
+    "description": "Create a credit note for an invoice. Returns a new credit invoice referencing the original; the original stays as it is.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1590,7 +1590,7 @@
   {
     "name": "fortnox_customer_growth",
     "title": "Customer Growth Analytics",
-    "description": "Identify growing and declining customers by comparing revenue across periods. Shows growth rates and trends.",
+    "description": "Growing and declining customers between two periods, with revenue change and counts of growing, declining and flat customers.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1722,7 +1722,7 @@
   {
     "name": "fortnox_delete_account",
     "title": "Delete Fortnox Account",
-    "description": "Delete an account from the chart of accounts.\n\nWARNING: This action cannot be undone. The account must not have any transactions.\n\nArgs:\n  - account_number (number): Account number to delete (required)\n\nReturns:\n  Confirmation of deletion.",
+    "description": "Delete an account from the chart of accounts. Cannot be undone, and only accounts without transactions can be removed.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1764,7 +1764,7 @@
   {
     "name": "fortnox_delete_customer",
     "title": "Delete Fortnox Customer",
-    "description": "Delete a customer from Fortnox.\n\nWARNING: This action cannot be undone. The customer must not have any invoices or orders.\n\nArgs:\n  - customer_number (string): Customer number to delete (required)\n\nReturns:\n  Confirmation of deletion.",
+    "description": "Delete a customer. Cannot be undone, and fails while the customer still has invoices or orders.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1805,7 +1805,7 @@
   {
     "name": "fortnox_delete_supplier",
     "title": "Delete Fortnox Supplier",
-    "description": "Delete a supplier from Fortnox.\n\nWARNING: This action cannot be undone. The supplier must not have any invoices.\n\nArgs:\n  - supplier_number (string): Supplier number to delete (required)\n\nReturns:\n  Confirmation of deletion.",
+    "description": "Delete a supplier. Cannot be undone, and fails while the supplier still has supplier invoices - cancel or settle them first.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2017,7 +2017,7 @@
   {
     "name": "fortnox_get_account",
     "title": "Get Fortnox Account",
-    "description": "Retrieve detailed information about a specific account.\n\nArgs:\n  - account_number (number): The account number to retrieve (1000-9999, required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Complete account details including description, VAT settings, and balances.",
+    "description": "One account from the chart of accounts: description, VAT code, cost-centre and project settings, SRU code and balances.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2134,7 +2134,7 @@
   {
     "name": "fortnox_get_company_info",
     "title": "Get Fortnox Company Information",
-    "description": "Retrieve information about the company connected to this Fortnox account.\n\nReturns company name, organisation number, addresses, contact details, and other company information.\n\nArgs:\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Company details including name, organisation number, address, and contact information.",
+    "description": "The company this token points at: name, organisation number, addresses and contact details. database_number identifies which company that is.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2347,7 +2347,7 @@
   {
     "name": "fortnox_get_customer",
     "title": "Get Fortnox Customer",
-    "description": "Retrieve detailed information about a specific customer.\n\nArgs:\n  - customer_number (string): The customer number to retrieve (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Complete customer details including contact info, addresses, payment terms, and VAT settings.",
+    "description": "One customer: contact details, addresses, payment terms, currency and VAT settings.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2550,7 +2550,7 @@
   {
     "name": "fortnox_get_invoice",
     "title": "Get Fortnox Invoice",
-    "description": "Retrieve detailed information about a specific invoice including all line items.\n\nArgs:\n  - document_number (string): The invoice document number to retrieve (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Complete invoice details including customer info, dates, amounts, line items, and payment status.",
+    "description": "One invoice with its line items, amounts and payment status.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2794,7 +2794,7 @@
   {
     "name": "fortnox_get_supplier",
     "title": "Get Fortnox Supplier",
-    "description": "Retrieve detailed information about a specific supplier.\n\nArgs:\n  - supplier_number (string): The supplier number to retrieve (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Complete supplier details including contact info, addresses, bank details, and payment terms.",
+    "description": "One supplier: contact details, addresses, bank details and payment terms.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3012,7 +3012,7 @@
   {
     "name": "fortnox_get_supplier_invoice",
     "title": "Get Fortnox Supplier Invoice",
-    "description": "Retrieve detailed information about a specific supplier invoice including all line items.\n\nArgs:\n  - given_number (string): The supplier invoice given number to retrieve (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Complete supplier invoice details including supplier info, dates, amounts, line items, and payment status.",
+    "description": "One supplier invoice with its line items, amounts and payment status. given_number is a string identifier, not a number.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3838,7 +3838,7 @@
   {
     "name": "fortnox_list_accounts",
     "title": "List Fortnox Accounts",
-    "description": "Chart of accounts, filterable by description or an account-number range.",
+    "description": "Chart of accounts, filterable by description or an account-number range; paginated.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -3948,7 +3948,7 @@
   {
     "name": "fortnox_list_customers",
     "title": "List Fortnox Customers",
-    "description": "Customers, filterable by status, name or customer number.",
+    "description": "Customers, filterable by status, name or customer number; paginated.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -5363,7 +5363,7 @@
   {
     "name": "fortnox_list_suppliers",
     "title": "List Fortnox Suppliers",
-    "description": "Suppliers, filterable by status or name.",
+    "description": "Suppliers, filterable by status or name; paginated.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -5498,7 +5498,7 @@
   {
     "name": "fortnox_list_voucher_series",
     "title": "List Fortnox Voucher Series",
-    "description": "List available voucher series in Fortnox.\n\nVoucher series are used to categorize vouchers (e.g., 'A' for manual entries, 'B' for bank, etc.).\n\nArgs:\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  List of voucher series with code, description, and whether manual entries are allowed.",
+    "description": "Voucher series (A, B, ...) with their descriptions and whether manual entries are allowed. Needed before creating a voucher.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -5691,7 +5691,7 @@
   {
     "name": "fortnox_order_pipeline",
     "title": "Order Pipeline Analytics",
-    "description": "Analyze order pipeline and backlog. Shows pending vs invoiced orders grouped by status, customer, or month.",
+    "description": "Order pipeline: pending, invoiced and cancelled orders with their value, plus a breakdown by customer, month or status.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -6099,7 +6099,7 @@
   {
     "name": "fortnox_period_comparison",
     "title": "Period Comparison Analytics",
-    "description": "Compare business metrics (revenue, invoice count, etc.) between two time periods with percentage changes.",
+    "description": "Compare revenue, invoice count, average invoice or new customers between two periods, as change and percentage change.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -6290,7 +6290,7 @@
   {
     "name": "fortnox_product_performance",
     "title": "Product Performance Analytics",
-    "description": "Analyze product/customer sales performance. Returns top performers ranked by revenue, quantity, or invoice count.",
+    "description": "Top performers ranked by revenue, quantity or invoice count. Aggregates per customer, not per article.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -6594,7 +6594,7 @@
   {
     "name": "fortnox_sales_funnel",
     "title": "Sales Funnel Analytics",
-    "description": "Analyze sales funnel from offers to orders to invoices. Shows counts, values, and conversion rates at each stage.",
+    "description": "Offers to orders to invoices: counts, values and conversion rates at each stage.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -6944,7 +6944,7 @@
   {
     "name": "fortnox_send_invoice_email",
     "title": "Send Fortnox Invoice by Email",
-    "description": "Send an invoice to the customer via email.\n\nThe invoice will be sent to the email address configured for the customer.\n\nArgs:\n  - document_number (string): Invoice document number to send (required)\n  - response_format ('markdown' | 'json'): Output format\n\nReturns:\n  Confirmation that the email was sent.",
+    "description": "Email the invoice to the address on the customer record. The company needs bank details on its transaction accounts or this fails before sending.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7001,7 +7001,7 @@
   {
     "name": "fortnox_top_customers",
     "title": "Top Customers Analytics",
-    "description": "Rank customers by revenue, invoice count, unpaid amount or average invoice over a period.",
+    "description": "Rank customers by revenue, invoice count, unpaid amount or average invoice over a period; top_n limits the list.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7551,7 +7551,7 @@
   {
     "name": "fortnox_update_customer",
     "title": "Update Fortnox Customer",
-    "description": "Update an existing customer in Fortnox.\n\nArgs:\n  - customer_number (string): Customer number to update (required)\n  - name, email, phone, address fields, etc.: Fields to update (only provided fields are changed)\n\nReturns:\n  The updated customer details.",
+    "description": "Update a customer. Only the fields you pass change: name, email, address, payment terms, currency and VAT settings.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7682,7 +7682,7 @@
   {
     "name": "fortnox_update_invoice",
     "title": "Update Fortnox Invoice",
-    "description": "Update an existing invoice in Fortnox. Only unbooked invoices can be updated.\n\nArgs:\n  - document_number (string): Invoice document number to update (required)\n  - rows (array): Updated line items (replaces all existing rows)\n  - Other fields: Same as create_invoice\n\nReturns:\n  The updated invoice details.",
+    "description": "Update a draft invoice. Only unbooked invoices can be edited, and rows replaces all existing rows.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7830,7 +7830,7 @@
   {
     "name": "fortnox_update_supplier",
     "title": "Update Fortnox Supplier",
-    "description": "Update an existing supplier in Fortnox.\n\nArgs:\n  - supplier_number (string): Supplier number to update (required)\n  - All other fields from create_supplier (only provided fields are updated)\n\nReturns:\n  The updated supplier details.",
+    "description": "Update a supplier. Only the fields you pass change.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -7961,7 +7961,7 @@
   {
     "name": "fortnox_yearly_comparison",
     "title": "Yearly Comparison Analytics",
-    "description": "Compare revenue and metrics across multiple years (2-5). Shows year-over-year growth trends.",
+    "description": "Compare revenue, invoice count, average invoice or customer count across 2-5 years, with year-over-year growth.",
     "inputSchema": {
       "type": "object",
       "properties": {

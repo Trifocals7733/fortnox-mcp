@@ -64,15 +64,7 @@ export function registerCompanyTools(server: McpServer): void {
     "fortnox_get_company_info",
     {
       title: "Get Fortnox Company Information",
-      description: `Retrieve information about the company connected to this Fortnox account.
-
-Returns company name, organisation number, addresses, contact details, and other company information.
-
-Args:
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Company details including name, organisation number, address, and contact information.`,
+      description: `The company this token points at: name, organisation number, addresses and contact details. database_number identifies which company that is.`,
       inputSchema: mcpSchema(CompanyInfoSchema),
       outputSchema: mcpSchema(CompanyInfoOutput),
       annotations: {

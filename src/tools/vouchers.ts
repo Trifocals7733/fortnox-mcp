@@ -349,15 +349,7 @@ export function registerVoucherTools(server: McpServer): void {
     "fortnox_list_voucher_series",
     {
       title: "List Fortnox Voucher Series",
-      description: `List available voucher series in Fortnox.
-
-Voucher series are used to categorize vouchers (e.g., 'A' for manual entries, 'B' for bank, etc.).
-
-Args:
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  List of voucher series with code, description, and whether manual entries are allowed.`,
+      description: `Voucher series (A, B, ...) with their descriptions and whether manual entries are allowed. Needed before creating a voucher.`,
       inputSchema: mcpSchema(ListVoucherSeriesSchema),
       outputSchema: mcpSchema(ListVoucherSeriesOutput),
       annotations: {

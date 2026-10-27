@@ -78,7 +78,7 @@ export function registerCustomerTools(server: McpServer): void {
     "fortnox_list_customers",
     {
       title: "List Fortnox Customers",
-      description: `Customers, filterable by status, name or customer number.`,
+      description: `Customers, filterable by status, name or customer number; paginated.`,
       inputSchema: mcpSchema(ListCustomersSchema),
       outputSchema: mcpSchema(ListCustomersOutput),
       annotations: {
@@ -163,14 +163,7 @@ export function registerCustomerTools(server: McpServer): void {
     "fortnox_get_customer",
     {
       title: "Get Fortnox Customer",
-      description: `Retrieve detailed information about a specific customer.
-
-Args:
-  - customer_number (string): The customer number to retrieve (required)
-  - response_format ('markdown' | 'json'): Output format
-
-Returns:
-  Complete customer details including contact info, addresses, payment terms, and VAT settings.`,
+      description: `One customer: contact details, addresses, payment terms, currency and VAT settings.`,
       inputSchema: mcpSchema(GetCustomerSchema),
       outputSchema: mcpSchema(CustomerDetailSchema),
       annotations: {
@@ -314,14 +307,7 @@ Returns:
     "fortnox_update_customer",
     {
       title: "Update Fortnox Customer",
-      description: `Update an existing customer in Fortnox.
-
-Args:
-  - customer_number (string): Customer number to update (required)
-  - name, email, phone, address fields, etc.: Fields to update (only provided fields are changed)
-
-Returns:
-  The updated customer details.`,
+      description: `Update a customer. Only the fields you pass change: name, email, address, payment terms, currency and VAT settings.`,
       inputSchema: mcpSchema(UpdateCustomerSchema),
       outputSchema: mcpSchema(CustomerMutationOutput),
       annotations: {
@@ -389,15 +375,7 @@ Returns:
     "fortnox_delete_customer",
     {
       title: "Delete Fortnox Customer",
-      description: `Delete a customer from Fortnox.
-
-WARNING: This action cannot be undone. The customer must not have any invoices or orders.
-
-Args:
-  - customer_number (string): Customer number to delete (required)
-
-Returns:
-  Confirmation of deletion.`,
+      description: `Delete a customer. Cannot be undone, and fails while the customer still has invoices or orders.`,
       inputSchema: mcpSchema(DeleteCustomerSchema),
       outputSchema: mcpSchema(DeleteCustomerOutput),
       annotations: {

@@ -214,6 +214,153 @@ if (!gate) {
     }
   });
 
+  test("every read-only tool answers with well-formed output", async () => {
+    // Folded in from scripts/smoke.ts: the same tools, but with assertions
+    // instead of just an exit code.
+    const cases: [string, Record<string, unknown>, (output: any) => void][] = [
+      ["fortnox_get_company_info", {}, (o) => assert.ok(o.company_name)],
+      ["fortnox_list_financial_years", {}, (o) => assert.equal(typeof o.count, "number")],
+      ["fortnox_list_accounts", { limit: 3 }, (o) => assert.equal(typeof o.total, "number")],
+      ["fortnox_list_voucher_series", {}, (o) => assert.ok(o.count >= 0)],
+      ["fortnox_list_customers", { limit: 3 }, (o) => assert.equal(typeof o.total, "number")],
+      ["fortnox_list_suppliers", { limit: 3 }, (o) => assert.equal(typeof o.total, "number")],
+      ["fortnox_list_invoices", { limit: 3 }, (o) => assert.ok(Array.isArray(o.invoices))],
+      ["fortnox_list_invoices", { fetch_all: true }, (o) => assert.equal(o.fetched_all, true)],
+      ["fortnox_list_vouchers", { limit: 3 }, (o) => assert.equal(typeof o.total, "number")],
+      ["fortnox_list_supplier_invoices", { limit: 3 }, (o) => assert.ok(Array.isArray(o.invoices))],
+      ["fortnox_list_orders", { limit: 3 }, (o) => assert.ok(Array.isArray(o.orders))],
+      ["fortnox_list_offers", { limit: 3 }, (o) => assert.ok(Array.isArray(o.offers))],
+      [
+        "fortnox_search_vouchers",
+        { search_text: "ab", financial_year: 1 },
+        (o) => assert.equal(typeof o.matching_count, "number")
+      ],
+      [
+        "fortnox_account_activity",
+        { account_number: 1930, financial_year: 1 },
+        (o) => assert.ok(Array.isArray(o.transactions))
+      ],
+      [
+        "fortnox_invoice_summary",
+        { period: "this_year" },
+        (o) => assert.equal(typeof o.summary.count, "number")
+      ],
+      [
+        "fortnox_top_customers",
+        { period: "this_year" },
+        (o) => assert.ok(Array.isArray(o.customers))
+      ],
+      ["fortnox_unpaid_report", {}, (o) => assert.equal(typeof o.summary.total_invoices, "number")],
+      [
+        "fortnox_cash_flow_forecast",
+        { horizon_days: 30 },
+        (o) => assert.ok(Array.isArray(o.periods))
+      ],
+      [
+        "fortnox_order_pipeline",
+        { period: "this_year" },
+        (o) => assert.equal(typeof o.summary.total_orders, "number")
+      ],
+      [
+        "fortnox_sales_funnel",
+        { period: "this_year" },
+        (o) => assert.equal(typeof o.funnel.invoices.count, "number")
+      ],
+      [
+        "fortnox_product_performance",
+        { period: "this_year" },
+        (o) => assert.ok(Array.isArray(o.top_performers))
+      ],
+      [
+        "fortnox_period_comparison",
+        { current_period: "this_month" },
+        (o) => assert.ok(o.current_period.metrics)
+      ],
+      [
+        "fortnox_customer_growth",
+        { current_period: "this_year" },
+        (o) => assert.equal(typeof o.summary.total_customers_analyzed, "number")
+      ],
+      [
+        "fortnox_project_profitability",
+        { period: "this_year" },
+        (o) => assert.ok(Array.isArray(o.projects))
+      ],
+      [
+        "fortnox_cost_center_analysis",
+        { period: "this_year" },
+        (o) => assert.ok(Array.isArray(o.cost_centers))
+      ],
+      [
+        "fortnox_expense_analysis",
+        { period: "this_year" },
+        (o) => assert.ok(Array.isArray(o.expense_classes))
+      ],
+      ["fortnox_yearly_comparison", { years: 2 }, (o) => assert.ok(Array.isArray(o.years))],
+      [
+        "fortnox_gross_margin_trend",
+        { period: "this_year" },
+        (o) => assert.ok(Array.isArray(o.periods))
+      ]
+    ];
+    for (const [name, args, check] of cases) {
+      const output = await ok(name, args);
+      check(output);
+    }
+    assert.equal(cases.length, 28, "read-only matrix shrank");
+  });
+
+  test("updates and cancels round-trip", async () => {
+    const account = 1998;
+    const created = await ok("fortnox_create_account", {
+      account_number: account,
+      description: "MCP live update account"
+    });
+    assert.equal(created.success, true);
+    try {
+      await ok("fortnox_update_account", {
+        account_number: account,
+        description: "renamed by test"
+      });
+      const after = await ok("fortnox_get_account", { account_number: account });
+      assert.equal(after.description, "renamed by test");
+    } finally {
+      await call("fortnox_delete_account", { account_number: account });
+    }
+
+    const supplier = await ok("fortnox_create_supplier", { name: "MCP Live Update Supplier" });
+    const supplierNumber = String(supplier.supplier_number);
+    try {
+      await ok("fortnox_update_supplier", { supplier_number: supplierNumber, phone: "031-999999" });
+      const after = await ok("fortnox_get_supplier", { supplier_number: supplierNumber });
+      assert.equal(after.phone, "031-999999");
+    } finally {
+      await call("fortnox_delete_supplier", { supplier_number: supplierNumber });
+    }
+
+    const customer = await ok("fortnox_create_customer", { name: "MCP Live Cancel AB" });
+    const customerNumber = String(customer.customer_number);
+    try {
+      const draft = await ok("fortnox_create_invoice", {
+        customer_number: customerNumber,
+        rows: [{ description: "to cancel", quantity: 1, price: 100, vat: 0 }]
+      });
+      const documentNumber = String(draft.document_number);
+
+      await ok("fortnox_update_invoice", {
+        document_number: documentNumber,
+        remarks: "edited by test"
+      });
+      const edited = await ok("fortnox_get_invoice", { document_number: documentNumber });
+      assert.equal(edited.remarks, "edited by test");
+
+      const cancelled = await ok("fortnox_cancel_invoice", { document_number: documentNumber });
+      assert.equal(cancelled.cancelled, true);
+    } finally {
+      await call("fortnox_delete_customer", { customer_number: customerNumber });
+    }
+  });
+
   test("invalid arguments are rejected before reaching Fortnox", async () => {
     const bad = await call("fortnox_list_invoices", { limit: 0 });
     assert.equal(bad.isError, true);

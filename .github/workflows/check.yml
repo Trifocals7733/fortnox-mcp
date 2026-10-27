@@ -1,0 +1,29 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # build + biome (format and lint) + node:test + tool-surface drift.
+      # No credentials: the live suite is a separate, manual command.
+      - run: npm run check
+
+      # Evidence in the job summary, so a drift review does not need a rerun.
+      - name: Tool surface summary
+        if: always()
+        run: node -e "const b=require('./test/tools-baseline.json'); console.log('frozen tools:', b.length, '| with outputSchema:', b.filter(t=>t.outputSchema).length)" >> "$GITHUB_STEP_SUMMARY"

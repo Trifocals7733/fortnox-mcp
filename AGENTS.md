@@ -24,16 +24,11 @@ npm run dev          # tsx watch src/index.ts
 npm run clean
 npm run snapshot:tools # rewrite test/tools-baseline.json from the live server
 npm run check:tools    # diff the advertised tool surface against it, exit 1 on drift
-npm run smoke          # live read-only calls against the real Fortnox account
 ```
-
-`smoke` needs credentials and is read-only on purpose (safe against production books); it prints tool names and counts, never account data or tokens, and exits 1 on any failure.
 
 `npm run check` = build + lint + tests + no tool-surface drift: the bar for "it works". Say so rather than claiming more.
 
-The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. `npm run smoke` covers a dozen read-only calls against whatever company the token points at.
-
-`npm run test:live` is the only suite that writes (test/live.test.ts). It needs `FORTNOX_TEST_COMPANY` set and a token, refuses to run when the connected company does not match, and otherwise exercises customer/supplier/account/voucher/invoice lifecycles including bookkeep and credit, asserting semantics the schemas cannot (invoice total is quantity×price+VAT, a booked invoice reports booked, credit links back).
+The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. `npm run test:live` covers the API (test/live.test.ts): all 51 tools, read-only ones as a matrix and the rest as lifecycles. It needs `FORTNOX_TEST_COMPANY` set and a token, refuses to run when the connected company does not match, and otherwise exercises customer/supplier/account/voucher/invoice lifecycles including bookkeep and credit, asserting semantics the schemas cannot (invoice total is quantity×price+VAT, a booked invoice reports booked, credit links back).
 
 **Linting is Biome, not ESLint.** typescript-eslint requires `typescript <6.1` and this repo is on TypeScript 7, whose package has no programmatic compiler API — so type-aware rules are unavailable without downgrading the compiler. Biome parses TypeScript itself and covers format + lint in one dependency, but its rules are syntax-only: no `no-floating-promises`, no `no-unnecessary-condition`.
 

@@ -413,7 +413,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     "fortnox_order_pipeline",
     {
       title: "Order Pipeline Analytics",
-      description: `Analyze order pipeline and backlog. Shows pending vs invoiced orders grouped by status, customer, or month.`,
+      description: `Order pipeline: pending, invoiced and cancelled orders with their value, plus a breakdown by customer, month or status.`,
       inputSchema: mcpSchema(OrderPipelineSchema),
       outputSchema: mcpSchema(OrderPipelineOutput),
       annotations: {
@@ -567,7 +567,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     "fortnox_sales_funnel",
     {
       title: "Sales Funnel Analytics",
-      description: `Analyze sales funnel from offers to orders to invoices. Shows counts, values, and conversion rates at each stage.`,
+      description: `Offers to orders to invoices: counts, values and conversion rates at each stage.`,
       inputSchema: mcpSchema(SalesFunnelSchema),
       outputSchema: mcpSchema(SalesFunnelOutput),
       annotations: {
@@ -750,7 +750,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     "fortnox_product_performance",
     {
       title: "Product Performance Analytics",
-      description: `Analyze product/customer sales performance. Returns top performers ranked by revenue, quantity, or invoice count.`,
+      description: `Top performers ranked by revenue, quantity or invoice count. Aggregates per customer, not per article.`,
       inputSchema: mcpSchema(ProductPerformanceSchema),
       outputSchema: mcpSchema(ProductPerformanceOutput),
       annotations: {
@@ -906,7 +906,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     "fortnox_period_comparison",
     {
       title: "Period Comparison Analytics",
-      description: `Compare business metrics (revenue, invoice count, etc.) between two time periods with percentage changes.`,
+      description: `Compare revenue, invoice count, average invoice or new customers between two periods, as change and percentage change.`,
       inputSchema: mcpSchema(PeriodComparisonSchema),
       outputSchema: mcpSchema(PeriodComparisonOutput),
       annotations: {
@@ -1035,7 +1035,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     "fortnox_customer_growth",
     {
       title: "Customer Growth Analytics",
-      description: `Identify growing and declining customers by comparing revenue across periods. Shows growth rates and trends.`,
+      description: `Growing and declining customers between two periods, with revenue change and counts of growing, declining and flat customers.`,
       inputSchema: mcpSchema(CustomerGrowthSchema),
       outputSchema: mcpSchema(CustomerGrowthOutput),
       annotations: {
@@ -1528,7 +1528,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
     "fortnox_yearly_comparison",
     {
       title: "Yearly Comparison Analytics",
-      description: `Compare revenue and metrics across multiple years (2-5). Shows year-over-year growth trends.`,
+      description: `Compare revenue, invoice count, average invoice or customer count across 2-5 years, with year-over-year growth.`,
       inputSchema: mcpSchema(YearlyComparisonSchema),
       outputSchema: mcpSchema(YearlyComparisonOutput),
       annotations: {

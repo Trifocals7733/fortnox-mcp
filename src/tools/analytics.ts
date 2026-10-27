@@ -278,7 +278,7 @@ export function registerAnalyticsTools(server: McpServer): void {
     "fortnox_top_customers",
     {
       title: "Top Customers Analytics",
-      description: `Rank customers by revenue, invoice count, unpaid amount or average invoice over a period.`,
+      description: `Rank customers by revenue, invoice count, unpaid amount or average invoice over a period; top_n limits the list.`,
       inputSchema: mcpSchema(TopCustomersSchema),
       outputSchema: mcpSchema(TopCustomersOutput),
       annotations: {
