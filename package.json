@@ -1,12 +1,11 @@
 {
-  "name": "fortnox-mcp-server",
+  "name": "fortnox-mcp",
   "version": "1.0.1",
-  "mcpName": "io.github.jakobwennberg/fortnox",
   "description": "MCP server for Fortnox Swedish accounting API integration",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "fortnox-mcp-server": "./dist/index.js"
+    "fortnox-mcp": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -14,24 +13,19 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
+    "get-token": "tsx scripts/get-token.ts",
     "build": "tsc",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build",
-    "release": "./scripts/release.sh",
-    "release:patch": "./scripts/release.sh patch",
-    "release:minor": "./scripts/release.sh minor",
-    "release:major": "./scripts/release.sh major"
+    "clean": "rm -rf dist"
   },
   "engines": {
     "node": ">=18"
   },
   "license": "MIT",
-  "author": "Jakob Wennberg",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jakobwennberg/fortnox-mcp.git"
+    "url": "git+https://github.com/Trifocals7733/fortnox-mcp.git"
   },
-  "homepage": "https://github.com/jakobwennberg/fortnox-mcp#readme",
+  "homepage": "https://github.com/Trifocals7733/fortnox-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
     "axios": "^1.7.9",
@@ -45,7 +39,6 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.0",
-    "@vercel/node": "^5.5.27",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
