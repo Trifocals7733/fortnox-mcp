@@ -129,8 +129,7 @@ A rewrite is in progress. Decisions already made, in execution order:
 
 Nothing outstanding from the rewrite plan. Two tools remain unverified, and both are blocked by settings on the test company rather than by code:
 
-- **`fortnox_approve_supplier_invoice`** answers `Inställningen för betalattestering är avstängd` — payment approval is switched off on the company. `/3/settings/company` would show it but needs a `settings` scope this server does not request, so it has to be enabled in the Fortnox UI.
-- **`fortnox_send_invoice_email`** answers `Bankuppgifter saknas` — the company has no bank details on its transaction accounts (Fortnox UI: Register → Transaktionskonton). It fails before sending, so nothing was delivered anywhere.
+- **`fortnox_approve_supplier_invoice`** answers `Inställningen för betalattestering är avstängd` — payment approval is off on the company. **`fortnox_send_invoice_email`** answers `Bankuppgifter saknas` — no transaction account with bankgiro/IBAN (Fortnox UI: Register → Transaktionskonton). Both are company settings that require BankID in the UI; `/3/settings/company` is **GET-only**, so no scope or code change can set them. Verified still blocked after every app permission was enabled on the account, which is why they are the only two tools outside `test:live`.
 
 Everything else is exercised by `npm run test:live`. The aggregation arrays declared `Schema.Array(Schema.Unknown)` are still unmodelled, and no agent has used the 51 tools for real work.
 

@@ -5,14 +5,18 @@
  * This script helps you obtain a refresh token through the OAuth2 flow.
  *
  * Usage:
- *   1. Run: npx tsx scripts/get-token.ts
- *   2. Open the URL in your browser
- *   3. Authorize the app in Fortnox
- *   4. Copy the authorization code from the redirect URL
- *   5. Paste it when prompted
- *   6. Save the refresh token to your environment
+ *   1. Run: npm run get-token
+ *   2. Open the printed URL in your browser
+ *   3. Authorize the app in Fortnox; the redirect is caught on port 8888
+ *   4. The refresh token is persisted to ~/.fortnox-mcp/tokens.json
+ *
+ * Uses PKCE (S256) and a random, verified `state`, as RFC 8252 asks of a
+ * native/CLI app with a loopback redirect. Fortnox also requires a client
+ * secret on the token exchange, so PKCE is defence in depth rather than the
+ * only thing standing between an intercepted code and a token.
  */
 
+import crypto from "node:crypto";
 import http from "http";
 import { URL } from "url";
 import { FORTNOX_SCOPES } from "../src/auth/credentials.js";
@@ -37,7 +41,17 @@ const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/callback`;
 // also covers this flow.
 const SCOPES = FORTNOX_SCOPES;
 
-async function getAuthorizationCode(): Promise<string> {
+const base64url = (buffer: Buffer): string =>
+  buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+/** PKCE verifier + its S256 challenge (RFC 7636). */
+function createPkcePair(): { verifier: string; challenge: string } {
+  const verifier = base64url(crypto.randomBytes(32));
+  const challenge = base64url(crypto.createHash("sha256").update(verifier).digest());
+  return { verifier, challenge };
+}
+
+async function getAuthorizationCode(challenge: string, expectedState: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
       const url = new URL(req.url || "", `http://localhost:${REDIRECT_PORT}`);
@@ -50,6 +64,17 @@ async function getAuthorizationCode(): Promise<string> {
           res.writeHead(400, { "Content-Type": "text/html" });
           res.end(`<h1>Error: ${error}</h1><p>${url.searchParams.get("error_description")}</p>`);
           reject(new Error(error));
+          server.close();
+          return;
+        }
+
+        const returnedState = url.searchParams.get("state");
+        if (returnedState !== expectedState) {
+          res.writeHead(400, { "Content-Type": "text/html" });
+          res.end(
+            "<h1>State mismatch</h1><p>Authorization response did not match this request.</p>"
+          );
+          reject(new Error("State mismatch - possible CSRF, authorization aborted"));
           server.close();
           return;
         }
@@ -78,7 +103,9 @@ async function getAuthorizationCode(): Promise<string> {
       authUrl.searchParams.set("scope", SCOPES.join(" "));
       authUrl.searchParams.set("response_type", "code");
       authUrl.searchParams.set("access_type", "offline");
-      authUrl.searchParams.set("state", "fortnox-mcp");
+      authUrl.searchParams.set("state", expectedState);
+      authUrl.searchParams.set("code_challenge", challenge);
+      authUrl.searchParams.set("code_challenge_method", "S256");
 
       console.log("\n╔════════════════════════════════════════════════════════════╗");
       console.log("║           FORTNOX OAUTH2 AUTHORIZATION                      ║");
@@ -101,7 +128,10 @@ async function getAuthorizationCode(): Promise<string> {
   });
 }
 
-async function exchangeCodeForTokens(code: string): Promise<{
+async function exchangeCodeForTokens(
+  code: string,
+  verifier: string
+): Promise<{
   access_token: string;
   refresh_token: string;
   expires_in: number;
@@ -118,7 +148,8 @@ async function exchangeCodeForTokens(code: string): Promise<{
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code: code,
-      redirect_uri: REDIRECT_URI
+      redirect_uri: REDIRECT_URI,
+      code_verifier: verifier
     })
   });
 
@@ -134,11 +165,13 @@ async function main() {
   try {
     console.log("Starting OAuth2 authorization flow...\n");
 
-    const code = await getAuthorizationCode();
+    const pkce = createPkcePair();
+    const state = base64url(crypto.randomBytes(16));
+    const code = await getAuthorizationCode(pkce.challenge, state);
     console.log("✓ Authorization code received\n");
 
     console.log("Exchanging code for tokens...\n");
-    const tokens = await exchangeCodeForTokens(code);
+    const tokens = await exchangeCodeForTokens(code, pkce.verifier);
 
     // Keep the token store in step with .env: the provider prefers the
     // persisted file, so a stale file there would shadow the new token.

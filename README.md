@@ -196,7 +196,7 @@ The upstream project was a working Fortnox MCP server. This fork rebuilt it: **4
 
 ## Limitations
 
-- **`approve_supplier_invoice`** needs *payment approval* enabled on the company; **`send_invoice_email`** needs bank details on the transaction accounts. Both are Fortnox UI settings, and both fail with a Fortnox message rather than doing anything surprising.
+- **`approve_supplier_invoice`** needs *betalattestering* (payment approval) enabled on the company; **`send_invoice_email`** needs a bank account under **Register → Transaktionskonton** (a name plus bankgiro, or IBAN + BIC). Both are Fortnox UI settings that need BankID to change, and the API cannot set them — `/3/settings/company` is read-only. Until they are set, both tools fail with a Fortnox message (`Inställningen för betalattestering är avstängd`, `Bankuppgifter saknas`) rather than doing anything surprising.
 - The four analytics tools noted above return structure, not full figures.
 - Collections built by aggregation helpers are declared as opaque arrays: a guessed element schema would only look right while the array is empty.
 - Reads and writes are verified against a test company with a financial year, but no agent has used these 51 tools for real work yet. Descriptions and output shapes are optimised against what a client can measure, not against what an agent actually picks.
