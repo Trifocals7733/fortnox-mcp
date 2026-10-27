@@ -1,22 +1,20 @@
 import { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod";
 import { fortnoxRequest } from "../services/api.js";
 import { ResponseFormat } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
   formatDetailMarkdown
 } from "../services/formatters.js";
-import { ListFinancialYearsSchema, type ListFinancialYearsInput } from "../schemas/projects.js";
-
-// Response format schema
-const CompanyInfoSchema = z.object({
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
-
-type CompanyInfoInput = z.infer<typeof CompanyInfoSchema>;
+import {
+  CompanyInfoSchema,
+  ListFinancialYearsSchema,
+  CompanyInfoOutput,
+  ListFinancialYearsOutput,
+  type CompanyInfoInput,
+  type ListFinancialYearsInput
+} from "../schemas/company.js";
 
 // API response types
 interface FortnoxCompanyInfo {
@@ -25,7 +23,7 @@ interface FortnoxCompanyInfo {
   CompanyName: string;
   Country: string;
   CountryCode: string;
-  DatabaseNumber: string;
+  DatabaseNumber: string | number;
   Email: string;
   Fax: string;
   OrganizationNumber: string;
@@ -75,7 +73,8 @@ Args:
 
 Returns:
   Company details including name, organisation number, address, and contact information.`,
-      inputSchema: CompanyInfoSchema,
+      inputSchema: mcpSchema(CompanyInfoSchema),
+      outputSchema: mcpSchema(CompanyInfoOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -152,7 +151,8 @@ Args:
 
 Returns:
   List of financial years with ID, date range, and accounting method.`,
-      inputSchema: ListFinancialYearsSchema,
+      inputSchema: mcpSchema(ListFinancialYearsSchema),
+      outputSchema: mcpSchema(ListFinancialYearsOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
