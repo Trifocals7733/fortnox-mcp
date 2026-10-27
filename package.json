@@ -24,7 +24,8 @@
     "format": "biome check --write src scripts test",
     "format:check": "biome format src scripts test",
     "check": "npm run build && npm run lint && npm run test && npm run check:tools",
-    "test": "tsx --test test/*.test.ts"
+    "test": "tsx --test test/mcp.test.ts",
+    "test:live": "tsx --env-file-if-exists=.env --test test/live.test.ts"
   },
   "engines": {
     "node": ">=22"

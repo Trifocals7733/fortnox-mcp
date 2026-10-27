@@ -31,7 +31,9 @@ npm run smoke          # live read-only calls against the real Fortnox account
 
 `npm run check` = build + lint + tests + no tool-surface drift: the bar for "it works". Say so rather than claiming more.
 
-The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. Anything that needs the Fortnox API belongs in `npm run smoke` instead.
+The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. `npm run smoke` covers a dozen read-only calls against whatever company the token points at.
+
+`npm run test:live` is the only suite that writes (test/live.test.ts). It needs `FORTNOX_TEST_COMPANY` set and a token, refuses to run when the connected company does not match, and otherwise exercises customer/supplier/account/voucher/invoice lifecycles including bookkeep and credit, asserting semantics the schemas cannot (invoice total is quantity×price+VAT, a booked invoice reports booked, credit links back).
 
 **Linting is Biome, not ESLint.** typescript-eslint requires `typescript <6.1` and this repo is on TypeScript 7, whose package has no programmatic compiler API — so type-aware rules are unavailable without downgrading the compiler. Biome parses TypeScript itself and covers format + lint in one dependency, but its rules are syntax-only: no `no-floating-promises`, no `no-unnecessary-condition`.
 
@@ -58,7 +60,6 @@ scripts/get-token.ts      interactive helper to obtain a local-mode refresh toke
 scripts/snapshot-tools.ts tools/list baseline + drift check (no credentials needed)
 test/tools-baseline.json  the frozen advertised tool surface — keep in sync, review diffs
 fortnox_docs/openapi.json current Fortnox OpenAPI spec — grep it, don't read it
-evaluations/              BI tool QA pairs (manual/XML, not run by any test runner)
 ```
 
 ## Adding or changing a tool
@@ -130,7 +131,7 @@ A rewrite is in progress. Decisions already made, in execution order:
 
 7. ~~**Delete remote mode.**~~ — done. The multi-user OAuth proxy (authorization server, JWT minting, per-user token storage in Redis, `AsyncLocalStorage` request context) is gone, along with `jose`, `@upstash/redis` and `@modelcontextprotocol/server-legacy`. One process serves one Fortnox company; reachability comes from the network (Tailscale) rather than from OAuth. Restoring it would be a revert, not a rebuild — which is why it was safe to remove.
 
-Open items deliberately not in that list: migrating `evaluations/` (prose XML with no runner).
+Nothing outstanding from the rewrite plan. What remains is verification that needs a real agent: `send_invoice_email` and `approve_supplier_invoice` have never been run (real-world side effects, and no tool can create the supplier invoice the latter needs), and the aggregation arrays declared `Schema.Array(Schema.Unknown)` have element shapes no one has confirmed against data.
 
 **Connect cost, measured** (`tools/list` as the client receives it): 103 409 chars ≈ 25.9k tokens for 51 tools — down from 127k at the start of the rewrite (descriptions alone were 27 598 chars). Current split: `inputSchema` 42 517, `outputSchema` 39 980, descriptions 9 495.
 

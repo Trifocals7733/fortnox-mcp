@@ -119,6 +119,10 @@ npm run clean          # rm -rf dist
 npm run snapshot:tools # rewrite test/tools-baseline.json from the server
 npm run check:tools    # diff the advertised tool surface, exit 1 on drift
 npm run smoke          # live read-only calls against the real Fortnox account
+npm run test           # unit/structure tests: no credentials, no network
+npm run test:live      # lifecycle tests that WRITE; needs FORTNOX_TEST_COMPANY
+npm run lint           # biome check (format + lint)
+npm run check          # build + lint + test + tool-surface drift
 npm run company        # list/switch the authorised Fortnox company
 ```
 
@@ -132,7 +136,15 @@ npm run company -- save 1888108  # archive the active token
 npm run company -- use 1865351   # make an archive active
 ```
 
-There is no test suite and no linter. `npm run build` plus `npm run check:tools` is what "works" means for the code; `npm run smoke` is what "works" means against a real account — it drives a dozen read-only tools over an in-memory MCP client and exits 1 on any failure. The 51-tool `tools/list` output is frozen in `test/tools-baseline.json` so a refactor that drops a tool, an argument or a description shows up as a diff. Neither needs a Fortnox token except `smoke`.
+`npm run check` is the gate: it compiles, lints, runs the test suite and diffs the advertised tool surface against `test/tools-baseline.json`, so a refactor that drops a tool, an argument or a description fails.
+
+Three layers of verification, in increasing cost:
+
+- `npm run test` — structure only, no credentials: the tool surface, that every tool has schemas and annotations, that the Effect→MCP bridge validates, that list outputs accept both response shapes, and that the rate limiter throttles.
+- `npm run smoke` — a dozen read-only tools against whatever company the token points at.
+- `npm run test:live` — the only suite that **writes**. It needs `FORTNOX_TEST_COMPANY` and refuses to run unless the connected company matches, then exercises customer/supplier/account/voucher/invoice lifecycles (bookkeep and credit included) on that company.
+
+`npm run wipe` doesn't exist — live tests clean up after themselves, but invoices cannot be deleted, only cancelled or credited.
 
 Adding tools: see [AGENTS.md](./AGENTS.md) for the codebase map and the conventions to follow.
 
