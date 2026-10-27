@@ -1,14 +1,14 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { Effect } from "effect";
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
-import { createMcpServer } from "../src/server/mcp.js";
-import { mcpSchema } from "../src/services/mcpSchema.js";
-import { RateLimiter, rateLimiterLayer } from "../src/services/rateLimiter.js";
+import { Effect } from "effect";
 import { FORTNOX_SCOPES } from "../src/auth/credentials.js";
 import { ListInvoicesOutput, ListInvoicesSchema } from "../src/schemas/invoices.js";
 import { ListOrdersOutput } from "../src/schemas/orders.js";
+import { createMcpServer } from "../src/server/mcp.js";
+import { mcpSchema } from "../src/services/mcpSchema.js";
+import { RateLimiter, rateLimiterLayer } from "../src/services/rateLimiter.js";
 
 const baseline = JSON.parse(readFileSync("test/tools-baseline.json", "utf8")) as {
   name: string;
@@ -76,7 +76,7 @@ test("the Effect-to-MCP bridge validates and advertises", () => {
 test("list outputs accept both paged and fetch_all shapes", () => {
   const cases = [
     { schema: ListInvoicesOutput, key: "invoices" },
-    { schema: ListOrdersOutput, key: "orders" },
+    { schema: ListOrdersOutput, key: "orders" }
   ] as const;
   for (const { schema, key } of cases) {
     const paged = {
@@ -87,7 +87,7 @@ test("list outputs accept both paged and fetch_all shapes", () => {
       has_more: true,
       total_pages: 2,
       next_offset: 2,
-      [key]: [],
+      [key]: []
     };
     const fetchedAll = {
       total: 3,
@@ -95,11 +95,14 @@ test("list outputs accept both paged and fetch_all shapes", () => {
       fetched_all: true,
       pages_fetched: 1,
       truncated: false,
-      [key]: [],
+      [key]: []
     };
     const validate = mcpSchema(schema) as any;
     assert.ok(!("issues" in validate["~standard"].validate(paged)), `${key}: paged rejected`);
-    assert.ok(!("issues" in validate["~standard"].validate(fetchedAll)), `${key}: fetch_all rejected`);
+    assert.ok(
+      !("issues" in validate["~standard"].validate(fetchedAll)),
+      `${key}: fetch_all rejected`
+    );
   }
 });
 
@@ -137,7 +140,7 @@ test("the requested OAuth scopes cover every API area the tools call", () => {
     "offer",
     "bookkeeping",
     "project",
-    "costcenter",
+    "costcenter"
   ]) {
     assert.ok(FORTNOX_SCOPES.includes(scope), `missing scope: ${scope}`);
   }
