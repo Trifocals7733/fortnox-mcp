@@ -57,11 +57,14 @@ A few tools are honest about being partial: `project_profitability`, `cost_cente
 ```bash
 git clone https://github.com/Trifocals7733/fortnox-mcp.git
 cd fortnox-mcp
-npm install
+npm ci
 npm run build
+npm run check     # optional: build + lint + tests + tool-surface drift
 ```
 
 The entry point is `dist/index.js`. Reference it by absolute path in your MCP client config — there is no global install and no `npx`.
+
+Nothing outside `dist/` and `node_modules/` is generated, so a clean checkout plus those two commands is a complete install. `npm ci` (not `install`) keeps the lockfile authoritative.
 
 ## Configuration
 
@@ -196,7 +199,7 @@ The upstream project was a working Fortnox MCP server. This fork rebuilt it: **4
 
 ## Limitations
 
-- **`approve_supplier_invoice`** needs *betalattestering* (payment approval) enabled on the company; **`send_invoice_email`** needs a bank account under **Register → Transaktionskonton** (a name plus bankgiro, or IBAN + BIC). Both are Fortnox UI settings that need BankID to change, and the API cannot set them — `/3/settings/company` is read-only. Until they are set, both tools fail with a Fortnox message (`Inställningen för betalattestering är avstängd`, `Bankuppgifter saknas`) rather than doing anything surprising.
+- **`approve_supplier_invoice` and `send_invoice_email` are untested, and probably untestable against a demo company.** They need *real* company data: payment approval (*betalattestering*) switched on, and a genuine bank account under **Register → Transaktionskonton** with bankgiro or IBAN + BIC. Both settings require BankID in the Fortnox UI, and the API cannot set them — `/3/settings/company` is read-only. On a demo company they fail cleanly with `Inställningen för betalattestering är avstängd` and `Bankuppgifter saknas`, doing nothing surprising. Everything else in this server has been exercised against a real account.
 - The four analytics tools noted above return structure, not full figures.
 - Collections built by aggregation helpers are declared as opaque arrays: a guessed element schema would only look right while the array is empty.
 - Reads and writes are verified against a test company with a financial year, but no agent has used these 51 tools for real work yet. Descriptions and output shapes are optimised against what a client can measure, not against what an agent actually picks.
