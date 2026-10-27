@@ -105,6 +105,7 @@ Every domain is now Effect Schema (`src/schemas/<domain>.ts`), with shared build
 - **zod must be ≥4.2** for the SDK to read `~standard.jsonSchema`. The repo is on zod 4 (`z.nativeEnum`, `.strict()` and `.email()` are deprecated but still work — `tsc` is clean on them). v1's zod-3 support is gone entirely.
 - TypeScript 7 (the native Go `tsc`) with no declaration emit; `engines` is `>=22`; `exactOptionalPropertyTypes` is on.
 - **Config comes from `.env`**, loaded by Node's `--env-file-if-exists=.env` in the `start` / `dev` / `get-token` scripts. There is no `dotenv` dependency and none is needed (Node 22+). `.env` is gitignored; `.env.example` is committed.
+- **Fortnox types are inconsistent per field and per endpoint.** On supplier invoices `Total` is a string, `Balance` is a number in the detail endpoint but a string in the list endpoint, and `Credit` is the string `"false"`; `DeliveredQuantity` on invoice rows is a string while `Price`, `VAT` and `Total` are numbers; `DatabaseNumber` is a number despite the spec saying string. Coerce with `asNumber` / `asBool` from `services/api.ts` and verify against real data — schema validation catches it only once a company has records.
 - **Fortnox permission failures are two different errors**, and neither is a startup error:
   - `400 ... Har inte behörighet för scope` — the token lacks that scope. Add it to `FORTNOX_SCOPES` in `src/auth/credentials.ts` *and* to `scripts/get-token.ts`, then re-authorize.
   - `400 ... Det finns ingen aktiv licens för önskat scope` — the subscription does not have that Fortnox module at all (the test company has no Order module, so `fortnox_list_orders` and `fortnox_list_offers` always fail there). Not a bug; verify those two some other way.
@@ -131,7 +132,12 @@ A rewrite is in progress. Decisions already made, in execution order:
 
 7. ~~**Delete remote mode.**~~ — done. The multi-user OAuth proxy (authorization server, JWT minting, per-user token storage in Redis, `AsyncLocalStorage` request context) is gone, along with `jose`, `@upstash/redis` and `@modelcontextprotocol/server-legacy`. One process serves one Fortnox company; reachability comes from the network (Tailscale) rather than from OAuth. Restoring it would be a revert, not a rebuild — which is why it was safe to remove.
 
-Nothing outstanding from the rewrite plan. What remains is verification that needs a real agent: `send_invoice_email` and `approve_supplier_invoice` have never been run (real-world side effects, and no tool can create the supplier invoice the latter needs), and the aggregation arrays declared `Schema.Array(Schema.Unknown)` have element shapes no one has confirmed against data.
+Nothing outstanding from the rewrite plan. Two tools remain unverified, and both are blocked by settings on the test company rather than by code:
+
+- **`fortnox_approve_supplier_invoice`** answers `Inställningen för betalattestering är avstängd` — payment approval is switched off on the company. `/3/settings/company` would show it but needs a `settings` scope this server does not request, so it has to be enabled in the Fortnox UI.
+- **`fortnox_send_invoice_email`** answers `Bankuppgifter saknas` — the company has no bank details on its transaction accounts (Fortnox UI: Register → Transaktionskonton). It fails before sending, so nothing was delivered anywhere.
+
+Everything else is exercised by `npm run test:live`. The aggregation arrays declared `Schema.Array(Schema.Unknown)` are still unmodelled, and no agent has used the 51 tools for real work.
 
 **Connect cost, measured** (`tools/list` as the client receives it): 103 409 chars ≈ 25.9k tokens for 51 tools — down from 127k at the start of the rewrite (descriptions alone were 27 598 chars). Current split: `inputSchema` 42 517, `outputSchema` 39 980, descriptions 9 495.
 

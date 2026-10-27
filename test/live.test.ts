@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { createMcpServer } from "../src/server/mcp.js";
+import { fortnoxRequest } from "../src/services/api.js";
 
 /**
  * Live tests: the only place in this repo that writes to Fortnox.
@@ -167,6 +168,49 @@ if (!gate) {
       assert.equal(credit.total, 2500);
     } finally {
       await call("fortnox_delete_customer", { customer_number: customerNumber });
+    }
+  });
+
+  test("supplier invoice reads survive Fortnox's stringly-typed fields", async () => {
+    // No tool creates supplier invoices, so seed one through the API: on this
+    // endpoint Fortnox returns Total and GivenNumber as strings and Balance as
+    // a number in the detail but a string in the list, and Credit as "false".
+    const supplier = await ok("fortnox_create_supplier", { name: "MCP Live SI Supplier AB" });
+    const supplierNumber = String(supplier.supplier_number);
+    const seeded = await fortnoxRequest<any>("/3/supplierinvoices", "POST", {
+      SupplierInvoice: {
+        SupplierNumber: supplierNumber,
+        InvoiceDate: "2026-03-01",
+        DueDate: "2026-03-31",
+        InvoiceNumber: `LIVE-${Date.now()}`,
+        SupplierInvoiceRows: [
+          { Account: 4010, Debit: 100 },
+          { Account: 2440, Credit: 100 }
+        ]
+      }
+    });
+    const givenNumber = String(seeded.SupplierInvoice.GivenNumber);
+    assert.ok(givenNumber, "seeding returned no given number");
+
+    try {
+      const detail = await ok("fortnox_get_supplier_invoice", { given_number: givenNumber });
+      assert.equal(typeof detail.given_number, "string");
+      assert.equal(typeof detail.total, "number");
+      assert.equal(typeof detail.credit, "boolean", 'Credit arrives as the string "false"');
+      assert.equal(detail.credit, false);
+
+      const list = await ok("fortnox_list_supplier_invoices", { limit: 50 });
+      assert.equal(typeof list.total, "number");
+      const seededItem = list.invoices.find((i: any) => i.given_number === givenNumber);
+      assert.ok(seededItem, "seeded invoice missing from the list");
+      assert.equal(typeof seededItem.balance, "number");
+
+      await ok("fortnox_payables_report", { include_details: true });
+    } finally {
+      // A supplier cannot be deleted while it has an unpaid, uncancelled
+      // supplier invoice, so clean up in that order.
+      await fortnoxRequest(`/3/supplierinvoices/${givenNumber}/cancel`, "PUT").catch(() => {});
+      await call("fortnox_delete_supplier", { supplier_number: supplierNumber });
     }
   });
 

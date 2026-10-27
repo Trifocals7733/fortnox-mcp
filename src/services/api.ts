@@ -187,6 +187,27 @@ export async function fortnoxRequest<T>(
 }
 
 /**
+ * Fortnox types its own fields inconsistently: on supplier invoices `Total` is
+ * a string, `Balance` is a number in the detail endpoint but a string in the
+ * list endpoint, and `Credit` is the *string* "false". Coerce rather than trust.
+ */
+export function asNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  return fallback;
+}
+
+export function asBool(value: unknown, fallback = false): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value.trim().toLowerCase() === "true";
+  if (typeof value === "number") return value !== 0;
+  return fallback;
+}
+
+/**
  * Format a date for Fortnox API (YYYY-MM-DD)
  */
 export function formatDate(date: Date): string {

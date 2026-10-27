@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import { DEFAULT_PAGE_SIZE, ResponseFormat } from "../constants.js";
+import { asBool, asNumber, fetchAllPages, fortnoxRequest } from "../services/api.js";
 import {
   type ApproveSupplierInvoiceInput,
   ApproveSupplierInvoiceOutput,
@@ -14,7 +15,6 @@ import {
   PayablesReportSchema,
   SupplierInvoiceDetailSchema
 } from "../schemas/supplierInvoices.js";
-import { fetchAllPages, fortnoxRequest } from "../services/api.js";
 import {
   type AgeBucket,
   getAgeBucket,
@@ -224,11 +224,11 @@ export function registerSupplierInvoiceTools(server: McpServer): void {
             invoice_number: inv.InvoiceNumber || null,
             invoice_date: inv.InvoiceDate || null,
             due_date: inv.DueDate || null,
-            total: inv.Total || 0,
-            balance: inv.Balance || 0,
+            total: asNumber(inv.Total),
+            balance: asNumber(inv.Balance),
             currency: inv.Currency || "SEK",
-            booked: inv.Booked ?? false,
-            cancelled: inv.Cancelled ?? false,
+            booked: asBool(inv.Booked),
+            cancelled: asBool(inv.Cancelled),
             status: getSupplierInvoiceStatus(inv)
           }))
         };
@@ -337,14 +337,14 @@ Returns:
           invoice_number: invoice.InvoiceNumber || null,
           invoice_date: invoice.InvoiceDate || null,
           due_date: invoice.DueDate || null,
-          total: invoice.Total || 0,
-          balance: invoice.Balance || 0,
+          total: asNumber(invoice.Total),
+          balance: asNumber(invoice.Balance),
           currency: invoice.Currency || "SEK",
           ocr: invoice.OCR || null,
-          booked: invoice.Booked ?? false,
-          cancelled: invoice.Cancelled ?? false,
-          credit: invoice.Credit ?? false,
-          payment_pending: invoice.PaymentPending ?? false,
+          booked: asBool(invoice.Booked),
+          cancelled: asBool(invoice.Cancelled),
+          credit: asBool(invoice.Credit),
+          payment_pending: asBool(invoice.PaymentPending),
           comments: invoice.Comments || null,
           rows: (invoice.SupplierInvoiceRows || []).map((row) => ({
             article_number: row.ArticleNumber || null,
@@ -453,7 +453,7 @@ Returns:
           message: `Supplier invoice #${invoice.GivenNumber} has been approved for payment`,
           given_number: invoice.GivenNumber,
           supplier_name: invoice.SupplierName || null,
-          total: invoice.Total || 0,
+          total: Number(invoice.Total ?? 0) || 0,
           payment_pending: true
         };
 
@@ -598,7 +598,7 @@ Returns:
               invoice_number: inv.InvoiceNumber || null,
               invoice_date: inv.InvoiceDate || null,
               due_date: inv.DueDate || null,
-              total: inv.Total || 0,
+              total: Number(inv.Total ?? 0) || 0,
               balance: inv.Balance || 0,
               age_bucket: getAgeBucket(inv.DueDate)
             }));

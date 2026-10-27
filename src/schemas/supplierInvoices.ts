@@ -102,8 +102,11 @@ export type PayablesReportInput = typeof PayablesReportSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 
+// Fortnox returns GivenNumber and Total as strings on supplier invoices
+// (unlike invoices, where the numbers really are numbers), so the handlers
+// coerce the amounts and the identifier stays a string.
 export const SupplierInvoiceListItemSchema = Schema.Struct({
-  given_number: Schema.Finite,
+  given_number: Schema.String.pipe(describe("Fortnox given number (a string identifier)")),
   supplier_number: NullableString,
   supplier_name: NullableString,
   invoice_number: NullableString,
@@ -136,7 +139,7 @@ export const SupplierInvoiceRowSchema = Schema.Struct({
 });
 
 export const SupplierInvoiceDetailSchema = Schema.Struct({
-  given_number: Schema.Finite,
+  given_number: Schema.String.pipe(describe("Fortnox given number (a string identifier)")),
   supplier_number: NullableString,
   supplier_name: NullableString,
   invoice_number: NullableString,
@@ -158,7 +161,7 @@ export type SupplierInvoiceDetail = typeof SupplierInvoiceDetailSchema.Type;
 
 export const ApproveSupplierInvoiceOutput = Schema.Struct({
   ...MutationResult.fields,
-  given_number: Schema.Finite,
+  given_number: Schema.String.pipe(describe("Fortnox given number (a string identifier)")),
   supplier_name: NullableString,
   total: Schema.Finite,
   payment_pending: Schema.Boolean
@@ -197,7 +200,7 @@ export const PayablesReportOutput = Schema.Struct({
   invoices: optionalValue(
     Schema.Array(
       Schema.Struct({
-        given_number: Schema.Finite,
+        given_number: Schema.String.pipe(describe("Fortnox given number (a string identifier)")),
         supplier_number: NullableString,
         supplier_name: NullableString,
         invoice_number: NullableString,
