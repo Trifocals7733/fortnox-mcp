@@ -97,7 +97,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -325,7 +325,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -337,12 +337,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "given_number": {
           "type": "number"
@@ -399,7 +397,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -411,12 +409,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "document_number": {
           "type": "string"
@@ -458,7 +454,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -470,12 +466,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "document_number": {
           "type": "string"
@@ -534,7 +528,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -723,7 +717,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -869,7 +863,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -882,12 +876,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "account_number": {
           "type": "number"
@@ -1026,12 +1018,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "customer_number": {
           "type": "string"
@@ -1193,7 +1183,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -1206,12 +1196,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "document_number": {
           "type": "string"
@@ -1364,7 +1352,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -1376,12 +1364,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "supplier_number": {
           "type": "string"
@@ -1489,7 +1475,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -1504,12 +1490,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "voucher_series": {
           "type": "string"
@@ -1559,7 +1543,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -1571,12 +1555,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "original_document_number": {
           "type": "string"
@@ -1669,7 +1651,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -1759,12 +1741,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         }
       },
       "required": [
@@ -1802,12 +1782,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         }
       },
       "required": [
@@ -1845,12 +1823,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         }
       },
       "required": [
@@ -1939,7 +1915,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -2056,7 +2032,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -2167,7 +2143,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -2196,8 +2172,7 @@
             {
               "type": "number"
             }
-          ],
-          "description": "Fortnox company/database number - identifies which company this token points at"
+          ]
         },
         "address": {
           "anyOf": [
@@ -2589,7 +2564,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -2833,7 +2808,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -3051,7 +3026,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -3293,7 +3268,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -3449,7 +3424,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -3620,7 +3595,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -3869,13 +3844,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "search_description": {
           "type": "string",
@@ -3900,7 +3875,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -3909,28 +3884,22 @@
       "type": "object",
       "properties": {
         "total": {
-          "type": "number",
-          "description": "Total matching records in Fortnox"
+          "type": "number"
         },
         "page": {
-          "type": "number",
-          "description": "Current page"
+          "type": "number"
         },
         "limit": {
-          "type": "number",
-          "description": "Page size"
+          "type": "number"
         },
         "count": {
-          "type": "number",
-          "description": "Records in this page"
+          "type": "number"
         },
         "has_more": {
-          "type": "boolean",
-          "description": "Whether more pages exist"
+          "type": "boolean"
         },
         "total_pages": {
-          "type": "number",
-          "description": "Total number of pages"
+          "type": "number"
         },
         "accounts": {
           "type": "array",
@@ -4140,7 +4109,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -4157,8 +4126,7 @@
             "type": "object",
             "properties": {
               "id": {
-                "type": "number",
-                "description": "Financial year ID used by voucher tools"
+                "type": "number"
               },
               "from_date": {
                 "type": "string"
@@ -4211,13 +4179,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "filter": {
           "type": "string",
@@ -4306,287 +4274,209 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
     },
     "outputSchema": {
       "type": "object",
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "total": {
-              "type": "number",
-              "description": "Total matching records in Fortnox"
-            },
-            "page": {
-              "type": "number",
-              "description": "Current page"
-            },
-            "limit": {
-              "type": "number",
-              "description": "Page size"
-            },
-            "count": {
-              "type": "number",
-              "description": "Records in this page"
-            },
-            "has_more": {
-              "type": "boolean",
-              "description": "Whether more pages exist"
-            },
-            "total_pages": {
-              "type": "number",
-              "description": "Total number of pages"
-            },
-            "next_offset": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "period_description": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "invoices": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "document_number": {
-                    "type": "string"
-                  },
-                  "customer_number": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "customer_name": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "invoice_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "due_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "balance": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string"
-                  },
-                  "booked": {
-                    "type": "boolean"
-                  },
-                  "cancelled": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "document_number",
-                  "customer_number",
-                  "customer_name",
-                  "invoice_date",
-                  "due_date",
-                  "total",
-                  "balance",
-                  "currency",
-                  "booked",
-                  "cancelled"
-                ],
-                "additionalProperties": true
-              }
-            }
-          },
-          "required": [
-            "total",
-            "page",
-            "limit",
-            "count",
-            "has_more",
-            "total_pages",
-            "invoices"
-          ],
-          "additionalProperties": true
+      "properties": {
+        "total": {
+          "type": "number"
         },
-        {
-          "type": "object",
-          "properties": {
-            "total": {
-              "type": "number",
-              "description": "Total matching records in Fortnox"
-            },
-            "count": {
-              "type": "number",
-              "description": "Records returned"
-            },
-            "fetched_all": {
-              "type": "boolean",
-              "description": "Always true for an auto-paginated response"
-            },
-            "pages_fetched": {
+        "count": {
+          "type": "number"
+        },
+        "page": {
+          "anyOf": [
+            {
               "type": "number"
             },
-            "truncated": {
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "has_more": {
+          "anyOf": [
+            {
               "type": "boolean"
             },
-            "truncation_reason": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "period_description": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "invoices": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "document_number": {
-                    "type": "string"
-                  },
-                  "customer_number": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "customer_name": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "invoice_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "due_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "balance": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string"
-                  },
-                  "booked": {
-                    "type": "boolean"
-                  },
-                  "cancelled": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "document_number",
-                  "customer_number",
-                  "customer_name",
-                  "invoice_date",
-                  "due_date",
-                  "total",
-                  "balance",
-                  "currency",
-                  "booked",
-                  "cancelled"
-                ],
-                "additionalProperties": true
-              }
+            {
+              "type": "null"
             }
-          },
-          "required": [
-            "total",
-            "count",
-            "fetched_all",
-            "pages_fetched",
-            "truncated",
-            "invoices"
-          ],
-          "additionalProperties": true
+          ]
+        },
+        "total_pages": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fetched_all": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pages_fetched": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncated": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "period_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "document_number": {
+                "type": "string"
+              },
+              "customer_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "customer_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "invoice_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "due_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "total": {
+                "type": "number"
+              },
+              "balance": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "booked": {
+                "type": "boolean"
+              },
+              "cancelled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "document_number",
+              "customer_number",
+              "customer_name",
+              "invoice_date",
+              "due_date",
+              "total",
+              "balance",
+              "currency",
+              "booked",
+              "cancelled"
+            ],
+            "additionalProperties": true
+          }
         }
-      ]
+      },
+      "required": [
+        "total",
+        "count",
+        "invoices"
+      ],
+      "additionalProperties": true
     },
     "annotations": {
       "readOnlyHint": true,
@@ -4606,13 +4496,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "filter": {
           "type": "string",
@@ -4682,303 +4572,216 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
     },
     "outputSchema": {
       "type": "object",
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "total": {
-              "type": "number",
-              "description": "Total matching records in Fortnox"
-            },
-            "page": {
-              "type": "number",
-              "description": "Current page"
-            },
-            "limit": {
-              "type": "number",
-              "description": "Page size"
-            },
-            "count": {
-              "type": "number",
-              "description": "Records in this page"
-            },
-            "has_more": {
-              "type": "boolean",
-              "description": "Whether more pages exist"
-            },
-            "total_pages": {
-              "type": "number",
-              "description": "Total number of pages"
-            },
-            "next_offset": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "period_description": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "offers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "document_number": {
-                    "type": "string"
-                  },
-                  "customer_number": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "customer_name": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "offer_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "expire_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Derived offer status label"
-                  },
-                  "expired": {
-                    "type": "boolean"
-                  },
-                  "order_reference": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "document_number",
-                  "customer_number",
-                  "customer_name",
-                  "offer_date",
-                  "expire_date",
-                  "total",
-                  "currency",
-                  "status",
-                  "expired",
-                  "order_reference"
-                ],
-                "additionalProperties": true
-              }
-            }
-          },
-          "required": [
-            "total",
-            "page",
-            "limit",
-            "count",
-            "has_more",
-            "total_pages",
-            "offers"
-          ],
-          "additionalProperties": true
+      "properties": {
+        "total": {
+          "type": "number"
         },
-        {
-          "type": "object",
-          "properties": {
-            "total": {
-              "type": "number",
-              "description": "Total matching records in Fortnox"
-            },
-            "count": {
-              "type": "number",
-              "description": "Records returned"
-            },
-            "fetched_all": {
-              "type": "boolean",
-              "description": "Always true for an auto-paginated response"
-            },
-            "pages_fetched": {
+        "count": {
+          "type": "number"
+        },
+        "page": {
+          "anyOf": [
+            {
               "type": "number"
             },
-            "truncated": {
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "has_more": {
+          "anyOf": [
+            {
               "type": "boolean"
             },
-            "truncation_reason": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "period_description": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "offers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "document_number": {
-                    "type": "string"
-                  },
-                  "customer_number": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "customer_name": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "offer_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "expire_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Derived offer status label"
-                  },
-                  "expired": {
-                    "type": "boolean"
-                  },
-                  "order_reference": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "document_number",
-                  "customer_number",
-                  "customer_name",
-                  "offer_date",
-                  "expire_date",
-                  "total",
-                  "currency",
-                  "status",
-                  "expired",
-                  "order_reference"
-                ],
-                "additionalProperties": true
-              }
+            {
+              "type": "null"
             }
-          },
-          "required": [
-            "total",
-            "count",
-            "fetched_all",
-            "pages_fetched",
-            "truncated",
-            "offers"
-          ],
-          "additionalProperties": true
+          ]
+        },
+        "total_pages": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fetched_all": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pages_fetched": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncated": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "period_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "document_number": {
+                "type": "string"
+              },
+              "customer_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "customer_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "offer_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expire_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "total": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "expired": {
+                "type": "boolean"
+              },
+              "order_reference": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "document_number",
+              "customer_number",
+              "customer_name",
+              "offer_date",
+              "expire_date",
+              "total",
+              "currency",
+              "status",
+              "expired",
+              "order_reference"
+            ],
+            "additionalProperties": true
+          }
         }
-      ]
+      },
+      "required": [
+        "total",
+        "count",
+        "offers"
+      ],
+      "additionalProperties": true
     },
     "annotations": {
       "readOnlyHint": true,
@@ -4998,13 +4801,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "filter": {
           "type": "string",
@@ -5074,295 +4877,212 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
     },
     "outputSchema": {
       "type": "object",
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "total": {
-              "type": "number",
-              "description": "Total matching records in Fortnox"
-            },
-            "page": {
-              "type": "number",
-              "description": "Current page"
-            },
-            "limit": {
-              "type": "number",
-              "description": "Page size"
-            },
-            "count": {
-              "type": "number",
-              "description": "Records in this page"
-            },
-            "has_more": {
-              "type": "boolean",
-              "description": "Whether more pages exist"
-            },
-            "total_pages": {
-              "type": "number",
-              "description": "Total number of pages"
-            },
-            "next_offset": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "period_description": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "orders": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "document_number": {
-                    "type": "string"
-                  },
-                  "customer_number": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "customer_name": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "order_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "delivery_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Derived order status label"
-                  },
-                  "invoice_reference": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "document_number",
-                  "customer_number",
-                  "customer_name",
-                  "order_date",
-                  "delivery_date",
-                  "total",
-                  "currency",
-                  "status",
-                  "invoice_reference"
-                ],
-                "additionalProperties": true
-              }
-            }
-          },
-          "required": [
-            "total",
-            "page",
-            "limit",
-            "count",
-            "has_more",
-            "total_pages",
-            "orders"
-          ],
-          "additionalProperties": true
+      "properties": {
+        "total": {
+          "type": "number"
         },
-        {
-          "type": "object",
-          "properties": {
-            "total": {
-              "type": "number",
-              "description": "Total matching records in Fortnox"
-            },
-            "count": {
-              "type": "number",
-              "description": "Records returned"
-            },
-            "fetched_all": {
-              "type": "boolean",
-              "description": "Always true for an auto-paginated response"
-            },
-            "pages_fetched": {
+        "count": {
+          "type": "number"
+        },
+        "page": {
+          "anyOf": [
+            {
               "type": "number"
             },
-            "truncated": {
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "has_more": {
+          "anyOf": [
+            {
               "type": "boolean"
             },
-            "truncation_reason": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "period_description": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "orders": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "document_number": {
-                    "type": "string"
-                  },
-                  "customer_number": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "customer_name": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "order_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "delivery_date": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "total": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string"
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Derived order status label"
-                  },
-                  "invoice_reference": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "document_number",
-                  "customer_number",
-                  "customer_name",
-                  "order_date",
-                  "delivery_date",
-                  "total",
-                  "currency",
-                  "status",
-                  "invoice_reference"
-                ],
-                "additionalProperties": true
-              }
+            {
+              "type": "null"
             }
-          },
-          "required": [
-            "total",
-            "count",
-            "fetched_all",
-            "pages_fetched",
-            "truncated",
-            "orders"
-          ],
-          "additionalProperties": true
+          ]
+        },
+        "total_pages": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fetched_all": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pages_fetched": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncated": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "period_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "document_number": {
+                "type": "string"
+              },
+              "customer_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "customer_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "order_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "delivery_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "total": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "invoice_reference": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "document_number",
+              "customer_number",
+              "customer_name",
+              "order_date",
+              "delivery_date",
+              "total",
+              "currency",
+              "status",
+              "invoice_reference"
+            ],
+            "additionalProperties": true
+          }
         }
-      ]
+      },
+      "required": [
+        "total",
+        "count",
+        "orders"
+      ],
+      "additionalProperties": true
     },
     "annotations": {
       "readOnlyHint": true,
@@ -5382,13 +5102,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "filter": {
           "type": "string",
@@ -5478,7 +5198,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -5487,28 +5207,22 @@
       "type": "object",
       "properties": {
         "total": {
-          "type": "number",
-          "description": "Total matching records in Fortnox"
+          "type": "number"
         },
         "page": {
-          "type": "number",
-          "description": "Current page"
+          "type": "number"
         },
         "limit": {
-          "type": "number",
-          "description": "Page size"
+          "type": "number"
         },
         "count": {
-          "type": "number",
-          "description": "Records in this page"
+          "type": "number"
         },
         "has_more": {
-          "type": "boolean",
-          "description": "Whether more pages exist"
+          "type": "boolean"
         },
         "total_pages": {
-          "type": "number",
-          "description": "Total number of pages"
+          "type": "number"
         },
         "period_description": {
           "anyOf": [
@@ -5604,8 +5318,7 @@
                 "type": "boolean"
               },
               "status": {
-                "type": "string",
-                "description": "Derived status label"
+                "type": "string"
               }
             },
             "required": [
@@ -5655,13 +5368,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "filter": {
           "type": "string",
@@ -5682,7 +5395,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -5691,28 +5404,22 @@
       "type": "object",
       "properties": {
         "total": {
-          "type": "number",
-          "description": "Total matching records in Fortnox"
+          "type": "number"
         },
         "page": {
-          "type": "number",
-          "description": "Current page"
+          "type": "number"
         },
         "limit": {
-          "type": "number",
-          "description": "Page size"
+          "type": "number"
         },
         "count": {
-          "type": "number",
-          "description": "Records in this page"
+          "type": "number"
         },
         "has_more": {
-          "type": "boolean",
-          "description": "Whether more pages exist"
+          "type": "boolean"
         },
         "total_pages": {
-          "type": "number",
-          "description": "Total number of pages"
+          "type": "number"
         },
         "suppliers": {
           "type": "array",
@@ -5720,12 +5427,10 @@
             "type": "object",
             "properties": {
               "supplier_number": {
-                "type": "string",
-                "description": "Fortnox supplier number"
+                "type": "string"
               },
               "name": {
-                "type": "string",
-                "description": "Supplier name"
+                "type": "string"
               },
               "email": {
                 "anyOf": [
@@ -5800,7 +5505,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -5859,13 +5564,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Maximum number of results to return (1-100, default 20)"
+          "description": "1-100, default 20"
         },
         "page": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
-          "description": "Page number for pagination (starts at 1)"
+          "description": "starts at 1"
         },
         "financial_year": {
           "type": "integer",
@@ -5908,7 +5613,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -5917,28 +5622,22 @@
       "type": "object",
       "properties": {
         "total": {
-          "type": "number",
-          "description": "Total matching records in Fortnox"
+          "type": "number"
         },
         "page": {
-          "type": "number",
-          "description": "Current page"
+          "type": "number"
         },
         "limit": {
-          "type": "number",
-          "description": "Page size"
+          "type": "number"
         },
         "count": {
-          "type": "number",
-          "description": "Records in this page"
+          "type": "number"
         },
         "has_more": {
-          "type": "boolean",
-          "description": "Whether more pages exist"
+          "type": "boolean"
         },
         "total_pages": {
-          "type": "number",
-          "description": "Total number of pages"
+          "type": "number"
         },
         "vouchers": {
           "type": "array",
@@ -6032,7 +5731,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -6182,7 +5881,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -6451,7 +6150,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -6640,7 +6339,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -6813,7 +6512,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -6925,7 +6624,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -7136,7 +6835,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -7216,8 +6915,7 @@
           "type": "number"
         },
         "vouchers": {
-          "type": "array",
-          "description": "Matching vouchers; shape follows the voucher detail schema"
+          "type": "array"
         }
       },
       "required": [
@@ -7257,7 +6955,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -7269,12 +6967,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "document_number": {
           "type": "string"
@@ -7355,7 +7051,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -7557,7 +7253,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true
@@ -7809,7 +7505,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -7821,12 +7517,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "account_number": {
           "type": "number"
@@ -7954,12 +7648,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "customer_number": {
           "type": "string"
@@ -8092,7 +7784,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -8104,12 +7796,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "document_number": {
           "type": "string"
@@ -8225,7 +7915,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "required": [
@@ -8237,12 +7927,10 @@
       "type": "object",
       "properties": {
         "success": {
-          "type": "boolean",
-          "description": "Whether the operation succeeded"
+          "type": "boolean"
         },
         "message": {
-          "type": "string",
-          "description": "Human-readable result summary"
+          "type": "string"
         },
         "supplier_number": {
           "type": "string"
@@ -8298,7 +7986,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown (default) or json"
         }
       },
       "additionalProperties": true

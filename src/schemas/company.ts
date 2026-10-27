@@ -24,9 +24,7 @@ export const CompanyInfoOutput = Schema.Struct({
   company_name: Schema.String,
   organisation_number: Schema.Union([Schema.String, Schema.Finite]),
   // Fortnox documents this as a string but returns a number.
-  database_number: Schema.Union([Schema.String, Schema.Finite]).pipe(
-    describe("Fortnox company/database number - identifies which company this token points at")
-  ),
+  database_number: Schema.Union([Schema.String, Schema.Finite]),
   address: NullableString,
   zip_code: NullableString,
   city: NullableString,
@@ -46,7 +44,7 @@ export const CompanyInfoOutput = Schema.Struct({
 export type CompanyInfoOutput = typeof CompanyInfoOutput.Type;
 
 export const FinancialYearSchema = Schema.Struct({
-  id: Schema.Finite.pipe(describe("Financial year ID used by voucher tools")),
+  id: Schema.Finite,
   from_date: Schema.String,
   to_date: Schema.String,
   accounting_method: NullableString

@@ -307,7 +307,5 @@ export const SearchVouchersOutput = Schema.Struct({
   truncated: Schema.Boolean,
   truncation_reason: optionalValue(NullableString),
   matching_count: Schema.Finite,
-  vouchers: Schema.Array(Schema.Unknown).pipe(
-    describe("Matching vouchers; shape follows the voucher detail schema")
-  )
+  vouchers: Schema.Array(Schema.Unknown)
 });

@@ -108,8 +108,8 @@ export type DeleteSupplierInput = typeof DeleteSupplierSchema.Type;
 /* ------------------------------- outputs ------------------------------- */
 
 export const SupplierListItemSchema = Schema.Struct({
-  supplier_number: Schema.String.pipe(describe("Fortnox supplier number")),
-  name: Schema.String.pipe(describe("Supplier name")),
+  supplier_number: Schema.String,
+  name: Schema.String,
   email: NullableString,
   city: NullableString,
   organisation_number: NullableString

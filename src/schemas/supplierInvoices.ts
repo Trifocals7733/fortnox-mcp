@@ -124,7 +124,7 @@ export const SupplierInvoiceListItemSchema = Schema.Struct({
   currency: Schema.String,
   booked: Schema.Boolean,
   cancelled: Schema.Boolean,
-  status: Schema.String.pipe(describe("Derived status label"))
+  status: Schema.String
 });
 
 export const ListSupplierInvoicesOutput = Schema.Struct({

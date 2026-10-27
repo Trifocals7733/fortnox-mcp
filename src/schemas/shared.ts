@@ -23,7 +23,7 @@ export const optionalValue = <S extends Schema.Constraint>(schema: S) => Schema.
 
 export const ResponseFormatSchema = optional(
   Schema.Literals(["markdown", "json"]).pipe(
-    describe("Output format: 'markdown' for human-readable or 'json' for structured data")
+    describe("markdown (default) or json")
   )
 );
 
@@ -65,18 +65,18 @@ export const DATE_PERIODS = [
 export const DatePeriodSchema = Schema.Literals(DATE_PERIODS);
 
 export const MutationResult = Schema.Struct({
-  success: Schema.Boolean.pipe(describe("Whether the operation succeeded")),
-  message: Schema.String.pipe(describe("Human-readable result summary"))
+  success: Schema.Boolean,
+  message: Schema.String
 });
 
 /** The pagination metadata block every list tool returns. */
 export const PaginationFields = {
-  total: Schema.Finite.pipe(describe("Total matching records in Fortnox")),
-  page: Schema.Finite.pipe(describe("Current page")),
-  limit: Schema.Finite.pipe(describe("Page size")),
-  count: Schema.Finite.pipe(describe("Records in this page")),
-  has_more: Schema.Boolean.pipe(describe("Whether more pages exist")),
-  total_pages: Schema.Finite.pipe(describe("Total number of pages"))
+  total: Schema.Finite,
+  page: Schema.Finite,
+  limit: Schema.Finite,
+  count: Schema.Finite,
+  has_more: Schema.Boolean,
+  total_pages: Schema.Finite
 };
 
 export const ListPaginationInput = {
@@ -84,13 +84,13 @@ export const ListPaginationInput = {
     Schema.Int.pipe(
       Schema.check(Schema.isGreaterThanOrEqualTo(1)),
       Schema.check(Schema.isLessThanOrEqualTo(MAX_PAGE_SIZE)),
-      describe(`Maximum number of results to return (1-${MAX_PAGE_SIZE}, default ${DEFAULT_PAGE_SIZE})`)
+      describe(`1-${MAX_PAGE_SIZE}, default ${DEFAULT_PAGE_SIZE}`)
     )
   ),
   page: optional(
     Schema.Int.pipe(
       Schema.check(Schema.isGreaterThanOrEqualTo(1)),
-      describe("Page number for pagination (starts at 1)")
+      describe("starts at 1")
     )
   )
 };

@@ -120,7 +120,7 @@ const OrderListItemSchema = Schema.Struct({
   delivery_date: NullableString,
   total: Schema.Finite,
   currency: Schema.String,
-  status: Schema.String.pipe(describe("Derived order status label")),
+  status: Schema.String,
   invoice_reference: NullableString
 });
 
@@ -132,47 +132,47 @@ const OfferListItemSchema = Schema.Struct({
   expire_date: NullableString,
   total: Schema.Finite,
   currency: Schema.String,
-  status: Schema.String.pipe(describe("Derived offer status label")),
+  status: Schema.String,
   expired: Schema.Boolean,
   order_reference: NullableString
 });
 
-const PagedFields = {
-  ...PaginationFields,
-  next_offset: optionalValue(Schema.Finite)
-};
-
 const FetchAllFields = {
-  total: Schema.Finite.pipe(describe("Total matching records in Fortnox")),
-  count: Schema.Finite.pipe(describe("Records returned")),
-  fetched_all: Schema.Boolean.pipe(describe("Always true for an auto-paginated response")),
+  total: Schema.Finite,
+  count: Schema.Finite,
+  fetched_all: Schema.Boolean,
   pages_fetched: Schema.Finite,
   truncated: Schema.Boolean,
   truncation_reason: optionalValue(NullableString)
 };
 
-export const ListOrdersOutput = Schema.Union([
-  Schema.Struct({
-    ...PagedFields,
-    period_description: optionalValue(Schema.String),
-    orders: Schema.Array(OrderListItemSchema)
-  }),
-  Schema.Struct({
-    ...FetchAllFields,
-    period_description: optionalValue(Schema.String),
-    orders: Schema.Array(OrderListItemSchema)
-  })
-]);
+/**
+ * Paged and fetch_all answers differ in which metadata keys they carry, so the
+ * merged shape makes every variant key optional. A union of the two shapes
+ * would repeat the shared fields and cost ~700 chars per tool in tools/list,
+ * which the client pays on each connect.
+ */
+const ListMeta = {
+  total: Schema.Finite,
+  count: Schema.Finite,
+  page: optionalValue(Schema.Finite),
+  limit: optionalValue(Schema.Finite),
+  has_more: optionalValue(Schema.Boolean),
+  total_pages: optionalValue(Schema.Finite),
+  fetched_all: optionalValue(Schema.Boolean),
+  pages_fetched: optionalValue(Schema.Finite),
+  truncated: optionalValue(Schema.Boolean),
+  truncation_reason: optionalValue(Schema.NullOr(Schema.String)),
+  next_offset: optionalValue(Schema.Finite),
+  period_description: optionalValue(Schema.String)
+};
 
-export const ListOffersOutput = Schema.Union([
-  Schema.Struct({
-    ...PagedFields,
-    period_description: optionalValue(Schema.String),
-    offers: Schema.Array(OfferListItemSchema)
-  }),
-  Schema.Struct({
-    ...FetchAllFields,
-    period_description: optionalValue(Schema.String),
-    offers: Schema.Array(OfferListItemSchema)
-  })
-]);
+export const ListOrdersOutput = Schema.Struct({
+  ...ListMeta,
+  orders: Schema.Array(OrderListItemSchema)
+});
+
+export const ListOffersOutput = Schema.Struct({
+  ...ListMeta,
+  offers: Schema.Array(OfferListItemSchema)
+});

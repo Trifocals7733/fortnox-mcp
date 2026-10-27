@@ -194,15 +194,10 @@ export type SendInvoiceEmailInput = typeof SendInvoiceEmailSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 
-const PagedFields = {
-  ...PaginationFields,
-  next_offset: optionalValue(Schema.Finite)
-};
-
 const FetchAllFields = {
-  total: Schema.Finite.pipe(describe("Total matching records in Fortnox")),
-  count: Schema.Finite.pipe(describe("Records returned")),
-  fetched_all: Schema.Boolean.pipe(describe("Always true for an auto-paginated response")),
+  total: Schema.Finite,
+  count: Schema.Finite,
+  fetched_all: Schema.Boolean,
   pages_fetched: Schema.Finite,
   truncated: Schema.Boolean,
   truncation_reason: optionalValue(NullableString)
@@ -221,18 +216,31 @@ const InvoiceListItemSchema = Schema.Struct({
   cancelled: Schema.Boolean
 });
 
-export const ListInvoicesOutput = Schema.Union([
-  Schema.Struct({
-    ...PagedFields,
-    period_description: optionalValue(Schema.String),
-    invoices: Schema.Array(InvoiceListItemSchema)
-  }),
-  Schema.Struct({
-    ...FetchAllFields,
-    period_description: optionalValue(Schema.String),
-    invoices: Schema.Array(InvoiceListItemSchema)
-  })
-]);
+/**
+ * Paged and fetch_all answers differ in which metadata keys they carry, so the
+ * merged shape makes every variant key optional. A union of the two shapes
+ * would repeat the shared fields and cost ~700 chars per tool in tools/list,
+ * which the client pays on each connect.
+ */
+const ListMeta = {
+  total: Schema.Finite,
+  count: Schema.Finite,
+  page: optionalValue(Schema.Finite),
+  limit: optionalValue(Schema.Finite),
+  has_more: optionalValue(Schema.Boolean),
+  total_pages: optionalValue(Schema.Finite),
+  fetched_all: optionalValue(Schema.Boolean),
+  pages_fetched: optionalValue(Schema.Finite),
+  truncated: optionalValue(Schema.Boolean),
+  truncation_reason: optionalValue(Schema.NullOr(Schema.String)),
+  next_offset: optionalValue(Schema.Finite),
+  period_description: optionalValue(Schema.String)
+};
+
+export const ListInvoicesOutput = Schema.Struct({
+  ...ListMeta,
+  invoices: Schema.Array(InvoiceListItemSchema)
+});
 
 export const InvoiceRowOutputSchema = Schema.Struct({
   article_number: NullableString,
