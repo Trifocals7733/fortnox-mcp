@@ -22,10 +22,10 @@ import {
  */
 
 const Period = optional(
-  DatePeriodSchema.pipe(describe("Date period to analyze (e.g., 'this_month', 'last_quarter')"))
+  DatePeriodSchema.pipe(describe("Named period, e.g. 'this_month'"))
 );
-const FromDate = DateString("Start date for analysis (YYYY-MM-DD). Ignored if period is specified.");
-const ToDate = DateString("End date for analysis (YYYY-MM-DD). Ignored if period is specified.");
+const FromDate = DateString("YYYY-MM-DD; ignored if period set.");
+const ToDate = DateString("YYYY-MM-DD; ignored if period set.");
 const AccountRangeFrom = optional(
   Schema.Int.pipe(describe("First account number in the range (defaults to the tool's own range)"))
 );

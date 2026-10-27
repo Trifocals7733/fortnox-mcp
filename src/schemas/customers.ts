@@ -16,7 +16,7 @@ const optional = <S extends Schema.Constraint>(schema: S) => Schema.optionalKey(
 
 const ResponseFormatSchema = optional(
   Schema.Literals(["markdown", "json"]).pipe(
-    describe("Output format: 'markdown' for human-readable or 'json' for structured data")
+    describe("markdown|json")
   )
 );
 

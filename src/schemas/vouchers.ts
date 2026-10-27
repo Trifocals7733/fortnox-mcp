@@ -27,7 +27,7 @@ const AccountNumber = (description: string) =>
 const FinancialYear = optional(
   Schema.Int.pipe(
     describe(
-      "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+      "Fortnox year ID (1,2,3...), not a calendar year."
     )
   )
 );
@@ -45,7 +45,7 @@ const VoucherFilters = {
   period: optional(
     DatePeriodSchema.pipe(
       describe(
-        "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."
+        "Named period; overrides from_date/to_date."
       )
     )
   ),

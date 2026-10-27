@@ -29,13 +29,13 @@ const Stats = Schema.Struct({
 const Period = optional(
   DatePeriodSchema.pipe(
     describe(
-      "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices."
+      "Named period, e.g. 'this_month'. If not specified, analyzes all invoices."
     )
   )
 );
 
-const FromDate = DateString("Start date for analysis (YYYY-MM-DD). Ignored if period is specified.");
-const ToDate = DateString("End date for analysis (YYYY-MM-DD). Ignored if period is specified.");
+const FromDate = DateString("YYYY-MM-DD; ignored if period set.");
+const ToDate = DateString("YYYY-MM-DD; ignored if period set.");
 
 const InvoiceStatusFilter = optional(
   Schema.Literals(["cancelled", "fullypaid", "unpaid", "unpaidoverdue", "unbooked"]).pipe(

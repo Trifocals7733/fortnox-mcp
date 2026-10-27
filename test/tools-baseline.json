@@ -50,7 +50,7 @@
           "type": "integer",
           "minimum": -9007199254740991,
           "maximum": 9007199254740991,
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "description": "Fortnox year ID (1,2,3...), not a calendar year."
         },
         "period": {
           "type": "string",
@@ -66,7 +66,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."
+          "description": "Named period; overrides from_date/to_date."
         },
         "from_date": {
           "type": "string",
@@ -97,7 +97,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -325,7 +325,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -397,7 +397,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -454,7 +454,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -528,7 +528,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -684,15 +684,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "cost_center": {
           "type": "string",
@@ -717,7 +717,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -863,7 +863,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -1006,7 +1006,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -1183,7 +1183,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -1352,7 +1352,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -1475,7 +1475,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -1543,7 +1543,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -1651,7 +1651,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -1863,15 +1863,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "account_range_from": {
           "type": "integer",
@@ -1915,7 +1915,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -2032,7 +2032,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -2143,7 +2143,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -2361,7 +2361,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -2564,7 +2564,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -2808,7 +2808,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -3026,7 +3026,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -3260,7 +3260,7 @@
           "type": "integer",
           "minimum": -9007199254740991,
           "maximum": 9007199254740991,
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "description": "Fortnox year ID (1,2,3...), not a calendar year."
         },
         "response_format": {
           "type": "string",
@@ -3268,7 +3268,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -3390,15 +3390,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "group_by": {
           "type": "string",
@@ -3424,7 +3424,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -3550,15 +3550,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices."
+          "description": "Named period, e.g. 'this_month'. If not specified, analyzes all invoices."
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "filter": {
           "type": "string",
@@ -3595,7 +3595,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -3875,7 +3875,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -3991,7 +3991,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -4109,7 +4109,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -4233,7 +4233,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          "description": "Named period; overrides from_date/to_date."
         },
         "sortby": {
           "type": "string",
@@ -4252,11 +4252,11 @@
             "ascending",
             "descending"
           ],
-          "description": "Sort order for results (default 'ascending')"
+          "description": "default 'ascending'"
         },
         "fetch_all": {
           "type": "boolean",
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Auto-paginate up to 10,000 results."
         },
         "min_amount": {
           "type": "number",
@@ -4274,7 +4274,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -4541,7 +4541,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          "description": "Named period; overrides from_date/to_date."
         },
         "sortby": {
           "type": "string",
@@ -4560,11 +4560,11 @@
             "ascending",
             "descending"
           ],
-          "description": "Sort order for results (default 'ascending')"
+          "description": "default 'ascending'"
         },
         "fetch_all": {
           "type": "boolean",
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Auto-paginate up to 10,000 results."
         },
         "response_format": {
           "type": "string",
@@ -4572,7 +4572,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -4846,7 +4846,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          "description": "Named period; overrides from_date/to_date."
         },
         "sortby": {
           "type": "string",
@@ -4865,11 +4865,11 @@
             "ascending",
             "descending"
           ],
-          "description": "Sort order for results (default 'ascending')"
+          "description": "default 'ascending'"
         },
         "fetch_all": {
           "type": "boolean",
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Auto-paginate up to 10,000 results."
         },
         "response_format": {
           "type": "string",
@@ -4877,7 +4877,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -5149,7 +5149,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+          "description": "Named period; overrides from_date/to_date."
         },
         "from_final_pay_date": {
           "type": "string",
@@ -5176,11 +5176,11 @@
             "ascending",
             "descending"
           ],
-          "description": "Sort order for results (default 'ascending')"
+          "description": "default 'ascending'"
         },
         "fetch_all": {
           "type": "boolean",
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+          "description": "Auto-paginate up to 10,000 results."
         },
         "min_amount": {
           "type": "number",
@@ -5198,7 +5198,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -5395,7 +5395,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -5505,7 +5505,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -5576,7 +5576,7 @@
           "type": "integer",
           "minimum": -9007199254740991,
           "maximum": 9007199254740991,
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "description": "Fortnox year ID (1,2,3...), not a calendar year."
         },
         "period": {
           "type": "string",
@@ -5592,7 +5592,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."
+          "description": "Named period; overrides from_date/to_date."
         },
         "from_date": {
           "type": "string",
@@ -5613,7 +5613,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -5706,15 +5706,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "group_by": {
           "type": "string",
@@ -5731,7 +5731,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -5881,7 +5881,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -6150,7 +6150,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -6304,15 +6304,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "metric": {
           "type": "string",
@@ -6339,7 +6339,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -6492,15 +6492,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "include_details": {
           "type": "boolean",
@@ -6512,7 +6512,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -6608,15 +6608,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
+          "description": "Named period, e.g. 'this_month'"
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "response_format": {
           "type": "string",
@@ -6624,7 +6624,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -6784,7 +6784,7 @@
           "type": "integer",
           "minimum": -9007199254740991,
           "maximum": 9007199254740991,
-          "description": "Fortnox financial year ID (1, 2, 3...). NOT calendar year. Use fortnox_list_financial_years to find the correct ID."
+          "description": "Fortnox year ID (1,2,3...), not a calendar year."
         },
         "period": {
           "type": "string",
@@ -6800,7 +6800,7 @@
             "this_year",
             "last_year"
           ],
-          "description": "Convenience date period filter (e.g., 'this_month', 'last_quarter'). Overrides from_date/to_date."
+          "description": "Named period; overrides from_date/to_date."
         },
         "from_date": {
           "type": "string",
@@ -6835,7 +6835,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -6955,7 +6955,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -7025,15 +7025,15 @@
             "this_year",
             "last_year"
           ],
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices."
+          "description": "Named period, e.g. 'this_month'. If not specified, analyzes all invoices."
         },
         "from_date": {
           "type": "string",
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "to_date": {
           "type": "string",
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
+          "description": "YYYY-MM-DD; ignored if period set."
         },
         "top_n": {
           "type": "integer",
@@ -7051,7 +7051,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -7253,7 +7253,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true
@@ -7505,7 +7505,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -7636,7 +7636,7 @@
             "markdown",
             "json"
           ],
-          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -7784,7 +7784,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -7915,7 +7915,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "required": [
@@ -7986,7 +7986,7 @@
             "markdown",
             "json"
           ],
-          "description": "markdown (default) or json"
+          "description": "markdown|json"
         }
       },
       "additionalProperties": true

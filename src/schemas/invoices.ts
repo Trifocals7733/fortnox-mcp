@@ -57,7 +57,7 @@ const InvoiceFilters = {
   period: optional(
     DatePeriodSchema.pipe(
       describe(
-        "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
+        "Named period; overrides from_date/to_date."
       )
     )
   )
@@ -78,13 +78,13 @@ export const ListInvoicesSchema = Schema.Struct({
   ),
   sortorder: optional(
     Schema.Literals(["ascending", "descending"]).pipe(
-      describe("Sort order for results (default 'ascending')")
+      describe("default 'ascending'")
     )
   ),
   fetch_all: optional(
     Schema.Boolean.pipe(
       describe(
-        "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
+        "Auto-paginate up to 10,000 results."
       )
     )
   ),

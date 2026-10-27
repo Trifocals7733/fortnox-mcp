@@ -23,7 +23,7 @@ export const optionalValue = <S extends Schema.Constraint>(schema: S) => Schema.
 
 export const ResponseFormatSchema = optional(
   Schema.Literals(["markdown", "json"]).pipe(
-    describe("markdown (default) or json")
+    describe("markdown|json")
   )
 );
 
