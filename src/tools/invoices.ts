@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -24,7 +25,15 @@ import {
   type CreateInvoiceInput,
   type UpdateInvoiceInput,
   type InvoiceActionInput,
-  type SendInvoiceEmailInput
+  type SendInvoiceEmailInput,
+  ListInvoicesOutput,
+  InvoiceDetailSchema,
+  CreateInvoiceOutput,
+  UpdateInvoiceOutput,
+  BookkeepInvoiceOutput,
+  CancelInvoiceOutput,
+  CreditInvoiceOutput,
+  SendInvoiceEmailOutput
 } from "../schemas/invoices.js";
 
 // API response types
@@ -133,7 +142,8 @@ Examples:
 Error Handling:
   - Returns "Error: Rate limit exceeded..." if API limit hit
   - Returns truncation info if fetch_all hits safety limits`,
-      inputSchema: ListInvoicesSchema,
+      inputSchema: mcpSchema(ListInvoicesSchema),
+      outputSchema: mcpSchema(ListInvoicesOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -187,8 +197,8 @@ Error Handling:
           truncationReason = result.truncationReason;
         } else {
           // Single page request
-          queryParams.limit = params.limit;
-          queryParams.page = params.page;
+          queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
+          queryParams.page = params.page ?? 1;
 
           const response = await fortnoxRequest<InvoiceListResponse>("/3/invoices", "GET", undefined, queryParams);
           invoices = response.Invoices || [];
@@ -214,8 +224,8 @@ Error Handling:
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page, params.limit, invoices.length),
-              next_offset: params.page * params.limit < total ? params.page * params.limit : undefined
+              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, invoices.length),
+              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
             };
 
         const output = {
@@ -277,8 +287,8 @@ Error Handling:
               title,
               invoices,
               total,
-              params.page,
-              params.limit,
+              params.page ?? 1,
+              params.limit ?? DEFAULT_PAGE_SIZE,
               (inv) => {
                 const status = inv.Cancelled ? "CANCELLED" :
                   (inv.Balance === 0 ? "PAID" :
@@ -313,7 +323,8 @@ Args:
 
 Returns:
   Complete invoice details including customer info, dates, amounts, line items, and payment status.`,
-      inputSchema: GetInvoiceSchema,
+      inputSchema: mcpSchema(GetInvoiceSchema),
+      outputSchema: mcpSchema(InvoiceDetailSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -443,7 +454,8 @@ Returns:
 
 Example rows:
   [{ "description": "Consulting services", "quantity": 10, "price": 1000 }]`,
-      inputSchema: CreateInvoiceSchema,
+      inputSchema: mcpSchema(CreateInvoiceSchema),
+      outputSchema: mcpSchema(CreateInvoiceOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -530,7 +542,8 @@ Args:
 
 Returns:
   The updated invoice details.`,
-      inputSchema: UpdateInvoiceSchema,
+      inputSchema: mcpSchema(UpdateInvoiceSchema),
+      outputSchema: mcpSchema(UpdateInvoiceOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -610,7 +623,8 @@ Args:
 
 Returns:
   Confirmation of bookkeeping with the created voucher reference.`,
-      inputSchema: InvoiceActionSchema,
+      inputSchema: mcpSchema(InvoiceActionSchema),
+      outputSchema: mcpSchema(BookkeepInvoiceOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -662,7 +676,8 @@ Args:
 
 Returns:
   Confirmation of cancellation.`,
-      inputSchema: InvoiceActionSchema,
+      inputSchema: mcpSchema(InvoiceActionSchema),
+      outputSchema: mcpSchema(CancelInvoiceOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,
@@ -713,7 +728,8 @@ Args:
 
 Returns:
   The created credit invoice details.`,
-      inputSchema: InvoiceActionSchema,
+      inputSchema: mcpSchema(InvoiceActionSchema),
+      outputSchema: mcpSchema(CreditInvoiceOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -769,7 +785,8 @@ Args:
 
 Returns:
   Confirmation that the email was sent.`,
-      inputSchema: SendInvoiceEmailSchema,
+      inputSchema: mcpSchema(SendInvoiceEmailSchema),
+      outputSchema: mcpSchema(SendInvoiceEmailOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,

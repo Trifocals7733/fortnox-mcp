@@ -394,22 +394,45 @@
           "description": "Invoice document number"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "document_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "document_number": {
+          "type": "string"
+        },
+        "booked": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "document_number",
+        "booked"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -430,22 +453,45 @@
           "description": "Invoice document number"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "document_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "document_number": {
+          "type": "string"
+        },
+        "cancelled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "document_number",
+        "cancelled"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": true,
@@ -833,15 +879,14 @@
           "description": "Customer number (required)"
         },
         "rows": {
-          "minItems": 1,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "article_number": {
-                "description": "Article number from article register",
                 "type": "string",
-                "maxLength": 50
+                "maxLength": 50,
+                "description": "Article number from article register"
               },
               "description": {
                 "type": "string",
@@ -849,130 +894,177 @@
                 "description": "Description of the invoice row"
               },
               "quantity": {
-                "description": "Quantity (default: 1)",
-                "type": "number"
+                "type": "number",
+                "description": "Quantity (default: 1)"
               },
               "unit": {
-                "description": "Unit code (e.g., 'st', 'h', 'kg')",
                 "type": "string",
-                "maxLength": 8
+                "maxLength": 8,
+                "description": "Unit code (e.g., 'st', 'h', 'kg')"
               },
               "price": {
-                "description": "Unit price excluding VAT",
-                "type": "number"
+                "type": "number",
+                "description": "Unit price excluding VAT"
               },
               "discount": {
-                "description": "Discount percentage (0-100)",
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Discount percentage (0-100)"
               },
               "account_number": {
-                "description": "Account number for bookkeeping",
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Account number for bookkeeping"
               },
               "vat": {
-                "description": "VAT percentage (e.g., 25, 12, 6, 0)",
-                "type": "number"
+                "type": "number",
+                "description": "VAT percentage (e.g., 25, 12, 6, 0)"
               }
             },
             "required": [
               "description"
             ],
-            "additionalProperties": false
+            "additionalProperties": true
           },
+          "minItems": 1,
           "description": "Invoice rows/lines (at least one required)"
         },
         "invoice_date": {
-          "description": "Invoice date (YYYY-MM-DD, defaults to today)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Invoice date (YYYY-MM-DD, defaults to today)"
         },
         "due_date": {
-          "description": "Due date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Due date (YYYY-MM-DD)"
         },
         "our_reference": {
-          "description": "Our reference person",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Our reference person"
         },
         "your_reference": {
-          "description": "Customer's reference person",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Customer's reference person"
         },
         "invoice_type": {
-          "description": "Type of invoice",
           "type": "string",
           "enum": [
             "INVOICE",
             "CASH",
             "CARD",
             "UNDEFINED"
-          ]
+          ],
+          "description": "Type of invoice"
         },
         "currency": {
-          "description": "Currency code (e.g., 'SEK')",
           "type": "string",
-          "minLength": 3,
-          "maxLength": 3
+          "maxLength": 3,
+          "description": "Currency code (e.g., 'SEK')"
         },
         "terms_of_payment": {
-          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Payment terms code"
         },
         "comments": {
-          "description": "Comments on the invoice",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Comments on the invoice"
         },
         "remarks": {
-          "description": "Remarks printed on the invoice",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Remarks printed on the invoice"
         },
         "freight": {
-          "description": "Freight/shipping cost",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Amount in SEK"
         },
         "administration_fee": {
-          "description": "Administration fee",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Administration fee"
         },
         "send_type": {
-          "description": "How to send the invoice",
           "type": "string",
           "enum": [
             "EMAIL",
             "PRINT",
             "EINVOICE"
-          ]
+          ],
+          "description": "How to send the invoice"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "customer_number",
         "rows"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "document_number": {
+          "type": "string"
+        },
+        "customer_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "customer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "document_number",
+        "customer_number",
+        "customer_name",
+        "total",
+        "currency"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -1273,22 +1365,49 @@
           "description": "Invoice document number"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "document_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "original_document_number": {
+          "type": "string"
+        },
+        "credit_document_number": {
+          "type": "string"
+        },
+        "total": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "original_document_number",
+        "credit_document_number",
+        "total"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -1965,22 +2084,230 @@
           "description": "The invoice document number to retrieve"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "document_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "document_number": {
+          "type": "string"
+        },
+        "customer_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "customer_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoice_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "due_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "type": "number"
+        },
+        "balance": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "ocr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "our_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "your_reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "booked": {
+          "type": "boolean"
+        },
+        "cancelled": {
+          "type": "boolean"
+        },
+        "sent": {
+          "type": "boolean"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "remarks": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "article_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quantity": {
+                "type": "number"
+              },
+              "unit": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "price": {
+                "type": "number"
+              },
+              "discount": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              },
+              "vat": {
+                "type": "number"
+              },
+              "account_number": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "article_number",
+              "description",
+              "quantity",
+              "unit",
+              "price",
+              "discount",
+              "total",
+              "vat",
+              "account_number"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "document_number",
+        "customer_number",
+        "customer_name",
+        "invoice_date",
+        "due_date",
+        "total",
+        "balance",
+        "currency",
+        "ocr",
+        "our_reference",
+        "your_reference",
+        "booked",
+        "cancelled",
+        "sent",
+        "comments",
+        "remarks",
+        "rows"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -3027,21 +3354,18 @@
       "type": "object",
       "properties": {
         "limit": {
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "description": "Maximum number of results to return (1-100, default 20)"
         },
         "page": {
-          "default": 1,
-          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "Page number for pagination (starts at 1)"
         },
         "filter": {
-          "description": "Filter invoices by status",
           "type": "string",
           "enum": [
             "cancelled",
@@ -3049,35 +3373,31 @@
             "unpaid",
             "unpaidoverdue",
             "unbooked"
-          ]
+          ],
+          "description": "Filter invoices by status"
         },
         "customer_number": {
-          "description": "Filter by customer number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Filter by customer number"
         },
         "from_date": {
-          "description": "Filter invoices from this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Filter invoices from this date (YYYY-MM-DD)"
         },
         "to_date": {
-          "description": "Filter invoices to this date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Filter invoices to this date (YYYY-MM-DD)"
         },
         "from_final_pay_date": {
-          "description": "Filter by due date from (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Filter by due date from (YYYY-MM-DD)"
         },
         "to_final_pay_date": {
-          "description": "Filter by due date to (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Filter by due date to (YYYY-MM-DD)"
         },
         "period": {
-          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided.",
           "type": "string",
           "enum": [
             "today",
@@ -3090,10 +3410,10 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Convenience date period filter (e.g., 'last_month', 'this_quarter'). Overrides from_date/to_date if provided."
         },
         "sortby": {
-          "description": "Field to sort results by",
           "type": "string",
           "enum": [
             "customername",
@@ -3101,46 +3421,319 @@
             "documentnumber",
             "invoicedate",
             "total"
-          ]
+          ],
+          "description": "Field to sort results by"
         },
         "sortorder": {
-          "default": "ascending",
-          "description": "Sort order for results",
           "type": "string",
           "enum": [
             "ascending",
             "descending"
-          ]
+          ],
+          "description": "Sort order for results (default 'ascending')"
         },
         "fetch_all": {
-          "default": false,
-          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results).",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Fetch all results by auto-paginating through all pages. WARNING: May take time for large datasets (max 10,000 results)."
         },
         "min_amount": {
-          "description": "Filter invoices with total >= this amount (client-side filter, applied after fetching)",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Filter invoices with total >= this amount (client-side filter, applied after fetching)"
         },
         "max_amount": {
-          "description": "Filter invoices with total <= this amount (client-side filter, applied after fetching)",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Filter invoices with total <= this amount (client-side filter, applied after fetching)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total matching records in Fortnox"
+            },
+            "page": {
+              "type": "number",
+              "description": "Current page"
+            },
+            "limit": {
+              "type": "number",
+              "description": "Page size"
+            },
+            "count": {
+              "type": "number",
+              "description": "Records in this page"
+            },
+            "has_more": {
+              "type": "boolean",
+              "description": "Whether more pages exist"
+            },
+            "total_pages": {
+              "type": "number",
+              "description": "Total number of pages"
+            },
+            "next_offset": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "period_description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "invoices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "document_number": {
+                    "type": "string"
+                  },
+                  "customer_number": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "customer_name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "invoice_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "due_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "balance": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "booked": {
+                    "type": "boolean"
+                  },
+                  "cancelled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "document_number",
+                  "customer_number",
+                  "customer_name",
+                  "invoice_date",
+                  "due_date",
+                  "total",
+                  "balance",
+                  "currency",
+                  "booked",
+                  "cancelled"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": [
+            "total",
+            "page",
+            "limit",
+            "count",
+            "has_more",
+            "total_pages",
+            "invoices"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total matching records in Fortnox"
+            },
+            "count": {
+              "type": "number",
+              "description": "Records returned"
+            },
+            "fetched_all": {
+              "type": "boolean",
+              "description": "Always true for an auto-paginated response"
+            },
+            "pages_fetched": {
+              "type": "number"
+            },
+            "truncated": {
+              "type": "boolean"
+            },
+            "truncation_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "period_description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "invoices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "document_number": {
+                    "type": "string"
+                  },
+                  "customer_number": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "customer_name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "invoice_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "due_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "balance": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "booked": {
+                    "type": "boolean"
+                  },
+                  "cancelled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "document_number",
+                  "customer_number",
+                  "customer_name",
+                  "invoice_date",
+                  "due_date",
+                  "total",
+                  "balance",
+                  "currency",
+                  "booked",
+                  "cancelled"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": [
+            "total",
+            "count",
+            "fetched_all",
+            "pages_fetched",
+            "truncated",
+            "invoices"
+          ],
+          "additionalProperties": true
+        }
+      ]
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -5308,22 +5901,45 @@
           "description": "Invoice document number"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "document_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "document_number": {
+          "type": "string"
+        },
+        "sent": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "document_number",
+        "sent"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -5700,16 +6316,14 @@
           "description": "Invoice document number to update (required)"
         },
         "rows": {
-          "description": "Updated invoice rows (replaces all existing rows)",
-          "minItems": 1,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
               "article_number": {
-                "description": "Article number from article register",
                 "type": "string",
-                "maxLength": 50
+                "maxLength": 50,
+                "description": "Article number from article register"
               },
               "description": {
                 "type": "string",
@@ -5717,98 +6331,121 @@
                 "description": "Description of the invoice row"
               },
               "quantity": {
-                "description": "Quantity (default: 1)",
-                "type": "number"
+                "type": "number",
+                "description": "Quantity (default: 1)"
               },
               "unit": {
-                "description": "Unit code (e.g., 'st', 'h', 'kg')",
                 "type": "string",
-                "maxLength": 8
+                "maxLength": 8,
+                "description": "Unit code (e.g., 'st', 'h', 'kg')"
               },
               "price": {
-                "description": "Unit price excluding VAT",
-                "type": "number"
+                "type": "number",
+                "description": "Unit price excluding VAT"
               },
               "discount": {
-                "description": "Discount percentage (0-100)",
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100
+                "maximum": 100,
+                "description": "Discount percentage (0-100)"
               },
               "account_number": {
-                "description": "Account number for bookkeeping",
                 "type": "integer",
                 "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+                "maximum": 9007199254740991,
+                "description": "Account number for bookkeeping"
               },
               "vat": {
-                "description": "VAT percentage (e.g., 25, 12, 6, 0)",
-                "type": "number"
+                "type": "number",
+                "description": "VAT percentage (e.g., 25, 12, 6, 0)"
               }
             },
             "required": [
               "description"
             ],
-            "additionalProperties": false
-          }
+            "additionalProperties": true
+          },
+          "minItems": 1,
+          "description": "Updated invoice rows (replaces all existing rows)"
         },
         "invoice_date": {
-          "description": "Invoice date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Invoice date (YYYY-MM-DD)"
         },
         "due_date": {
-          "description": "Due date (YYYY-MM-DD)",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Due date (YYYY-MM-DD)"
         },
         "our_reference": {
-          "description": "Our reference person",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Our reference person"
         },
         "your_reference": {
-          "description": "Customer's reference person",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Customer's reference person"
         },
         "comments": {
-          "description": "Comments on the invoice",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Comments on the invoice"
         },
         "remarks": {
-          "description": "Remarks printed on the invoice",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Remarks printed on the invoice"
         },
         "freight": {
-          "description": "Freight/shipping cost",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Amount in SEK"
         },
         "administration_fee": {
-          "description": "Administration fee",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Administration fee"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "document_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "document_number": {
+          "type": "string"
+        },
+        "total": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "document_number",
+        "total"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
