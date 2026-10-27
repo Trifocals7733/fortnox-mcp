@@ -228,7 +228,7 @@ export interface FetchAllResult<T> {
   /** Whether results were truncated due to limits */
   truncated: boolean;
   /** Reason for truncation if truncated is true */
-  truncationReason?: string;
+  truncationReason?: string | undefined;
 }
 
 /**

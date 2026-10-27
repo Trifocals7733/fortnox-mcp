@@ -730,7 +730,7 @@ Returns:
             description: string | null;
             debit: number;
             credit: number;
-          }>;
+          }> | undefined;
         }
 
         const matchingVouchers: MatchingVoucher[] = [];

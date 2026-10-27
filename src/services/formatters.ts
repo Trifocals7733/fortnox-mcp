@@ -244,7 +244,7 @@ export function formatFunnelVisualization(stages: Array<{
   name: string;
   count: number;
   value: number;
-  conversionFromPrevious?: number;
+  conversionFromPrevious?: number | undefined;
 }>): string {
   const lines: string[] = [
     "## Sales Funnel",

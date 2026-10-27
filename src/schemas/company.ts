@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { describe } from "../services/mcpSchema.js";
-import { MutationResult, NullableString, ResponseFormatSchema } from "./shared.js";
+import { NullableString, ResponseFormatSchema } from "./shared.js";
 
 /**
  * Input and output schemas for the company-information tools.
@@ -57,4 +57,3 @@ export const ListFinancialYearsOutput = Schema.Struct({
 
 export type ListFinancialYearsOutput = typeof ListFinancialYearsOutput.Type;
 
-export { MutationResult };

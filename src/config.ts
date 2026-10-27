@@ -4,8 +4,8 @@ export type TransportMode = "stdio" | "http";
 export interface ServerConfig {
   authMode: AuthMode;
   transport: TransportMode;
-  serverUrl?: string;
-  jwtSecret?: string;
+  serverUrl?: string | undefined;
+  jwtSecret?: string | undefined;
   port: number;
 }
 

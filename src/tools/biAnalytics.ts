@@ -264,7 +264,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         );
 
         // Fetch unpaid supplier invoices (payables) with error handling for missing scope
-        let payablesResult: { items: FortnoxSupplierInvoiceListItem[]; total: number; truncated: boolean; truncationReason?: string };
+        let payablesResult: { items: FortnoxSupplierInvoiceListItem[]; total: number; truncated: boolean; truncationReason?: string | undefined };
         let supplierInvoicesWarning: string | undefined;
 
         try {

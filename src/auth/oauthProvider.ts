@@ -144,7 +144,7 @@ export class FortnoxProxyOAuthProvider implements OAuthServerProvider {
     return {
       redirectUri: pending.mcpParams.redirectUri,
       code: mcpAuthCode,
-      state: pending.mcpParams.state,
+      ...(pending.mcpParams.state ? { state: pending.mcpParams.state } : {}),
     };
   }
 

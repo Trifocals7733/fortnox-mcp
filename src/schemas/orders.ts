@@ -43,9 +43,6 @@ const FetchAll = optional(
   )
 );
 
-const DocumentNumber = (description: string) =>
-  Schema.String.pipe(Schema.check(Schema.isMinLength(1)), describe(description));
-
 export const ListOrdersSchema = Schema.Struct({
   ...ListPaginationInput,
   filter: optional(
@@ -68,13 +65,6 @@ export const ListOrdersSchema = Schema.Struct({
 
 export type ListOrdersInput = typeof ListOrdersSchema.Type;
 
-export const GetOrderSchema = Schema.Struct({
-  document_number: DocumentNumber("The order document number to retrieve"),
-  response_format: ResponseFormatSchema
-});
-
-export type GetOrderInput = typeof GetOrderSchema.Type;
-
 export const ListOffersSchema = Schema.Struct({
   ...ListPaginationInput,
   filter: optional(
@@ -96,13 +86,6 @@ export const ListOffersSchema = Schema.Struct({
 });
 
 export type ListOffersInput = typeof ListOffersSchema.Type;
-
-export const GetOfferSchema = Schema.Struct({
-  document_number: DocumentNumber("The offer document number to retrieve"),
-  response_format: ResponseFormatSchema
-});
-
-export type GetOfferInput = typeof GetOfferSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 

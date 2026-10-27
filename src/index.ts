@@ -30,15 +30,15 @@ import { McpServer } from "@modelcontextprotocol/server";
 import express from "express";
 
 import { loadConfig, validateEnvironment, logConfig } from "./config.js";
-import { getFortnoxAuth } from "./services/auth.js";
+import { getTokenProvider } from "./auth/index.js";
 import { getStorageFromEnv } from "./auth/storage/index.js";
 import { runRemoteServer } from "./server/remote.js";
 import { createMcpServer } from "./server/mcp.js";
+import { closeRuntime } from "./services/runtime.js";
 
 async function runStdio(): Promise<void> {
   try {
-    const auth = getFortnoxAuth();
-    if (!auth.isAuthenticated()) {
+    if (!getTokenProvider().isAuthenticated()) {
       throw new Error("FORTNOX_REFRESH_TOKEN not set");
     }
   } catch (error) {
@@ -53,8 +53,7 @@ async function runStdio(): Promise<void> {
 
 async function runLocalHTTP(): Promise<void> {
   try {
-    const auth = getFortnoxAuth();
-    if (!auth.isAuthenticated()) {
+    if (!getTokenProvider().isAuthenticated()) {
       throw new Error("FORTNOX_REFRESH_TOKEN not set");
     }
   } catch (error) {
@@ -120,3 +119,10 @@ async function main(): Promise<void> {
 }
 
 main();
+
+// Release the Effect runtime (rate-limiter state, HTTP client) on the way out.
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.once(signal, () => {
+    void closeRuntime().finally(() => process.exit(0));
+  });
+}
