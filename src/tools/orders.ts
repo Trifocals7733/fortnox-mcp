@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -16,6 +17,8 @@ import {
 import {
   ListOrdersSchema,
   ListOffersSchema,
+  ListOrdersOutput,
+  ListOffersOutput,
   type ListOrdersInput,
   type ListOffersInput
 } from "../schemas/orders.js";
@@ -109,7 +112,8 @@ export function registerOrderTools(server: McpServer): void {
     {
       title: "List Fortnox Orders",
       description: `List sales orders with filtering by status, customer, date range. Filter: cancelled, expired, invoicecreated, invoicenotcreated.`,
-      inputSchema: ListOrdersSchema,
+      inputSchema: mcpSchema(ListOrdersSchema),
+      outputSchema: mcpSchema(ListOrdersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -157,8 +161,8 @@ export function registerOrderTools(server: McpServer): void {
           truncated = result.truncated;
           truncationReason = result.truncationReason;
         } else {
-          queryParams.limit = params.limit;
-          queryParams.page = params.page;
+          queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
+          queryParams.page = params.page ?? 1;
 
           const response = await fortnoxRequest<OrderListResponse>("/3/orders", "GET", undefined, queryParams);
           orders = response.Orders || [];
@@ -175,8 +179,8 @@ export function registerOrderTools(server: McpServer): void {
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page, params.limit, orders.length),
-              next_offset: params.page * params.limit < total ? params.page * params.limit : undefined
+              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, orders.length),
+              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
             };
 
         const output = {
@@ -234,8 +238,8 @@ export function registerOrderTools(server: McpServer): void {
               title,
               orders,
               total,
-              params.page,
-              params.limit,
+              params.page ?? 1,
+              params.limit ?? DEFAULT_PAGE_SIZE,
               (order) => {
                 const status = getOrderStatus(order);
                 return `## Order #${order.DocumentNumber}\n` +
@@ -261,7 +265,8 @@ export function registerOrderTools(server: McpServer): void {
     {
       title: "List Fortnox Offers",
       description: `List sales offers/quotes with filtering by status, customer, date range. Filter: cancelled, expired, ordercreated, ordernotcreated.`,
-      inputSchema: ListOffersSchema,
+      inputSchema: mcpSchema(ListOffersSchema),
+      outputSchema: mcpSchema(ListOffersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -309,8 +314,8 @@ export function registerOrderTools(server: McpServer): void {
           truncated = result.truncated;
           truncationReason = result.truncationReason;
         } else {
-          queryParams.limit = params.limit;
-          queryParams.page = params.page;
+          queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
+          queryParams.page = params.page ?? 1;
 
           const response = await fortnoxRequest<OfferListResponse>("/3/offers", "GET", undefined, queryParams);
           offers = response.Offers || [];
@@ -327,8 +332,8 @@ export function registerOrderTools(server: McpServer): void {
               truncation_reason: truncationReason
             }
           : {
-              ...buildPaginationMeta(total, params.page, params.limit, offers.length),
-              next_offset: params.page * params.limit < total ? params.page * params.limit : undefined
+              ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, offers.length),
+              next_offset: (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) < total ? (params.page ?? 1) * (params.limit ?? DEFAULT_PAGE_SIZE) : undefined
             };
 
         const output = {
@@ -388,8 +393,8 @@ export function registerOrderTools(server: McpServer): void {
               title,
               offers,
               total,
-              params.page,
-              params.limit,
+              params.page ?? 1,
+              params.limit ?? DEFAULT_PAGE_SIZE,
               (offer) => {
                 const status = getOfferStatus(offer);
                 const expired = isOfferExpired(offer);
