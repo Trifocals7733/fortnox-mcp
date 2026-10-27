@@ -1,140 +1,123 @@
-import { z } from "zod";
-import { ResponseFormat, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "../constants.js";
+import { Schema } from "effect";
+import { describe } from "../services/mcpSchema.js";
+import {
+  ListPaginationInput,
+  MutationResult,
+  PaginationFields,
+  ResponseFormatSchema,
+  ShortText,
+  optional
+} from "./shared.js";
 
 /**
- * Schema for listing accounts
+ * Input and output schemas for the chart-of-accounts tools.
  */
-export const ListAccountsSchema = z.object({
-  limit: z.number()
-    .int()
-    .min(1)
-    .max(MAX_PAGE_SIZE)
-    .default(DEFAULT_PAGE_SIZE)
-    .describe("Maximum number of results to return (1-100)"),
-  page: z.number()
-    .int()
-    .min(1)
-    .default(1)
-    .describe("Page number for pagination"),
-  search_description: z.string()
-    .max(100)
-    .optional()
-    .describe("Search accounts by description"),
-  from_account: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .optional()
-    .describe("Filter accounts from this account number"),
-  to_account: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .optional()
-    .describe("Filter accounts to this account number"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
 
-export type ListAccountsInput = z.infer<typeof ListAccountsSchema>;
+const AccountNumber = (description: string) =>
+  Schema.Int.pipe(
+    Schema.check(Schema.isGreaterThanOrEqualTo(1000)),
+    Schema.check(Schema.isLessThanOrEqualTo(9999)),
+    describe(description)
+  );
 
-/**
- * Schema for getting a single account
- */
-export const GetAccountSchema = z.object({
-  account_number: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .describe("The account number to retrieve (1000-9999)"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+const SettingValue = Schema.Literals(["ALLOWED", "MANDATORY", "NOTALLOWED"]);
 
-export type GetAccountInput = z.infer<typeof GetAccountSchema>;
+export const ListAccountsSchema = Schema.Struct({
+  ...ListPaginationInput,
+  search_description: ShortText(100, "Search accounts by description"),
+  from_account: optional(AccountNumber("Filter accounts from this account number")),
+  to_account: optional(AccountNumber("Filter accounts to this account number")),
+  response_format: ResponseFormatSchema
+});
 
-/**
- * Schema for creating an account
- */
-export const CreateAccountSchema = z.object({
-  account_number: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .describe("Account number (1000-9999, required)"),
-  description: z.string()
-    .min(1)
-    .max(200)
-    .describe("Account description (required)"),
-  vat_code: z.string()
-    .max(10)
-    .optional()
-    .describe("VAT code for the account"),
-  active: z.boolean()
-    .default(true)
-    .describe("Whether the account is active"),
-  cost_center_settings: z.enum(["ALLOWED", "MANDATORY", "NOTALLOWED"])
-    .optional()
-    .describe("Cost center settings for the account"),
-  project_settings: z.enum(["ALLOWED", "MANDATORY", "NOTALLOWED"])
-    .optional()
-    .describe("Project settings for the account"),
-  sru_code: z.number()
-    .int()
-    .optional()
-    .describe("SRU code for tax reporting"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export type ListAccountsInput = typeof ListAccountsSchema.Type;
 
-export type CreateAccountInput = z.infer<typeof CreateAccountSchema>;
+export const GetAccountSchema = Schema.Struct({
+  account_number: AccountNumber("The account number to retrieve (1000-9999)"),
+  response_format: ResponseFormatSchema
+});
 
-/**
- * Schema for updating an account
- */
-export const UpdateAccountSchema = z.object({
-  account_number: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .describe("Account number to update (required)"),
-  description: z.string()
-    .min(1)
-    .max(200)
-    .optional()
-    .describe("Account description"),
-  vat_code: z.string()
-    .max(10)
-    .optional()
-    .describe("VAT code for the account"),
-  active: z.boolean()
-    .optional()
-    .describe("Whether the account is active"),
-  cost_center_settings: z.enum(["ALLOWED", "MANDATORY", "NOTALLOWED"])
-    .optional()
-    .describe("Cost center settings"),
-  project_settings: z.enum(["ALLOWED", "MANDATORY", "NOTALLOWED"])
-    .optional()
-    .describe("Project settings"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export type GetAccountInput = typeof GetAccountSchema.Type;
 
-export type UpdateAccountInput = z.infer<typeof UpdateAccountSchema>;
+export const CreateAccountSchema = Schema.Struct({
+  account_number: AccountNumber("Account number (1000-9999, required)"),
+  description: Schema.String.pipe(
+    Schema.check(Schema.isMinLength(1)),
+    Schema.check(Schema.isMaxLength(200)),
+    describe("Account description (required)")
+  ),
+  vat_code: ShortText(10, "VAT code for the account"),
+  active: optional(
+    Schema.Boolean.pipe(describe("Whether the account is active (default true)"))
+  ),
+  cost_center_settings: optional(
+    SettingValue.pipe(describe("Cost center settings for the account"))
+  ),
+  project_settings: optional(SettingValue.pipe(describe("Project settings for the account"))),
+  sru_code: optional(Schema.Int.pipe(describe("SRU code for tax reporting"))),
+  response_format: ResponseFormatSchema
+});
 
-/**
- * Schema for deleting an account
- */
-export const DeleteAccountSchema = z.object({
-  account_number: z.number()
-    .int()
-    .min(1000)
-    .max(9999)
-    .describe("Account number to delete")
-}).strict();
+export type CreateAccountInput = typeof CreateAccountSchema.Type;
 
-export type DeleteAccountInput = z.infer<typeof DeleteAccountSchema>;
+export const UpdateAccountSchema = Schema.Struct({
+  account_number: AccountNumber("Account number to update (required)"),
+  description: optional(
+    Schema.String.pipe(
+      Schema.check(Schema.isMinLength(1)),
+      Schema.check(Schema.isMaxLength(200)),
+      describe("Account description")
+    )
+  ),
+  vat_code: ShortText(10, "VAT code for the account"),
+  active: optional(Schema.Boolean.pipe(describe("Whether the account is active"))),
+  cost_center_settings: optional(SettingValue.pipe(describe("Cost center settings"))),
+  project_settings: optional(SettingValue.pipe(describe("Project settings"))),
+  response_format: ResponseFormatSchema
+});
+
+export type UpdateAccountInput = typeof UpdateAccountSchema.Type;
+
+export const DeleteAccountSchema = Schema.Struct({
+  account_number: AccountNumber("Account number to delete")
+});
+
+export type DeleteAccountInput = typeof DeleteAccountSchema.Type;
+
+/* ------------------------------- outputs ------------------------------- */
+
+export const AccountListItemSchema = Schema.Struct({
+  account_number: Schema.Finite,
+  description: Schema.String,
+  active: Schema.Boolean
+});
+
+export const ListAccountsOutput = Schema.Struct({
+  ...PaginationFields,
+  accounts: Schema.Array(AccountListItemSchema)
+});
+
+export type ListAccountsOutput = typeof ListAccountsOutput.Type;
+
+export const AccountDetailSchema = Schema.Struct({
+  account_number: Schema.Finite,
+  description: Schema.String,
+  active: Schema.Boolean,
+  vat_code: Schema.NullOr(Schema.String),
+  balance_brought_forward: Schema.Finite,
+  balance_carried_forward: Schema.Finite,
+  cost_center_settings: Schema.NullOr(Schema.String),
+  project_settings: Schema.NullOr(Schema.String),
+  sru_code: Schema.NullOr(Schema.String),
+  year: Schema.NullOr(Schema.Finite)
+});
+
+export type AccountDetail = typeof AccountDetailSchema.Type;
+
+export const AccountMutationOutput = Schema.Struct({
+  ...MutationResult.fields,
+  account_number: Schema.Finite,
+  description: Schema.String
+});
+
+export const DeleteAccountOutput = MutationResult;

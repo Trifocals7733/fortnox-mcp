@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -19,7 +20,11 @@ import {
   type GetAccountInput,
   type CreateAccountInput,
   type UpdateAccountInput,
-  type DeleteAccountInput
+  type DeleteAccountInput,
+  ListAccountsOutput,
+  AccountDetailSchema,
+  AccountMutationOutput,
+  DeleteAccountOutput
 } from "../schemas/accounts.js";
 
 // API response types
@@ -84,7 +89,8 @@ Returns:
 Examples:
   - List revenue accounts: from_account=3000, to_account=3999
   - List expense accounts: from_account=4000, to_account=8999`,
-      inputSchema: ListAccountsSchema,
+      inputSchema: mcpSchema(ListAccountsSchema),
+      outputSchema: mcpSchema(ListAccountsOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -95,8 +101,8 @@ Examples:
     async (params: ListAccountsInput) => {
       try {
         const queryParams: Record<string, string | number | boolean | undefined> = {
-          limit: params.limit,
-          page: params.page
+          limit: params.limit ?? DEFAULT_PAGE_SIZE,
+          page: params.page ?? 1
         };
 
         if (params.search_description) queryParams.description = params.search_description;
@@ -108,7 +114,7 @@ Examples:
         const total = response.MetaInformation?.["@TotalResources"] || accounts.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page, params.limit, accounts.length),
+          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, accounts.length),
           accounts: accounts.map((a) => ({
             account_number: a.Number,
             description: a.Description,
@@ -124,8 +130,8 @@ Examples:
             "Chart of Accounts",
             accounts,
             total,
-            params.page,
-            params.limit,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
             (a) => `- **${a.Number}**: ${a.Description}${a.Active === false ? " *(inactive)*" : ""}`
           );
         }
@@ -150,7 +156,8 @@ Args:
 
 Returns:
   Complete account details including description, VAT settings, and balances.`,
-      inputSchema: GetAccountSchema,
+      inputSchema: mcpSchema(GetAccountSchema),
+      outputSchema: mcpSchema(AccountDetailSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -220,7 +227,8 @@ Args:
 
 Returns:
   The created account details.`,
-      inputSchema: CreateAccountSchema,
+      inputSchema: mcpSchema(CreateAccountSchema),
+      outputSchema: mcpSchema(AccountMutationOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -236,7 +244,7 @@ Returns:
         };
 
         if (params.vat_code) accountData.VATCode = params.vat_code;
-        if (params.active !== undefined) accountData.Active = params.active;
+        accountData.Active = params.active ?? true;
         if (params.cost_center_settings) accountData.CostCenterSettings = params.cost_center_settings;
         if (params.project_settings) accountData.ProjectSettings = params.project_settings;
         if (params.sru_code !== undefined) accountData.SRU = params.sru_code;
@@ -289,7 +297,8 @@ Args:
 
 Returns:
   The updated account details.`,
-      inputSchema: UpdateAccountSchema,
+      inputSchema: mcpSchema(UpdateAccountSchema),
+      outputSchema: mcpSchema(AccountMutationOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -352,7 +361,8 @@ Args:
 
 Returns:
   Confirmation of deletion.`,
-      inputSchema: DeleteAccountSchema,
+      inputSchema: mcpSchema(DeleteAccountSchema),
+      outputSchema: mcpSchema(DeleteAccountOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,

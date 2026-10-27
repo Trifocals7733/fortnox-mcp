@@ -401,57 +401,79 @@
           "description": "Account description (required)"
         },
         "vat_code": {
-          "description": "VAT code for the account",
           "type": "string",
-          "maxLength": 10
+          "maxLength": 10,
+          "description": "VAT code for the account"
         },
         "active": {
-          "default": true,
-          "description": "Whether the account is active",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the account is active (default true)"
         },
         "cost_center_settings": {
-          "description": "Cost center settings for the account",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ]
+          ],
+          "description": "Cost center settings for the account"
         },
         "project_settings": {
-          "description": "Project settings for the account",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ]
+          ],
+          "description": "Project settings for the account"
         },
         "sru_code": {
-          "description": "SRU code for tax reporting",
           "type": "integer",
           "minimum": -9007199254740991,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "SRU code for tax reporting"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "account_number",
         "description"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "account_number": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "account_number",
+        "description"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -1295,10 +1317,26 @@
       "required": [
         "account_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        }
+      },
+      "required": [
+        "success",
+        "message"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": true,
@@ -1497,22 +1535,102 @@
           "description": "The account number to retrieve (1000-9999)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "account_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "account_number": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "vat_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "balance_brought_forward": {
+          "type": "number"
+        },
+        "balance_carried_forward": {
+          "type": "number"
+        },
+        "cost_center_settings": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "project_settings": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sru_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "year": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "account_number",
+        "description",
+        "active",
+        "vat_code",
+        "balance_brought_forward",
+        "balance_carried_forward",
+        "cost_center_settings",
+        "project_settings",
+        "sru_code",
+        "year"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -2447,50 +2565,107 @@
       "type": "object",
       "properties": {
         "limit": {
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "description": "Maximum number of results to return (1-100, default 20)"
         },
         "page": {
-          "default": 1,
-          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "Page number for pagination (starts at 1)"
         },
         "search_description": {
-          "description": "Search accounts by description",
           "type": "string",
-          "maxLength": 100
+          "maxLength": 100,
+          "description": "Search accounts by description"
         },
         "from_account": {
-          "description": "Filter accounts from this account number",
           "type": "integer",
           "minimum": 1000,
-          "maximum": 9999
+          "maximum": 9999,
+          "description": "Filter accounts from this account number"
         },
         "to_account": {
-          "description": "Filter accounts to this account number",
           "type": "integer",
           "minimum": 1000,
-          "maximum": 9999
+          "maximum": 9999,
+          "description": "Filter accounts to this account number"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "number",
+          "description": "Total matching records in Fortnox"
+        },
+        "page": {
+          "type": "number",
+          "description": "Current page"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Page size"
+        },
+        "count": {
+          "type": "number",
+          "description": "Records in this page"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more pages exist"
+        },
+        "total_pages": {
+          "type": "number",
+          "description": "Total number of pages"
+        },
+        "accounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "account_number": {
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "account_number",
+              "description",
+              "active"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "count",
+        "has_more",
+        "total_pages",
+        "accounts"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -4387,55 +4562,78 @@
           "description": "Account number to update (required)"
         },
         "description": {
-          "description": "Account description",
           "type": "string",
           "minLength": 1,
-          "maxLength": 200
+          "maxLength": 200,
+          "description": "Account description"
         },
         "vat_code": {
-          "description": "VAT code for the account",
           "type": "string",
-          "maxLength": 10
+          "maxLength": 10,
+          "description": "VAT code for the account"
         },
         "active": {
-          "description": "Whether the account is active",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the account is active"
         },
         "cost_center_settings": {
-          "description": "Cost center settings",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ]
+          ],
+          "description": "Cost center settings"
         },
         "project_settings": {
-          "description": "Project settings",
           "type": "string",
           "enum": [
             "ALLOWED",
             "MANDATORY",
             "NOTALLOWED"
-          ]
+          ],
+          "description": "Project settings"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "account_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the operation succeeded"
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable result summary"
+        },
+        "account_number": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "success",
+        "message",
+        "account_number",
+        "description"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
