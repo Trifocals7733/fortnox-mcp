@@ -49,7 +49,7 @@ const VoucherFilters = {
   )
 };
 
-export const VoucherRowSchema = Schema.Struct({
+const VoucherRowSchema = Schema.Struct({
   account_number: AccountNumber("Account number (1000-9999, required)"),
   debit: optional(
     Schema.Finite.pipe(
@@ -76,7 +76,6 @@ export const VoucherRowSchema = Schema.Struct({
   )
 );
 
-export type VoucherRowInput = typeof VoucherRowSchema.Type;
 
 export const ListVouchersSchema = Schema.Struct({
   ...ListPaginationInput,
@@ -195,7 +194,7 @@ export type SearchVouchersInput = typeof SearchVouchersSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 
-export const VoucherListItemSchema = Schema.Struct({
+const VoucherListItemSchema = Schema.Struct({
   voucher_series: Schema.String,
   voucher_number: Schema.Finite,
   description: Schema.String,
@@ -209,7 +208,7 @@ export const ListVouchersOutput = Schema.Struct({
 
 export type ListVouchersOutput = typeof ListVouchersOutput.Type;
 
-export const VoucherRowOutputSchema = Schema.Struct({
+const VoucherRowOutputSchema = Schema.Struct({
   account_number: Schema.Finite,
   debit: Schema.Finite,
   credit: Schema.Finite,
@@ -237,7 +236,7 @@ export const CreateVoucherOutput = Schema.Struct({
   transaction_date: Schema.String
 });
 
-export const VoucherSeriesItemSchema = Schema.Struct({
+const VoucherSeriesItemSchema = Schema.Struct({
   code: Schema.String,
   description: Schema.String,
   manual: Schema.Boolean
@@ -248,7 +247,7 @@ export const ListVoucherSeriesOutput = Schema.Struct({
   series: Schema.Array(VoucherSeriesItemSchema)
 });
 
-export const AccountActivityTransactionSchema = Schema.Struct({
+const AccountActivityTransactionSchema = Schema.Struct({
   voucher_series: Schema.String,
   voucher_number: Schema.Finite,
   transaction_date: Schema.String,

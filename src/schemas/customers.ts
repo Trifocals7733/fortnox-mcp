@@ -151,7 +151,7 @@ const PaginationFields = {
   total_pages: Schema.Finite.pipe(describe("Total number of pages"))
 };
 
-export const CustomerListItemSchema = Schema.Struct({
+const CustomerListItemSchema = Schema.Struct({
   customer_number: Schema.String.pipe(describe("Fortnox customer number")),
   name: Schema.String.pipe(describe("Customer name")),
   email: Schema.NullOr(Schema.String),

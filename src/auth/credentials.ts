@@ -40,7 +40,7 @@ export function getFortnoxCredentials(): FortnoxCredentials {
 /**
  * Check if credentials are available
  */
-export function hasFortnoxCredentials(): boolean {
+function _hasFortnoxCredentials(): boolean {
   const clientId = EMBEDDED_CLIENT_ID || process.env.FORTNOX_CLIENT_ID;
   const clientSecret = EMBEDDED_CLIENT_SECRET || process.env.FORTNOX_CLIENT_SECRET;
   return !!(clientId && clientSecret);

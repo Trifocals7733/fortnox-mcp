@@ -107,7 +107,7 @@ export type DeleteSupplierInput = typeof DeleteSupplierSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 
-export const SupplierListItemSchema = Schema.Struct({
+const SupplierListItemSchema = Schema.Struct({
   supplier_number: Schema.String,
   name: Schema.String,
   email: NullableString,

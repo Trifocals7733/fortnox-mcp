@@ -24,7 +24,7 @@ export function formatDisplayDate(dateStr: string | undefined): string {
 /**
  * Format a boolean as Yes/No
  */
-export function formatBoolean(value: boolean | undefined): string {
+function formatBoolean(value: boolean | undefined): string {
   if (value === undefined) return "-";
   return value ? "Yes" : "No";
 }
@@ -32,7 +32,7 @@ export function formatBoolean(value: boolean | undefined): string {
 /**
  * Truncate text if it exceeds a limit
  */
-export function truncateText(text: string, maxLength: number): string {
+function _truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return `${text.substring(0, maxLength - 3)}...`;
 }
@@ -75,12 +75,7 @@ export function buildErrorResponse(error: unknown): {
 /**
  * Format pagination info for markdown
  */
-export function formatPaginationInfo(
-  total: number,
-  page: number,
-  limit: number,
-  showing: number
-): string {
+function formatPaginationInfo(total: number, page: number, limit: number, showing: number): string {
   const totalPages = Math.ceil(total / limit);
   const start = (page - 1) * limit + 1;
   const end = start + showing - 1;
@@ -183,16 +178,6 @@ export function formatTrend(change: number): string {
 }
 
 /**
- * Format growth comparison data
- */
-export interface GrowthData {
-  current: number;
-  previous: number;
-  change: number;
-  percentChange: number;
-}
-
-/**
  * Format a comparison row for markdown tables
  */
 export function formatComparisonRow(
@@ -224,7 +209,7 @@ export function formatComparisonTableHeader(currentLabel: string, previousLabel:
 /**
  * Format a funnel stage row
  */
-export function formatFunnelStage(
+function _formatFunnelStage(
   stage: string,
   count: number,
   value: number,
@@ -294,7 +279,7 @@ export function formatCashFlowTable(
 /**
  * Format percentage with sign
  */
-export function formatPercent(value: number, decimals = 1): string {
+function _formatPercent(value: number, decimals = 1): string {
   const sign = value > 0 ? "+" : "";
   return `${sign}${value.toFixed(decimals)}%`;
 }
@@ -302,7 +287,7 @@ export function formatPercent(value: number, decimals = 1): string {
 /**
  * Format a ranking table for top N items
  */
-export function formatRankingTable(headers: string[], rows: string[][]): string {
+function _formatRankingTable(headers: string[], rows: string[][]): string {
   const headerLine = `| ${headers.join(" | ")} |`;
   const separatorLine = `|${headers.map(() => "------").join("|")}|`;
 
@@ -317,7 +302,7 @@ export function formatRankingTable(headers: string[], rows: string[][]): string 
 /**
  * Format a simple bar for ASCII visualization
  */
-export function formatBar(value: number, maxValue: number, width = 20): string {
+function _formatBar(value: number, maxValue: number, width = 20): string {
   if (maxValue === 0) return "";
   const filled = Math.round((value / maxValue) * width);
   return "█".repeat(filled) + "░".repeat(width - filled);
@@ -326,7 +311,7 @@ export function formatBar(value: number, maxValue: number, width = 20): string {
 /**
  * Format margin/profitability with color indicator
  */
-export function formatMargin(margin: number): string {
+function _formatMargin(margin: number): string {
   const percentStr = `${margin.toFixed(1)}%`;
   if (margin >= 30) return `${percentStr} (Good)`;
   if (margin >= 15) return `${percentStr} (OK)`;

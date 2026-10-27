@@ -42,7 +42,7 @@ export const CompanyInfoOutput = Schema.Struct({
 
 export type CompanyInfoOutput = typeof CompanyInfoOutput.Type;
 
-export const FinancialYearSchema = Schema.Struct({
+const FinancialYearSchema = Schema.Struct({
   id: Schema.Finite,
   from_date: Schema.String,
   to_date: Schema.String,

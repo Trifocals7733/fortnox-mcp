@@ -14,7 +14,7 @@ import { accessToken } from "./tokenProvider.js";
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
 /** A Fortnox failure with the same wording the tools have always surfaced. */
-export class FortnoxError extends Error {
+class FortnoxError extends Error {
   constructor(
     message: string,
     readonly status?: number,
@@ -96,7 +96,7 @@ function describe(error: unknown, context?: string): Error {
 }
 
 /** Public for callers that wrap their own errors in tool handlers. */
-export function handleApiError(error: unknown, context?: string): Error {
+function _handleApiError(error: unknown, context?: string): Error {
   return describe(error, context);
 }
 
@@ -224,7 +224,7 @@ export function parseDate(dateStr: string): Date {
 /**
  * Configuration for fetchAllPages
  */
-export interface FetchAllConfig {
+interface FetchAllConfig {
   /** Maximum total results to fetch (default: MAX_FETCH_ALL_RESULTS) */
   maxResults?: number;
   /** Maximum pages to fetch (default: MAX_FETCH_ALL_PAGES) */
@@ -238,7 +238,7 @@ export interface FetchAllConfig {
 /**
  * Result from fetchAllPages
  */
-export interface FetchAllResult<T> {
+interface FetchAllResult<T> {
   /** All items fetched */
   items: T[];
   /** Total count from API (may be higher than items.length if truncated) */

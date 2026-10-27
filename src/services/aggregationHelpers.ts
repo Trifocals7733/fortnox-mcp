@@ -7,7 +7,7 @@
 /**
  * Basic statistics result
  */
-export interface BasicStats {
+interface BasicStats {
   count: number;
   total: number;
   average: number;
@@ -34,7 +34,7 @@ export type TimeBucket = "week" | "month" | "quarter" | "year";
 /**
  * Calculate basic statistics for an array of numbers
  */
-export function calculateBasicStats(values: number[]): BasicStats {
+function _calculateBasicStats(values: number[]): BasicStats {
   if (values.length === 0) {
     return { count: 0, total: 0, average: 0, min: 0, max: 0 };
   }
@@ -110,7 +110,7 @@ export function getQuarterNumber(date: Date): number {
 /**
  * Get time bucket key for a date
  */
-export function getTimeBucketKey(dateStr: string | undefined, bucket: TimeBucket): string {
+function getTimeBucketKey(dateStr: string | undefined, bucket: TimeBucket): string {
   if (!dateStr) return "unknown";
 
   const date = new Date(dateStr);
@@ -159,7 +159,7 @@ export function countUnique<T>(items: T[], keyExtractor: (item: T) => string): n
 /**
  * Get date range for a number of days ahead from today
  */
-export function getFutureDateRange(daysAhead: number): { from_date: string; to_date: string } {
+function _getFutureDateRange(daysAhead: number): { from_date: string; to_date: string } {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -189,7 +189,7 @@ export function parseDate(dateStr: string): Date {
 /**
  * Check if a date falls within a range
  */
-export function isDateInRange(
+function _isDateInRange(
   dateStr: string | undefined,
   from_date?: string,
   to_date?: string
@@ -217,7 +217,7 @@ export function isDateInRange(
 /**
  * Sort groups by total value descending
  */
-export function sortGroupsByTotal<T>(
+function _sortGroupsByTotal<T>(
   groups: Map<string, T[]>,
   valueExtractor: (item: T) => number
 ): Array<{ key: string; items: T[]; total: number }> {
@@ -233,7 +233,7 @@ export function sortGroupsByTotal<T>(
 /**
  * Calculate running totals for time series
  */
-export function calculateRunningTotals(
+function _calculateRunningTotals(
   values: Array<{ key: string; value: number }>,
   startingBalance = 0
 ): Array<{ key: string; value: number; runningTotal: number }> {

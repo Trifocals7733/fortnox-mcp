@@ -105,7 +105,7 @@ export type PayablesReportInput = typeof PayablesReportSchema.Type;
 // Fortnox returns GivenNumber and Total as strings on supplier invoices
 // (unlike invoices, where the numbers really are numbers), so the handlers
 // coerce the amounts and the identifier stays a string.
-export const SupplierInvoiceListItemSchema = Schema.Struct({
+const SupplierInvoiceListItemSchema = Schema.Struct({
   given_number: Schema.String.pipe(describe("Fortnox given number (a string identifier)")),
   supplier_number: NullableString,
   supplier_name: NullableString,
@@ -127,7 +127,7 @@ export const ListSupplierInvoicesOutput = Schema.Struct({
   invoices: Schema.Array(SupplierInvoiceListItemSchema)
 });
 
-export const SupplierInvoiceRowSchema = Schema.Struct({
+const SupplierInvoiceRowSchema = Schema.Struct({
   article_number: NullableString,
   account: Schema.NullOr(Schema.Finite),
   account_description: NullableString,

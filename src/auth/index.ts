@@ -8,7 +8,7 @@ import type { ITokenProvider } from "./types.js";
 // Global token provider instance
 let tokenProvider: ITokenProvider | null = null;
 
-export function initializeTokenProvider(provider: ITokenProvider): void {
+function _initializeTokenProvider(provider: ITokenProvider): void {
   tokenProvider = provider;
 }
 

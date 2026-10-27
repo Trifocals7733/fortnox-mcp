@@ -37,7 +37,7 @@ The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts
 
 **Linting is Biome, not ESLint.** typescript-eslint requires `typescript <6.1` and this repo is on TypeScript 7, whose package has no programmatic compiler API — so type-aware rules are unavailable without downgrading the compiler. Biome parses TypeScript itself and covers format + lint in one dependency, but its rules are syntax-only: no `no-floating-promises`, no `no-unnecessary-condition`.
 
-No release/publish tooling exists (the upstream `scripts/release.sh` and the `release:*` scripts were removed). Keep it that way unless asked. `server.json` is inert MCP Registry metadata kept for reference — it is not validated or synced by anything.
+No release/publish tooling exists (the upstream `scripts/release.sh` and the `release:*` scripts were removed). Keep it that way unless asked. Nothing is published: there is no npm package and no MCP Registry entry, and the metadata file that implied otherwise has been deleted.
 
 ## Layout
 
@@ -144,3 +144,4 @@ Everything else is exercised by `npm run test:live`. The aggregation arrays decl
 That is close to the floor for anything short of removing declared schemas: the remainder is irreducible JSON Schema structure for 102 schemas, plus ~9.8k chars of `anyOf` noise from nullable fields. The user has explicitly chosen to **keep `outputSchema` on all 51** (13.9k chars would have gone by dropping it for the 14 analytics/BI tools), so don't re-open that without them. If cost matters again, the levers are: make nullable output fields optional instead of null, or shorten field descriptions further — not dropping schemas.
 
 Verification reality: two Fortnox companies are connected and switchable with `npm run company` — a live one (1865351, no Order module) and a test one (1888108, with Order module and a financial year). On the test company, reads and writes have both been exercised through the tools over an in-memory MCP client: customer/supplier create-get-update-delete, account create, voucher create, invoice create-get-update-bookkeep-cancel-credit, and all 11 BI tools. Not verified anywhere: `send_invoice_email` and `approve_supplier_invoice` (real-world side effects), and the element shapes inside the aggregation arrays that are declared as `Schema.Array(Schema.Unknown)` — those need richer data than an almost-empty test company has.
+

@@ -9,17 +9,13 @@ import { TokenProviderService, tokenProviderLayer } from "./tokenProvider.js";
  * plain async functions until the domain conversion), but the services they
  * need - the rate limiter's window state and the HTTP client - are shared.
  */
-export const AppLayer = Layer.mergeAll(
-  rateLimiterLayer(),
-  tokenProviderLayer,
-  FetchHttpClient.layer
-);
+const AppLayer = Layer.mergeAll(rateLimiterLayer(), tokenProviderLayer, FetchHttpClient.layer);
 
 // The layer graph has no requirements of its own; the cast satisfies the
 // build-time signature that cannot see that through mergeAll.
 const makeRuntime = () =>
   ManagedRuntime.make(AppLayer as unknown as Parameters<typeof ManagedRuntime.make>[0]);
-export type AppRuntime = ReturnType<typeof makeRuntime>;
+type AppRuntime = ReturnType<typeof makeRuntime>;
 
 let runtime: AppRuntime | null = null;
 

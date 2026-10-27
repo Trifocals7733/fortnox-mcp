@@ -36,7 +36,6 @@ export const InvoiceRowSchema = Schema.Struct({
   vat: optional(Schema.Finite.pipe(describe("VAT percentage (e.g., 25, 12, 6, 0)")))
 });
 
-export type InvoiceRowInput = typeof InvoiceRowSchema.Type;
 
 const Amount = optional(
   Schema.Finite.pipe(Schema.check(Schema.isGreaterThanOrEqualTo(0)), describe("Amount in SEK"))
@@ -230,7 +229,7 @@ export const ListInvoicesOutput = Schema.Struct({
   invoices: Schema.Array(InvoiceListItemSchema)
 });
 
-export const InvoiceRowOutputSchema = Schema.Struct({
+const InvoiceRowOutputSchema = Schema.Struct({
   article_number: NullableString,
   description: NullableString,
   quantity: Schema.Finite,

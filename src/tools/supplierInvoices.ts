@@ -1,6 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import { DEFAULT_PAGE_SIZE, ResponseFormat } from "../constants.js";
-import { asBool, asNumber, fetchAllPages, fortnoxRequest } from "../services/api.js";
 import {
   type ApproveSupplierInvoiceInput,
   ApproveSupplierInvoiceOutput,
@@ -15,6 +14,7 @@ import {
   PayablesReportSchema,
   SupplierInvoiceDetailSchema
 } from "../schemas/supplierInvoices.js";
+import { asBool, asNumber, fetchAllPages, fortnoxRequest } from "../services/api.js";
 import {
   type AgeBucket,
   getAgeBucket,

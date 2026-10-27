@@ -15,7 +15,7 @@ import {
  * Input and output schemas for the order/offer tools.
  */
 
-export const OrderFilters = {
+const OrderFilters = {
   customer_number: ShortText(50, "Filter by customer number"),
   from_date: DateString("Filter from this date (YYYY-MM-DD)"),
   to_date: DateString("Filter to this date (YYYY-MM-DD)"),

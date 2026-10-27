@@ -84,7 +84,7 @@ export type DeleteAccountInput = typeof DeleteAccountSchema.Type;
 
 /* ------------------------------- outputs ------------------------------- */
 
-export const AccountListItemSchema = Schema.Struct({
+const AccountListItemSchema = Schema.Struct({
   account_number: Schema.Finite,
   description: Schema.String,
   active: Schema.Boolean

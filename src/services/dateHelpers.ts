@@ -239,7 +239,7 @@ export function getPeriodDescription(period: DatePeriod): string {
  * getPreviousPeriod("this_month") // "last_month"
  * getPreviousPeriod("this_quarter") // "last_quarter"
  */
-export function getPreviousPeriod(period: DatePeriod): DatePeriod {
+function getPreviousPeriod(period: DatePeriod): DatePeriod {
   const mapping: Record<DatePeriod, DatePeriod> = {
     today: "yesterday",
     yesterday: "yesterday", // Can't go further back simply
@@ -346,7 +346,7 @@ export function getLastNYears(years: number): Array<{
 /**
  * Get the number of days between two dates
  */
-export function daysBetween(date1: string, date2: string): number {
+function _daysBetween(date1: string, date2: string): number {
   const d1 = new Date(date1);
   const d2 = new Date(date2);
   const diffTime = Math.abs(d2.getTime() - d1.getTime());

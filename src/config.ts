@@ -1,6 +1,6 @@
-export type TransportMode = "stdio" | "http";
+type TransportMode = "stdio" | "http";
 
-export interface ServerConfig {
+interface ServerConfig {
   transport: TransportMode;
   port: number;
 }

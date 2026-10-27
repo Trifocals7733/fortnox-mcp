@@ -343,7 +343,8 @@
           "type": "string"
         },
         "given_number": {
-          "type": "number"
+          "type": "string",
+          "description": "Fortnox given number (a string identifier)"
         },
         "supplier_name": {
           "anyOf": [
@@ -3038,7 +3039,8 @@
       "type": "object",
       "properties": {
         "given_number": {
-          "type": "number"
+          "type": "string",
+          "description": "Fortnox given number (a string identifier)"
         },
         "supplier_number": {
           "anyOf": [
@@ -5250,7 +5252,8 @@
             "type": "object",
             "properties": {
               "given_number": {
-                "type": "number"
+                "type": "string",
+                "description": "Fortnox given number (a string identifier)"
               },
               "supplier_number": {
                 "anyOf": [
@@ -5997,7 +6000,8 @@
                 "type": "object",
                 "properties": {
                   "given_number": {
-                    "type": "number"
+                    "type": "string",
+                    "description": "Fortnox given number (a string identifier)"
                   },
                   "supplier_number": {
                     "anyOf": [
