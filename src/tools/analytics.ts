@@ -16,10 +16,14 @@ import {
   InvoiceSummarySchema,
   TopCustomersSchema,
   UnpaidReportSchema,
+  InvoiceSummaryOutput,
+  TopCustomersOutput,
+  UnpaidReportOutput,
   type InvoiceSummaryInput,
   type TopCustomersInput,
   type UnpaidReportInput
 } from "../schemas/analytics.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 
 // Reuse invoice types from invoices.ts
 interface FortnoxInvoiceListItem {
@@ -145,7 +149,8 @@ Examples:
 Error Handling:
   - Returns truncation warning if >10,000 invoices
   - Returns "Error: ..." if API call fails`,
-      inputSchema: InvoiceSummarySchema,
+      inputSchema: mcpSchema(InvoiceSummarySchema),
+      outputSchema: mcpSchema(InvoiceSummaryOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -233,7 +238,7 @@ Error Handling:
           output.groups = groups;
         }
 
-        if (params.include_details) {
+        if (params.include_details ?? false) {
           output.invoices = invoices.map(inv => ({
             document_number: inv.DocumentNumber,
             customer_number: inv.CustomerNumber,
@@ -334,7 +339,8 @@ Examples:
 Error Handling:
   - Returns truncation warning if >10,000 invoices analyzed
   - Returns "Error: ..." if API call fails`,
-      inputSchema: TopCustomersSchema,
+      inputSchema: mcpSchema(TopCustomersSchema),
+      outputSchema: mcpSchema(TopCustomersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -408,15 +414,15 @@ Error Handling:
         });
 
         // Sort by selected metric
-        const metricKey = params.metric as keyof typeof customerStats[0];
+        const metricKey = (params.metric ?? "total_amount") as keyof typeof customerStats[0];
         customerStats.sort((a, b) => (b[metricKey] as number) - (a[metricKey] as number));
 
         // Take top N
-        const topCustomers = customerStats.slice(0, params.top_n);
+        const topCustomers = customerStats.slice(0, params.top_n ?? 10);
 
         // Build output
         const output: Record<string, unknown> = {
-          metric: params.metric,
+          metric: params.metric ?? "total_amount",
           period: params.period || null,
           date_range: dateRangeDescription || null,
           total_invoices_analyzed: invoices.length,
@@ -434,7 +440,7 @@ Error Handling:
               average_invoice: c.average_invoice
             };
 
-            if (params.include_details) {
+            if (params.include_details ?? false) {
               customer.invoices = c.invoices.map(inv => ({
                 document_number: inv.DocumentNumber,
                 invoice_date: inv.InvoiceDate,
@@ -460,7 +466,7 @@ Error Handling:
           };
 
           const lines: string[] = [
-            `# Top ${params.top_n} Customers by ${metricLabels[params.metric]}`,
+            `# Top ${params.top_n ?? 10} Customers by ${metricLabels[params.metric ?? "total_amount"]}`,
             ""
           ];
 
@@ -475,13 +481,13 @@ Error Handling:
             lines.push("");
           }
 
-          lines.push(`| Rank | Customer | ${metricLabels[params.metric]} | Invoices | Total | Unpaid |`);
-          lines.push(`|------|----------|${"-".repeat(metricLabels[params.metric].length + 2)}|----------|-------|--------|`);
+          lines.push(`| Rank | Customer | ${metricLabels[metricKey]} | Invoices | Total | Unpaid |`);
+          lines.push(`|------|----------|${"-".repeat(metricLabels[metricKey].length + 2)}|----------|-------|--------|`);
 
           for (const c of topCustomers) {
-            const metricValue = params.metric === "invoice_count"
+            const metricValue = metricKey === "invoice_count"
               ? c.invoice_count.toString()
-              : formatMoney(c[params.metric]);
+              : formatMoney(typeof c[metricKey] === "number" ? (c[metricKey] as number) : 0);
 
             lines.push(
               `| ${(output.customers as Array<{ rank: number }>).find(x => x.rank === topCustomers.indexOf(c) + 1)?.rank} ` +
@@ -542,7 +548,8 @@ Examples:
 Error Handling:
   - Returns truncation warning if >10,000 invoices
   - Returns "Error: ..." if API call fails`,
-      inputSchema: UnpaidReportSchema,
+      inputSchema: mcpSchema(UnpaidReportSchema),
+      outputSchema: mcpSchema(UnpaidReportOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -615,7 +622,7 @@ Error Handling:
         };
 
         // Add groupings based on params
-        if (params.group_by === "age_bucket" || params.group_by === "both") {
+        if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
           output.by_age_bucket = ageBucketOrder.map(bucket => {
             const items = byAgeBucket.get(bucket)!;
             return {
@@ -626,7 +633,7 @@ Error Handling:
           });
         }
 
-        if (params.group_by === "customer" || params.group_by === "both") {
+        if ((params.group_by ?? "both") === "customer" || (params.group_by ?? "both") === "both") {
           output.by_customer = Array.from(byCustomer.entries())
             .map(([customer, items]) => ({
               customer,
@@ -636,7 +643,7 @@ Error Handling:
             .sort((a, b) => b.total_balance - a.total_balance);
         }
 
-        if (params.include_details) {
+        if (params.include_details ?? true) {
           output.invoices = invoices
             .sort((a, b) => (b.Balance || 0) - (a.Balance || 0))
             .map(inv => ({
@@ -675,7 +682,7 @@ Error Handling:
           lines.push(`| **Total Unpaid Balance** | **${formatMoney(totalUnpaid)}** |`);
           lines.push(`| Unique Customers | ${byCustomer.size} |`);
 
-          if (params.group_by === "age_bucket" || params.group_by === "both") {
+          if ((params.group_by ?? "both") === "age_bucket" || (params.group_by ?? "both") === "both") {
             lines.push("");
             lines.push("## Aging Breakdown");
             lines.push("");
@@ -691,7 +698,7 @@ Error Handling:
             }
           }
 
-          if (params.group_by === "customer" || params.group_by === "both") {
+          if ((params.group_by ?? "both") === "customer" || (params.group_by ?? "both") === "both") {
             lines.push("");
             lines.push("## By Customer");
             lines.push("");

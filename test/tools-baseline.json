@@ -3159,7 +3159,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices.",
           "type": "string",
           "enum": [
             "today",
@@ -3172,20 +3171,18 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices."
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "filter": {
-          "description": "Filter invoices by status before calculating summary",
           "type": "string",
           "enum": [
             "cancelled",
@@ -3193,41 +3190,264 @@
             "unpaid",
             "unpaidoverdue",
             "unbooked"
-          ]
+          ],
+          "description": "Filter invoices by status before calculating summary"
         },
         "customer_number": {
-          "description": "Filter by specific customer number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Filter by specific customer number"
         },
         "group_by": {
-          "description": "Group summary statistics by this dimension",
           "type": "string",
           "enum": [
             "customer",
             "month",
             "status"
-          ]
+          ],
+          "description": "Group summary statistics by this dimension"
         },
         "include_details": {
-          "default": false,
-          "description": "Include list of individual invoices in the response",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Include list of individual invoices in the response (default false)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "api_total": {
+          "type": "number"
+        },
+        "fetched": {
+          "type": "number"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "number"
+            },
+            "total": {
+              "type": "number"
+            },
+            "average": {
+              "type": "number"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "paid_count": {
+              "type": "number"
+            },
+            "unpaid_count": {
+              "type": "number"
+            },
+            "total_balance": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "count",
+            "total",
+            "average",
+            "min",
+            "max",
+            "paid_count",
+            "unpaid_count",
+            "total_balance"
+          ],
+          "additionalProperties": true
+        },
+        "groups": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "stats": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "number"
+                      },
+                      "total": {
+                        "type": "number"
+                      },
+                      "average": {
+                        "type": "number"
+                      },
+                      "min": {
+                        "type": "number"
+                      },
+                      "max": {
+                        "type": "number"
+                      },
+                      "paid_count": {
+                        "type": "number"
+                      },
+                      "unpaid_count": {
+                        "type": "number"
+                      },
+                      "total_balance": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "count",
+                      "total",
+                      "average",
+                      "min",
+                      "max",
+                      "paid_count",
+                      "unpaid_count",
+                      "total_balance"
+                    ],
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "key",
+                  "stats"
+                ],
+                "additionalProperties": true
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoices": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "document_number": {
+                    "type": "string"
+                  },
+                  "customer_number": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "customer_name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "invoice_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "balance": {
+                    "type": "number"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "document_number",
+                  "customer_number",
+                  "customer_name",
+                  "invoice_date",
+                  "total",
+                  "balance",
+                  "status"
+                ],
+                "additionalProperties": true
+              }
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "required": [
+        "period",
+        "date_range",
+        "api_total",
+        "fetched",
+        "truncated",
+        "summary"
+      ],
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -6186,18 +6406,16 @@
       "type": "object",
       "properties": {
         "metric": {
-          "default": "total_amount",
-          "description": "Metric to rank customers by",
           "type": "string",
           "enum": [
             "total_amount",
             "invoice_count",
             "unpaid_amount",
             "average_invoice"
-          ]
+          ],
+          "description": "Metric to rank customers by (default 'total_amount')"
         },
         "period": {
-          "description": "Date period to analyze (e.g., 'this_year', 'last_month')",
           "type": "string",
           "enum": [
             "today",
@@ -6210,44 +6428,192 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter'). If not specified, analyzes all invoices."
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "top_n": {
-          "default": 10,
-          "description": "Number of top customers to return (1-50)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 50
+          "maximum": 50,
+          "description": "Number of top customers to return (1-50, default 10)"
         },
         "include_details": {
-          "default": false,
-          "description": "Include invoice breakdown for each customer",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Include invoice breakdown for each customer (default false)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "metric": {
+          "type": "string"
+        },
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total_invoices_analyzed": {
+          "type": "number"
+        },
+        "unique_customers": {
+          "type": "number"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "customers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rank": {
+                "type": "number"
+              },
+              "customer_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "customer_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "total_amount": {
+                "type": "number"
+              },
+              "invoice_count": {
+                "type": "number"
+              },
+              "unpaid_amount": {
+                "type": "number"
+              },
+              "average_invoice": {
+                "type": "number"
+              },
+              "invoices": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "document_number": {
+                          "type": "string"
+                        },
+                        "invoice_date": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "total": {
+                          "type": "number"
+                        },
+                        "balance": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "document_number",
+                        "invoice_date",
+                        "total",
+                        "balance"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "rank",
+              "customer_number",
+              "customer_name",
+              "total_amount",
+              "invoice_count",
+              "unpaid_amount",
+              "average_invoice"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "metric",
+        "period",
+        "date_range",
+        "total_invoices_analyzed",
+        "unique_customers",
+        "truncated",
+        "customers"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -6263,44 +6629,227 @@
       "type": "object",
       "properties": {
         "min_amount": {
-          "description": "Only include invoices with balance >= this amount",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Only include invoices with balance >= this amount"
         },
         "customer_number": {
-          "description": "Filter by specific customer number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Filter by specific customer number"
         },
         "group_by": {
-          "default": "both",
-          "description": "How to group unpaid invoices in the report",
           "type": "string",
           "enum": [
             "customer",
             "age_bucket",
             "both"
-          ]
+          ],
+          "description": "How to group unpaid invoices in the report (default 'both')"
         },
         "include_details": {
-          "default": true,
-          "description": "Include list of individual unpaid invoices",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Include list of individual unpaid invoices (default true)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_invoices": {
+              "type": "number"
+            },
+            "total_invoice_amount": {
+              "type": "number"
+            },
+            "total_unpaid_balance": {
+              "type": "number"
+            },
+            "unique_customers": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "total_invoices",
+            "total_invoice_amount",
+            "total_unpaid_balance",
+            "unique_customers"
+          ],
+          "additionalProperties": true
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "by_age_bucket": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "bucket": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number"
+                  },
+                  "total_balance": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "bucket",
+                  "count",
+                  "total_balance"
+                ],
+                "additionalProperties": true
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "by_customer": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "customer": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number"
+                  },
+                  "total_balance": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "customer",
+                  "count",
+                  "total_balance"
+                ],
+                "additionalProperties": true
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "invoices": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "document_number": {
+                    "type": "string"
+                  },
+                  "customer_number": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "customer_name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "invoice_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "due_date": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "balance": {
+                    "type": "number"
+                  },
+                  "age_bucket": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "document_number",
+                  "customer_number",
+                  "customer_name",
+                  "invoice_date",
+                  "due_date",
+                  "total",
+                  "balance",
+                  "age_bucket"
+                ],
+                "additionalProperties": true
+              }
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "required": [
+        "summary",
+        "truncated"
+      ],
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
