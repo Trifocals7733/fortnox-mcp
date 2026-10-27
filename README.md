@@ -1,5 +1,3 @@
-> **WIP — not a usable product yet.**
-
 # Fortnox MCP Server
 
 [![check](https://github.com/Trifocals7733/fortnox-mcp/actions/workflows/check.yml/badge.svg)](https://github.com/Trifocals7733/fortnox-mcp/actions/workflows/check.yml)
