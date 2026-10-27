@@ -21,9 +21,11 @@ npm install          # required first; node_modules is not checked in
 npm run build        # tsc — this is the ONLY check. No tests, no linter, no formatter.
 npm run dev          # tsx watch src/index.ts
 npm run clean
+npm run snapshot:tools # rewrite test/tools-baseline.json from the live server
+npm run check:tools    # diff the advertised tool surface against it, exit 1 on drift
 ```
 
-There is no test suite. `npm run build` passing is the bar for "it works". Don't claim a change is verified beyond that.
+There is no test suite. `npm run build` passing plus `npm run check:tools` reporting no drift is the bar for "it works". Don't claim a change is verified beyond that.
 
 No release/publish tooling exists (the upstream `scripts/release.sh` and the `release:*` scripts were removed). Keep it that way unless asked. `server.json` is inert MCP Registry metadata kept for reference — it is not validated or synced by anything.
 
@@ -31,6 +33,7 @@ No release/publish tooling exists (the upstream `scripts/release.sh` and the `re
 
 ```
 src/index.ts              entry; mode dispatch + stdio/local-HTTP servers
+src/server/mcp.ts         createMcpServer() — the single tool registration list
 src/server/remote.ts      remote Express app; OAuth router, bearer auth, per-request MCP transport
 src/config.ts             AUTH_MODE / TRANSPORT / PORT; throws on missing remote vars
 src/constants.ts          base URLs, rate limits, page sizes, 25k char response cap
@@ -43,7 +46,9 @@ src/services/aggregationHelpers.ts  stats, growth, groupBy helpers for BI tools
 src/auth/                 ITokenProvider (env-var vs database), OAuth proxy provider, AsyncLocalStorage ctx
 src/auth/storage/         ITokenStorage: memory | Upstash Redis (`redis.ts`)
 scripts/get-token.ts      interactive helper to obtain a local-mode refresh token
-fortnox_docs/fortnox_api.json  full Fortnox OpenAPI spec — grep it, don't read it
+scripts/snapshot-tools.ts tools/list baseline + drift check (no credentials needed)
+test/tools-baseline.json  the frozen advertised tool surface — keep in sync, review diffs
+fortnox_docs/openapi.json current Fortnox OpenAPI spec — grep it, don't read it
 evaluations/              BI tool QA pairs (manual/XML, not run by any test runner)
 ```
 
@@ -56,8 +61,8 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
    - `annotations` is required on every tool; get `readOnlyHint` / `destructiveHint` right (deletes and bookkeeping are destructive).
    - Body: map snake_case args → Fortnox's PascalCase query params (`customer_number` → `customernumber`, `search_name` → `name`), `fortnoxRequest<T>(endpoint, method, data, params)`, build a snake_case `output` object, branch on `response_format` (JSON = `JSON.stringify(output, null, 2)`, otherwise a formatter helper), then `return buildToolResponse(text, output)` — never a bare `{ content }`.
    - Wrap the whole body in `try/catch` returning `buildErrorResponse(error)`.
-3. **Register it in BOTH places**: `createMcpServer()` in `src/index.ts` and the remote app in `src/server/remote.ts`. They drift silently — tools have shipped missing from remote mode before. If the domain is new, add the `registerXxxTools` call to both.
-4. Checks: `npm run build`, and confirm README's tool list stays true.
+3. **Register it in `src/server/mcp.ts`** — the one registration list that every transport (stdio, local HTTP, remote) builds from. Nothing else needs touching.
+4. Checks: `npm run build`, then `npm run check:tools` and review the diff against `test/tools-baseline.json`; `npm run snapshot:tools` to accept a deliberate change. Keep README's tool list true.
 
 ## API + data conventions
 
@@ -71,6 +76,7 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 ## Gotchas
 
 - ESM with `module: Node16`: **every relative import needs a `.js` extension** (`./services/api.js`), even in `.ts` files. CI-free repo, so a missing extension only shows up at runtime or on `tsc`.
+- TypeScript 7 (the native Go `tsc`) with no declaration emit; `engines` is `>=22`. `exactOptionalPropertyTypes` is still off — enabling it produces 10 errors, 4 of them at `StreamableHTTPServerTransport` call sites that the SDK v2 migration deletes.
 - zod v3 — `z.nativeEnum`, not v4 syntax. Schemas are `.strict()`, so new args must be added to the schema or calls fail.
 - Look up Fortnox endpoints/fields by grepping `fortnox_docs/fortnox_api.json` (OpenAPI: `paths`, `components.schemas`). It's ~1 MB; never load it whole.
 - Remote mode needs `SERVER_URL`, `JWT_SECRET`, `FORTNOX_CLIENT_ID`, `FORTNOX_CLIENT_SECRET`; Redis vars fall back to in-memory storage with a warning (loses tokens on restart).

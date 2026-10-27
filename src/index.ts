@@ -33,36 +33,7 @@ import { loadConfig, validateEnvironment, logConfig } from "./config.js";
 import { getFortnoxAuth } from "./services/auth.js";
 import { getStorageFromEnv } from "./auth/storage/index.js";
 import { runRemoteServer } from "./server/remote.js";
-import { registerCustomerTools } from "./tools/customers.js";
-import { registerInvoiceTools } from "./tools/invoices.js";
-import { registerSupplierTools } from "./tools/suppliers.js";
-import { registerAccountTools } from "./tools/accounts.js";
-import { registerVoucherTools } from "./tools/vouchers.js";
-import { registerCompanyTools } from "./tools/company.js";
-import { registerAnalyticsTools } from "./tools/analytics.js";
-import { registerSupplierInvoiceTools } from "./tools/supplierInvoices.js";
-import { registerOrderTools } from "./tools/orders.js";
-import { registerBIAnalyticsTools } from "./tools/biAnalytics.js";
-
-function createMcpServer(): McpServer {
-  const server = new McpServer({
-    name: "fortnox-mcp-server",
-    version: "1.0.0"
-  });
-
-  registerCustomerTools(server);
-  registerInvoiceTools(server);
-  registerSupplierTools(server);
-  registerSupplierInvoiceTools(server);
-  registerAccountTools(server);
-  registerVoucherTools(server);
-  registerCompanyTools(server);
-  registerAnalyticsTools(server);
-  registerOrderTools(server);
-  registerBIAnalyticsTools(server);
-
-  return server;
-}
+import { createMcpServer } from "./server/mcp.js";
 
 async function runStdio(): Promise<void> {
   try {
