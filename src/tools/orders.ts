@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE, FORTNOX_PATHS } from "../constants.js";
 import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
@@ -150,7 +150,7 @@ export function registerOrderTools(server: McpServer): void {
 
         if (params.fetch_all) {
           const result = await fetchAllPages<FortnoxOrderListItem, OrderListResponse>(
-            "/3/orders",
+            FORTNOX_PATHS.orders,
             queryParams,
             (r) => r.Orders || [],
             (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -164,7 +164,7 @@ export function registerOrderTools(server: McpServer): void {
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<OrderListResponse>("/3/orders", "GET", undefined, queryParams);
+          const response = await fortnoxRequest<OrderListResponse>(FORTNOX_PATHS.orders, "GET", undefined, queryParams);
           orders = response.Orders || [];
           total = response.MetaInformation?.["@TotalResources"] || orders.length;
         }
@@ -303,7 +303,7 @@ export function registerOrderTools(server: McpServer): void {
 
         if (params.fetch_all) {
           const result = await fetchAllPages<FortnoxOfferListItem, OfferListResponse>(
-            "/3/offers",
+            FORTNOX_PATHS.offers,
             queryParams,
             (r) => r.Offers || [],
             (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -317,7 +317,7 @@ export function registerOrderTools(server: McpServer): void {
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<OfferListResponse>("/3/offers", "GET", undefined, queryParams);
+          const response = await fortnoxRequest<OfferListResponse>(FORTNOX_PATHS.offers, "GET", undefined, queryParams);
           offers = response.Offers || [];
           total = response.MetaInformation?.["@TotalResources"] || offers.length;
         }

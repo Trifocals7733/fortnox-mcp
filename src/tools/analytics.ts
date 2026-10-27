@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fetchAllPages } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, FORTNOX_PATHS } from "../constants.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -181,7 +181,7 @@ Error Handling:
 
         // Fetch all invoices for the period
         const result = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-          "/3/invoices",
+          FORTNOX_PATHS.invoices,
           queryParams,
           (r) => r.Invoices || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -368,7 +368,7 @@ Error Handling:
 
         // Fetch all invoices
         const result = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-          "/3/invoices",
+          FORTNOX_PATHS.invoices,
           queryParams,
           (r) => r.Invoices || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -568,7 +568,7 @@ Error Handling:
         queryParams.filter = "unpaid";
 
         const result = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-          "/3/invoices",
+          FORTNOX_PATHS.invoices,
           queryParams,
           (r) => r.Invoices || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0

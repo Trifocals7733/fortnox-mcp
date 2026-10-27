@@ -1,5 +1,17 @@
 // Fortnox API Configuration
 export const FORTNOX_API_BASE_URL = "https://api.fortnox.se";
+
+/**
+ * Resource paths. Fortnox's -v2 endpoints return the same payloads as v1 for
+ * everything this server uses (verified field by field against a live account;
+ * v2 only adds a `Bundle` flag on invoice rows), so the migration is the path
+ * alone. Articles are not used: there is no article tool.
+ */
+export const FORTNOX_PATHS = {
+  invoices: "/3/invoices-v2",
+  orders: "/3/orders-v2",
+  offers: "/3/offers-v2"
+} as const;
 export const FORTNOX_OAUTH_URL = "https://apps.fortnox.se/oauth-v1";
 
 // Rate limiting: 25 requests per 5 seconds

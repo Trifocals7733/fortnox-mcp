@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest, fetchAllPages } from "../services/api.js";
-import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE, FORTNOX_PATHS } from "../constants.js";
 import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
@@ -185,7 +185,7 @@ Error Handling:
         if (params.fetch_all) {
           // Use fetchAllPages for complete dataset
           const result = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-            "/3/invoices",
+            FORTNOX_PATHS.invoices,
             queryParams,
             (r) => r.Invoices || [],
             (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -200,7 +200,7 @@ Error Handling:
           queryParams.limit = params.limit ?? DEFAULT_PAGE_SIZE;
           queryParams.page = params.page ?? 1;
 
-          const response = await fortnoxRequest<InvoiceListResponse>("/3/invoices", "GET", undefined, queryParams);
+          const response = await fortnoxRequest<InvoiceListResponse>(FORTNOX_PATHS.invoices, "GET", undefined, queryParams);
           invoices = response.Invoices || [];
           total = response.MetaInformation?.["@TotalResources"] || invoices.length;
         }
@@ -335,7 +335,7 @@ Returns:
     async (params: GetInvoiceInput) => {
       try {
         const response = await fortnoxRequest<InvoiceResponse>(
-          `/3/invoices/${encodeURIComponent(params.document_number)}`
+          `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}`
         );
         const invoice = response.Invoice;
 
@@ -495,7 +495,7 @@ Example rows:
         if (params.administration_fee !== undefined) invoiceData.AdministrationFee = params.administration_fee;
 
         const response = await fortnoxRequest<InvoiceResponse>(
-          "/3/invoices",
+          FORTNOX_PATHS.invoices,
           "POST",
           { Invoice: invoiceData }
         );
@@ -581,7 +581,7 @@ Returns:
         if (params.administration_fee !== undefined) invoiceData.AdministrationFee = params.administration_fee;
 
         const response = await fortnoxRequest<InvoiceResponse>(
-          `/3/invoices/${encodeURIComponent(params.document_number)}`,
+          `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}`,
           "PUT",
           { Invoice: invoiceData }
         );
@@ -636,7 +636,7 @@ Returns:
     async (params: InvoiceActionInput) => {
       try {
         const response = await fortnoxRequest<InvoiceResponse>(
-          `/3/invoices/${encodeURIComponent(params.document_number)}/bookkeep`,
+          `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}/bookkeep`,
           "PUT"
         );
         const invoice = response.Invoice;
@@ -689,7 +689,7 @@ Returns:
     async (params: InvoiceActionInput) => {
       try {
         const response = await fortnoxRequest<InvoiceResponse>(
-          `/3/invoices/${encodeURIComponent(params.document_number)}/cancel`,
+          `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}/cancel`,
           "PUT"
         );
         const invoice = response.Invoice;
@@ -741,7 +741,7 @@ Returns:
     async (params: InvoiceActionInput) => {
       try {
         const response = await fortnoxRequest<InvoiceResponse>(
-          `/3/invoices/${encodeURIComponent(params.document_number)}/credit`,
+          `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}/credit`,
           "PUT"
         );
         const creditInvoice = response.Invoice;
@@ -798,8 +798,7 @@ Returns:
     async (params: SendInvoiceEmailInput) => {
       try {
         const response = await fortnoxRequest<InvoiceResponse>(
-          `/3/invoices/${encodeURIComponent(params.document_number)}/email`,
-          "PUT"
+          `${FORTNOX_PATHS.invoices}/${encodeURIComponent(params.document_number)}/email`
         );
         const invoice = response.Invoice;
 

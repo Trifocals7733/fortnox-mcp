@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fetchAllPages } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, FORTNOX_PATHS } from "../constants.js";
 import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
@@ -257,7 +257,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
         // Fetch unpaid customer invoices (receivables)
         const receivablesResult = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-          "/3/invoices",
+          FORTNOX_PATHS.invoices,
           { filter: "unpaid" },
           (r) => r.Invoices || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -473,7 +473,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         }
 
         const result = await fetchAllPages<FortnoxOrderListItem, OrderListResponse>(
-          "/3/orders",
+          FORTNOX_PATHS.orders,
           queryParams,
           (r) => r.Orders || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -620,19 +620,19 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         // Fetch all three stages in parallel
         const [offersResult, ordersResult, invoicesResult] = await Promise.all([
           fetchAllPages<FortnoxOfferListItem, OfferListResponse>(
-            "/3/offers",
+            FORTNOX_PATHS.offers,
             queryParams,
             (r) => r.Offers || [],
             (r) => r.MetaInformation?.["@TotalResources"] || 0
           ),
           fetchAllPages<FortnoxOrderListItem, OrderListResponse>(
-            "/3/orders",
+            FORTNOX_PATHS.orders,
             queryParams,
             (r) => r.Orders || [],
             (r) => r.MetaInformation?.["@TotalResources"] || 0
           ),
           fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-            "/3/invoices",
+            FORTNOX_PATHS.invoices,
             queryParams,
             (r) => r.Invoices || [],
             (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -787,7 +787,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
         // Fetch invoices
         const result = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-          "/3/invoices",
+          FORTNOX_PATHS.invoices,
           queryParams,
           (r) => r.Invoices || [],
           (r) => r.MetaInformation?.["@TotalResources"] || 0
@@ -925,7 +925,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         // Fetch invoices for both periods
         const [currentResult, previousResult] = await Promise.all([
           fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-            "/3/invoices",
+            FORTNOX_PATHS.invoices,
             {
               fromdate: comparison.currentPeriod.dateRange.from_date,
               todate: comparison.currentPeriod.dateRange.to_date
@@ -934,7 +934,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
             (r) => r.MetaInformation?.["@TotalResources"] || 0
           ),
           fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-            "/3/invoices",
+            FORTNOX_PATHS.invoices,
             {
               fromdate: comparison.previousPeriod.dateRange.from_date,
               todate: comparison.previousPeriod.dateRange.to_date
@@ -1048,7 +1048,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         // Fetch invoices for both periods
         const [currentResult, previousResult] = await Promise.all([
           fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-            "/3/invoices",
+            FORTNOX_PATHS.invoices,
             {
               fromdate: comparison.currentPeriod.dateRange.from_date,
               todate: comparison.currentPeriod.dateRange.to_date
@@ -1057,7 +1057,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
             (r) => r.MetaInformation?.["@TotalResources"] || 0
           ),
           fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-            "/3/invoices",
+            FORTNOX_PATHS.invoices,
             {
               fromdate: comparison.previousPeriod.dateRange.from_date,
               todate: comparison.previousPeriod.dateRange.to_date
@@ -1526,7 +1526,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
         const yearResults = await Promise.all(
           yearRanges.map(({ year, dateRange }) =>
             fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
-              "/3/invoices",
+              FORTNOX_PATHS.invoices,
               {
                 fromdate: dateRange.from_date,
                 todate: dateRange.to_date
