@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Guidance for agents working in this repo. Human-facing docs (install, OAuth setup, env var tables, tool catalogue) live in [README.md](./README.md) — read that first, don't duplicate it here.
+Guidance for agents working in this repo. Human-facing docs — install, OAuth setup, env var tables, tool catalogue, and a section on what this fork changed versus upstream — live in [README.md](./README.md). Read that first, don't duplicate it here.
 
 ## What this is
 
-An MCP server exposing the Fortnox (Swedish accounting) REST API as 51 `fortnox_*` tools. TypeScript, ESM, Node 22+. Personal fork of `jakobwennberg/fortnox-mcp`; **not published anywhere** — no npm, no MCP Registry. Runs locally from `dist/index.js`, or self-hosted internally (planned: own VPS behind Tailscale). Three shapes from one tool registry:
+An MCP server exposing the Fortnox (Swedish accounting) REST API as 51 `fortnox_*` tools. TypeScript, ESM, Node 22+. Personal fork of `jakobwennberg/fortnox-mcp`; **not published anywhere** — no npm, no MCP Registry. Runs locally from `dist/index.js`, or over HTTP for agents on the same tailnet. Two shapes from one tool registry:
 
 | Shape | Entry | Auth |
 |---|---|---|
@@ -17,7 +17,7 @@ Selected by `TRANSPORT` in `src/config.ts`. **There is no multi-user/OAuth mode:
 
 ```bash
 npm install          # required first; node_modules is not checked in
-npm run check        # build + lint + tool-surface drift: the gate to run before committing
+npm run check        # build + lint + test + tool-surface drift: the gate before committing
 npm run build        # tsc — compiles, nothing more
 npm run lint         # biome check (format + lint; no type-aware rules, see below)
 npm run dev          # tsx watch src/index.ts
@@ -28,7 +28,7 @@ npm run check:tools    # diff the advertised tool surface against it, exit 1 on 
 
 `npm run check` = build + lint + tests + no tool-surface drift: the bar for "it works". Say so rather than claiming more.
 
-The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. `npm run test:live` covers the API (test/live.test.ts): all 51 tools, read-only ones as a matrix and the rest as lifecycles. It needs `FORTNOX_TEST_COMPANY` set and a token, refuses to run when the connected company does not match, and otherwise exercises customer/supplier/account/voucher/invoice lifecycles including bookkeep and credit, asserting semantics the schemas cannot (invoice total is quantity×price+VAT, a booked invoice reports booked, credit links back).
+The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. `npm run test:live` covers the API (test/live.test.ts): 49 of the 51 tools — the read-only ones as a matrix, the rest as lifecycles. The two it cannot reach (`approve_supplier_invoice`, `send_invoice_email`) are blocked on Fortnox UI settings, not on code. It needs `FORTNOX_TEST_COMPANY` set and a token, refuses to run when the connected company does not match, and otherwise exercises customer/supplier/account/voucher/invoice lifecycles including bookkeep and credit, asserting semantics the schemas cannot (invoice total is quantity×price+VAT, a booked invoice reports booked, credit links back).
 
 **Linting is Biome, not ESLint.** typescript-eslint requires `typescript <6.1` and this repo is on TypeScript 7, whose package has no programmatic compiler API — so type-aware rules are unavailable without downgrading the compiler. Biome parses TypeScript itself and covers format + lint in one dependency, but its rules are syntax-only: no `no-floating-promises`, no `no-unnecessary-condition`.
 
@@ -37,7 +37,7 @@ No release/publish tooling exists (the upstream `scripts/release.sh` and the `re
 ## Layout
 
 ```
-src/index.ts              entry; mode dispatch + stdio/local-HTTP servers
+src/index.ts              entry; TRANSPORT dispatch + stdio/HTTP servers
 src/server/mcp.ts         createMcpServer() — the single tool registration list
 src/config.ts             TRANSPORT / PORT
 src/constants.ts          base URLs, rate limits, page sizes, 25k char response cap
