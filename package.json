@@ -22,7 +22,8 @@
     "company": "tsx scripts/company.ts",
     "lint": "biome check src scripts",
     "format": "biome check --write src scripts",
-    "format:check": "biome format src scripts"
+    "format:check": "biome format src scripts",
+    "check": "npm run build && npm run lint && npm run check:tools"
   },
   "engines": {
     "node": ">=22"

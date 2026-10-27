@@ -1,0 +1,6 @@
+# Normalise line endings: LF in the repository, LF in the working tree.
+# Without this, git's autocrlf rewrites the tree on checkout and Biome (which
+# wants LF) reports every file as misformatted.
+* text=auto eol=lf
+*.png binary
+*.ico binary

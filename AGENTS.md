@@ -18,7 +18,9 @@ Mode is selected by `AUTH_MODE` / `TRANSPORT` in `src/config.ts`.
 
 ```bash
 npm install          # required first; node_modules is not checked in
-npm run build        # tsc — compiles, nothing more. No lint, no formatter, no test suite.
+npm run check        # build + lint + tool-surface drift: the gate to run before committing
+npm run build        # tsc — compiles, nothing more
+npm run lint         # biome check (format + lint; no type-aware rules, see below)
 npm run dev          # tsx watch src/index.ts
 npm run clean
 npm run snapshot:tools # rewrite test/tools-baseline.json from the live server
@@ -28,7 +30,9 @@ npm run smoke          # live read-only calls against the real Fortnox account
 
 `smoke` needs credentials and is read-only on purpose (safe against production books); it prints tool names and counts, never account data or tokens, and exits 1 on any failure.
 
-There is no test suite. `npm run build` passing plus `npm run check:tools` reporting no drift is the bar for "it works". Don't claim a change is verified beyond that.
+There is no test suite. `npm run check` (build + lint + no tool-surface drift) is the bar for "it works"; say so rather than claiming more.
+
+**Linting is Biome, not ESLint.** typescript-eslint requires `typescript <6.1` and this repo is on TypeScript 7, whose package has no programmatic compiler API — so type-aware rules are unavailable without downgrading the compiler. Biome parses TypeScript itself and covers format + lint in one dependency, but its rules are syntax-only: no `no-floating-promises`, no `no-unnecessary-condition`.
 
 No release/publish tooling exists (the upstream `scripts/release.sh` and the `release:*` scripts were removed). Keep it that way unless asked. `server.json` is inert MCP Registry metadata kept for reference — it is not validated or synced by anything.
 
