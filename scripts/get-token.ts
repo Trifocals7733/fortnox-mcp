@@ -16,6 +16,7 @@
 import http from "http";
 import { URL } from "url";
 import readline from "readline";
+import { persistTokens } from "../src/auth/fileTokenStore.js";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -36,8 +37,13 @@ const SCOPES = [
   "customer",
   "invoice",
   "supplier",
+  "supplierinvoice",
+  "order",
+  "offer",
   "bookkeeping",
-  "companyinformation"
+  "companyinformation",
+  "project",
+  "costcenter"
 ];
 
 async function getAuthorizationCode(): Promise<string> {
@@ -102,7 +108,12 @@ async function getAuthorizationCode(): Promise<string> {
   });
 }
 
-async function exchangeCodeForTokens(code: string): Promise<{ access_token: string; refresh_token: string }> {
+async function exchangeCodeForTokens(code: string): Promise<{
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  scope: string;
+}> {
   const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
 
   const response = await fetch("https://apps.fortnox.se/oauth-v1/token", {
@@ -135,6 +146,15 @@ async function main() {
 
     console.log("Exchanging code for tokens...\n");
     const tokens = await exchangeCodeForTokens(code);
+
+    // Keep the token store in step with .env: the provider prefers the
+    // persisted file, so a stale file there would shadow the new token.
+    persistTokens(
+      tokens.refresh_token,
+      tokens.access_token,
+      Date.now() + tokens.expires_in * 1000,
+      tokens.scope
+    );
 
     console.log("╔════════════════════════════════════════════════════════════╗");
     console.log("║                    SUCCESS!                                 ║");

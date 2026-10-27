@@ -25,6 +25,8 @@ The entry point is `dist/index.js`. Reference it by absolute path in your MCP cl
 
 ## Configuration
 
+Copy `.env.example` to `.env` and fill it in: `npm start`, `npm run dev` and `npm run get-token` load it automatically via Node's `--env-file-if-exists` (no `dotenv`). Environment variables already set in the shell take precedence over the file.
+
 ### Local mode (default)
 
 | Variable | Required | Description |
@@ -59,7 +61,7 @@ The entry point is `dist/index.js`. Reference it by absolute path in your MCP cl
 2. Obtain a refresh token with `npm run get-token` (needs `FORTNOX_CLIENT_ID` and `FORTNOX_CLIENT_SECRET` set). It opens a browser flow and prints the refresh token.
 3. Put the three values in the `env` block of your MCP client config.
 
-Scopes requested: `companyinformation`, `customer`, `invoice`, `supplier`, `bookkeeping`.
+Scopes requested: `companyinformation`, `customer`, `invoice`, `supplier`, `supplierinvoice`, `order`, `offer`, `bookkeeping`, `project`, `costcenter` — one per API area the tools call. Fortnox gates some of these on the subscription's licences (`order`/`offer` need the Order module), and a missing scope shows up as a 400 "Har inte behörighet för scope" when that tool is called, not at startup. Requesting fewer scopes is fine, that tool just fails.
 
 ### Token persistence (local mode)
 

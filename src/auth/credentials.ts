@@ -49,10 +49,26 @@ export function hasFortnoxCredentials(): boolean {
 /**
  * Fortnox OAuth scopes required by this MCP server
  */
+/**
+ * Fortnox OAuth scopes required by this MCP server.
+ *
+ * One scope per API area the tools actually call. A missing scope is not a
+ * startup error — Fortnox answers the call with 400 "Har inte behörighet för
+ * scope", so the tool looks broken rather than unauthorised.
+ *
+ * Licences are gated per scope on the customer's Fortnox subscription: asking
+ * for `order`/`offer` from a company without the Order module makes the whole
+ * authorization fail, so drop those two if that is a problem.
+ */
 export const FORTNOX_SCOPES = [
   "companyinformation",
   "customer",
   "invoice",
   "supplier",
-  "bookkeeping"
+  "supplierinvoice",
+  "order",
+  "offer",
+  "bookkeeping",
+  "project",
+  "costcenter"
 ];

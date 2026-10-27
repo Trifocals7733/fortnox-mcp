@@ -77,6 +77,10 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 
 - ESM with `module: Node16`: **every relative import needs a `.js` extension** (`./services/api.js`), even in `.ts` files. CI-free repo, so a missing extension only shows up at runtime or on `tsc`.
 - TypeScript 7 (the native Go `tsc`) with no declaration emit; `engines` is `>=22`. `exactOptionalPropertyTypes` is still off — enabling it produces 10 errors, 4 of them at `StreamableHTTPServerTransport` call sites that the SDK v2 migration deletes.
+- **Config comes from `.env`**, loaded by Node's `--env-file-if-exists=.env` in the `start` / `dev` / `get-token` scripts. There is no `dotenv` dependency and none is needed (Node 22+). `.env` is gitignored; `.env.example` is committed.
+- **Fortnox permission failures are two different errors**, and neither is a startup error:
+  - `400 ... Har inte behörighet för scope` — the token lacks that scope. Add it to `FORTNOX_SCOPES` in `src/auth/credentials.ts` *and* to `scripts/get-token.ts`, then re-authorize.
+  - `400 ... Det finns ingen aktiv licens för önskat scope` — the subscription does not have that Fortnox module at all (the test company has no Order module, so `fortnox_list_orders` and `fortnox_list_offers` always fail there). Not a bug; verify those two some other way.
 - zod v3 — `z.nativeEnum`, not v4 syntax. Schemas are `.strict()`, so new args must be added to the schema or calls fail.
 - Look up Fortnox endpoints/fields by grepping `fortnox_docs/openapi.json` (OpenAPI: `paths`, `components.schemas`). It's ~1.7 MB / 285 paths; never load it whole.
 - Fortnox has `-v2` variants of invoices, orders, offers and articles (plus assets, recurring-billing, bank-process areas this server does not cover). Every tool currently targets v1, and nothing in v1 is deprecated in the spec — so v1 is correct today and the v2 move is planned, not urgent.
@@ -100,4 +104,4 @@ A rewrite is in progress. Decisions already made, in execution order:
 
 Open items deliberately not in that list: trimming tool descriptions (~28k chars ≈ 7k tokens on every connect — the biggest remaining agent-facing win); adding a test suite; migrating `scripts/get-token.ts` and `evaluations/`.
 
-Verification reality: no Fortnox credentials in this environment yet, so everything so far is checked by `npm run build` + `npm run check:tools` only. Live calls against a real account are the next thing that must happen before tool handlers are trusted.
+Verification reality: a working Fortnox connection now exists via `.env` + `~/.fortnox-mcp/tokens.json`, and read-only tools have been exercised live end to end over an in-memory MCP client (company info, accounts, voucher series, financial years, customers, suppliers, invoices, vouchers, supplier invoices, and the `fetchAllPages`-based analytics tools). Two tools cannot be verified on this subscription: `fortnox_list_orders` and `fortnox_list_offers` return "Det finns ingen aktiv licens för önskat scope" because the company has no Order module. Everything else is still covered only by `npm run build` + `npm run check:tools`.

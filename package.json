@@ -11,9 +11,9 @@
     "dist"
   ],
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "tsx watch src/index.ts",
-    "get-token": "tsx scripts/get-token.ts",
+    "start": "node --env-file-if-exists=.env dist/index.js",
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "get-token": "tsx --env-file-if-exists=.env scripts/get-token.ts",
     "snapshot:tools": "tsx scripts/snapshot-tools.ts",
     "check:tools": "tsx scripts/snapshot-tools.ts --check",
     "build": "tsc",
