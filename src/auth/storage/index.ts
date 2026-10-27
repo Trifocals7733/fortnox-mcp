@@ -1,21 +1,15 @@
 export * from "./types.js";
 export { MemoryTokenStorage, getMemoryStorage } from "./memory.js";
-export {
-  UpstashRedisTokenStorage,
-  VercelKVTokenStorage,
-  getVercelKVStorage,
-  getUpstashRedisStorage
-} from "./vercelKV.js";
+export { UpstashRedisTokenStorage, getUpstashRedisStorage } from "./redis.js";
 
 import { ITokenStorage } from "./types.js";
 import { MemoryTokenStorage } from "./memory.js";
-import { UpstashRedisTokenStorage } from "./vercelKV.js";
+import { UpstashRedisTokenStorage } from "./redis.js";
 
-export type StorageType = "memory" | "vercel-kv" | "upstash-redis";
+export type StorageType = "memory" | "upstash-redis";
 
 export function createTokenStorage(type: StorageType): ITokenStorage {
   switch (type) {
-    case "vercel-kv":
     case "upstash-redis":
       return new UpstashRedisTokenStorage();
     case "memory":

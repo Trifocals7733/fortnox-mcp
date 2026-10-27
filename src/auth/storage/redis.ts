@@ -6,10 +6,10 @@ const TOKEN_TTL_SECONDS = 90 * 24 * 60 * 60;
 
 /**
  * Upstash Redis token storage
- * Uses Upstash's serverless Redis for token persistence on Vercel
+ * Used in remote mode to persist per-user Fortnox tokens.
  *
  * Required environment variables:
- * - UPSTASH_REDIS_REST_URL: Upstash Redis REST URL (or KV_REST_API_URL for backwards compat)
+ * - UPSTASH_REDIS_REST_URL: Upstash Redis REST URL (or KV_REST_API_URL)
  * - UPSTASH_REDIS_REST_TOKEN: Upstash Redis REST token (or KV_REST_API_TOKEN)
  */
 export class UpstashRedisTokenStorage implements ITokenStorage {
@@ -28,7 +28,7 @@ export class UpstashRedisTokenStorage implements ITokenStorage {
       try {
         const { Redis } = await import("@upstash/redis");
 
-        // Support both new Upstash env vars and old Vercel KV env vars
+        // Support both Upstash and legacy Vercel KV env var names
         const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
         const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 
@@ -91,19 +91,12 @@ export class UpstashRedisTokenStorage implements ITokenStorage {
   }
 }
 
-// Backwards compatibility aliases
-export { UpstashRedisTokenStorage as VercelKVTokenStorage };
-
 // Default storage instance
 let redisStorage: UpstashRedisTokenStorage | null = null;
 
-export function getVercelKVStorage(): UpstashRedisTokenStorage {
+export function getUpstashRedisStorage(): UpstashRedisTokenStorage {
   if (!redisStorage) {
     redisStorage = new UpstashRedisTokenStorage();
   }
   return redisStorage;
-}
-
-export function getUpstashRedisStorage(): UpstashRedisTokenStorage {
-  return getVercelKVStorage();
 }
