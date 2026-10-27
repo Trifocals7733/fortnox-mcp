@@ -15,6 +15,7 @@
 
 import http from "http";
 import { URL } from "url";
+import { FORTNOX_SCOPES } from "../src/auth/credentials.js";
 import { persistTokens } from "../src/auth/fileTokenStore.js";
 
 function requireEnv(name: string): string {
@@ -32,18 +33,9 @@ const CLIENT_SECRET = requireEnv("FORTNOX_CLIENT_SECRET");
 const REDIRECT_PORT = 8888;
 const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/callback`;
 
-const SCOPES = [
-  "customer",
-  "invoice",
-  "supplier",
-  "supplierinvoice",
-  "order",
-  "offer",
-  "bookkeeping",
-  "companyinformation",
-  "project",
-  "costcenter"
-];
+// One copy of the scope list, in credentials.ts, so the test that checks it
+// also covers this flow.
+const SCOPES = FORTNOX_SCOPES;
 
 async function getAuthorizationCode(): Promise<string> {
   return new Promise((resolve, reject) => {

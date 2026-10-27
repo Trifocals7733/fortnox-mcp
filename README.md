@@ -27,7 +27,7 @@ The entry point is `dist/index.js`. Reference it by absolute path in your MCP cl
 
 Copy `.env.example` to `.env` and fill it in: `npm start`, `npm run dev` and `npm run get-token` load it automatically via Node's `--env-file-if-exists` (no `dotenv`). Environment variables already set in the shell take precedence over the file.
 
-### Local mode (default)
+### Environment variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -39,22 +39,6 @@ Copy `.env.example` to `.env` and fill it in: `npm start`, `npm run dev` and `np
 | `TRANSPORT` | No | `stdio` (default) or `http` |
 | `PORT` | No | HTTP port (default: 3000) |
 
-### Remote mode (`AUTH_MODE=remote`)
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `AUTH_MODE` | Yes | Set to `remote` |
-| `SERVER_URL` | Yes | Public URL of this server; used as the OAuth issuer |
-| `JWT_SECRET` | Yes | Secret for signing JWT access tokens (`openssl rand -hex 32`) |
-| `FORTNOX_CLIENT_ID` | Yes | Your Fortnox app client ID |
-| `FORTNOX_CLIENT_SECRET` | Yes | Your Fortnox app client secret |
-| `UPSTASH_REDIS_REST_URL` | No* | Redis URL for per-user token storage (`KV_REST_API_URL` also accepted) |
-| `UPSTASH_REDIS_REST_TOKEN` | No* | Redis token (`KV_REST_API_TOKEN` also accepted) |
-| `TOKEN_STORAGE` | No | `upstash-redis` (default when Redis vars are set) or `memory` |
-| `PORT` | No | HTTP port (default: 3000) |
-
-*Without Redis the server falls back to in-memory storage and warns: tokens are lost on restart, so that is dev-only.
-
 ### Getting credentials
 
 1. Register at the [Fortnox Developer Portal](https://developer.fortnox.se) and create an application to get a **Client ID** and **Client Secret**.
@@ -63,7 +47,7 @@ Copy `.env.example` to `.env` and fill it in: `npm start`, `npm run dev` and `np
 
 Scopes requested: `companyinformation`, `customer`, `invoice`, `supplier`, `supplierinvoice`, `order`, `offer`, `bookkeeping`, `project`, `costcenter` — one per API area the tools call. Fortnox gates some of these on the subscription's licences (`order`/`offer` need the Order module), and a missing scope shows up as a 400 "Har inte behörighet för scope" when that tool is called, not at startup. Requesting fewer scopes is fine, that tool just fails.
 
-### Token persistence (local mode)
+### Token persistence
 
 Fortnox refresh tokens are single-use — every refresh returns a new one. The server keeps the latest in `~/.fortnox-mcp/tokens.json` (created `0600`), so restarts don't need config edits:
 
@@ -93,30 +77,19 @@ Add to your client config (`~/Library/Application Support/Claude/claude_desktop_
 }
 ```
 
-### Local HTTP
+### HTTP (agents on another machine)
+
+Same tools and the same single Fortnox token, reachable over HTTP instead of a
+pipe:
 
 ```bash
 TRANSPORT=http PORT=3000 node dist/index.js
 ```
 
-Connect to `http://localhost:3000/mcp`. `GET /health` reports liveness.
-
-### Remote mode (self-hosted, multi-user)
-
-Remote mode puts the same tools behind an OAuth proxy: MCP clients authenticate against this server, and the server holds each user's Fortnox tokens itself, so nobody pastes a refresh token into their client config.
-
-1. Set `AUTH_MODE=remote`, `SERVER_URL`, `JWT_SECRET` and the Fortnox client credentials on the host.
-2. Configure Redis, or accept in-memory storage for single-user/dev.
-3. In your Fortnox app settings, register the redirect URI `${SERVER_URL}/oauth/fortnox/callback`.
-4. Run `node dist/index.js` behind a reverse proxy and point clients at `${SERVER_URL}/mcp`.
-
-Clients discover the flow the standard MCP way: `GET /.well-known/oauth-authorization-server` → `POST /authorize` → Fortnox consent → `GET /oauth/fortnox/callback` → `POST /token` → authenticated `POST /mcp`.
-
-Operational notes:
-
-- Client registrations, pending authorizations, issued codes and revocations are held **in memory**, so run a **single instance**. A restart means clients re-authorize once.
-- The server binds plain HTTP; TLS, hostnames and access control belong to the reverse proxy (Tailscale/WireGuard rather than the open internet).
-- Fortnox tokens live in Redis per user with a 90-day TTL; the JWTs this server issues expire after an hour.
+Point agents at `http://<host>:3000/mcp`; `GET /health` reports liveness. There
+is no authentication of its own — the network is the access control, so run it
+behind Tailscale or WireGuard rather than on a public interface. One instance
+per process: the rate limiter and the token live in-process.
 
 ## Tools
 

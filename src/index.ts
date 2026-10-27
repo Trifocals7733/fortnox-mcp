@@ -1,37 +1,22 @@
-#!/usr/bin/env node
 /**
  * Fortnox MCP Server
  *
- * An MCP server for integrating with the Fortnox Swedish accounting system.
- * Provides tools for managing invoices, customers, suppliers, accounts, and vouchers.
+ * An MCP server for the Fortnox Swedish accounting API. One Fortnox user per
+ * process, configured with:
  *
- * Supports two modes:
- *
- * LOCAL MODE (default):
- *   Run with npx, users provide their own refresh token
- *   - FORTNOX_CLIENT_ID: Fortnox app client ID (can be embedded)
- *   - FORTNOX_CLIENT_SECRET: Fortnox app client secret (can be embedded)
- *   - FORTNOX_REFRESH_TOKEN: User's OAuth2 refresh token
- *   - TRANSPORT: 'stdio' (default) or 'http'
- *   - PORT: HTTP server port (default: 3000)
- *
- * REMOTE MODE (AUTH_MODE=remote):
- *   Hosted server with OAuth flow
- *   - AUTH_MODE: Set to 'remote'
- *   - SERVER_URL: Public URL of the server
- *   - JWT_SECRET: Secret for signing JWT tokens
- *   - UPSTASH_REDIS_REST_URL: Redis URL for token storage
- *   - UPSTASH_REDIS_REST_TOKEN: Redis token
+ *   FORTNOX_CLIENT_ID      Fortnox app client ID
+ *   FORTNOX_CLIENT_SECRET  Fortnox app client secret
+ *   FORTNOX_REFRESH_TOKEN  OAuth2 refresh token (rotated into ~/.fortnox-mcp)
+ *   TRANSPORT              'stdio' (default) or 'http'
+ *   PORT                   HTTP port when TRANSPORT=http (default 3000)
  */
 
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import express from "express";
 import { getTokenProvider } from "./auth/index.js";
-import { getStorageFromEnv } from "./auth/storage/index.js";
-import { loadConfig, logConfig, validateEnvironment } from "./config.js";
+import { loadConfig } from "./config.js";
 import { createMcpServer } from "./server/mcp.js";
-import { runRemoteServer } from "./server/remote.js";
 import { closeRuntime } from "./services/runtime.js";
 
 async function runStdio(): Promise<void> {
@@ -49,7 +34,7 @@ async function runStdio(): Promise<void> {
   await server.connect(transport);
 }
 
-async function runLocalHTTP(): Promise<void> {
+async function runHTTP(): Promise<void> {
   try {
     if (!getTokenProvider().isAuthenticated()) {
       throw new Error("FORTNOX_REFRESH_TOKEN not set");
@@ -91,23 +76,10 @@ async function runLocalHTTP(): Promise<void> {
 async function main(): Promise<void> {
   try {
     const config = loadConfig();
-    validateEnvironment(config);
-    logConfig(config);
 
-    if (config.authMode === "remote") {
-      // Remote mode: OAuth with token storage
-      const tokenStorage = getStorageFromEnv();
-      await runRemoteServer({
-        serverUrl: config.serverUrl!,
-        jwtSecret: config.jwtSecret!,
-        tokenStorage,
-        port: config.port
-      });
-    } else if (config.transport === "http") {
-      // Local HTTP mode (no OAuth, uses env vars)
-      await runLocalHTTP();
+    if (config.transport === "http") {
+      await runHTTP();
     } else {
-      // Local stdio mode (default)
       await runStdio();
     }
   } catch (error) {

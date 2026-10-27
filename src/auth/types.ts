@@ -5,25 +5,19 @@ export interface TokenInfo {
   scope: string;
 }
 
-// Abstraction for local/remote token retrieval
+/**
+ * Local mode has exactly one user: the token in FORTNOX_REFRESH_TOKEN (and its
+ * rotated copy in ~/.fortnox-mcp/tokens.json).
+ */
 export interface ITokenProvider {
-  getAccessToken(userId?: string): Promise<string>;
-  isAuthenticated(userId?: string): boolean;
-  getTokenInfo(userId?: string): TokenInfo | null;
-}
-
-export interface RequestContext {
-  userId?: string;
-  sessionId?: string;
+  getAccessToken(): Promise<string>;
+  isAuthenticated(): boolean;
+  getTokenInfo(): TokenInfo | null;
 }
 
 export class AuthRequiredError extends Error {
-  constructor(public userId?: string) {
-    super(
-      userId
-        ? `Authentication required for user ${userId}`
-        : "Authentication required. Set FORTNOX_REFRESH_TOKEN environment variable."
-    );
+  constructor() {
+    super("Authentication required. Set FORTNOX_REFRESH_TOKEN environment variable.");
     this.name = "AuthRequiredError";
   }
 }

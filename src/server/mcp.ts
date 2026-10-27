@@ -11,9 +11,9 @@ import { registerSupplierTools } from "../tools/suppliers.js";
 import { registerVoucherTools } from "../tools/vouchers.js";
 
 /**
- * The one place tools are registered. Every transport (stdio, local HTTP,
- * remote OAuth) builds its server through this, so a tool cannot end up
- * available in one mode and missing in another.
+ * The one place tools are registered. Both transports (stdio, HTTP) build
+ * their server through this, so a tool cannot end up available in one and
+ * missing in the other.
  */
 export function createMcpServer(): McpServer {
   const server = new McpServer({

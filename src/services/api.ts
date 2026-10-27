@@ -1,6 +1,5 @@
 import { Duration, Effect, Schedule, Schema } from "effect";
 import { HttpClient, HttpClientRequest, HttpIncomingMessage } from "effect/http";
-import { getCurrentUserId } from "../auth/context.js";
 import {
   FETCH_ALL_DELAY_MS,
   FETCH_ALL_PAGE_SIZE,
@@ -10,7 +9,7 @@ import {
 } from "../constants.js";
 import { RateLimiter } from "./rateLimiter.js";
 import { getRuntime } from "./runtime.js";
-import { accessToken, CurrentUser } from "./tokenProvider.js";
+import { accessToken } from "./tokenProvider.js";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -133,8 +132,7 @@ function buildRequest(
  * Make an authenticated request to the Fortnox API.
  *
  * Runs inside the app runtime: the rate limiter gate and the HTTP client are
- * shared process-wide, and the access token comes from the token provider for
- * the current request's user.
+ * shared process-wide, and the access token comes from the token provider.
  */
 export async function fortnoxRequest<T>(
   endpoint: string,
@@ -142,7 +140,6 @@ export async function fortnoxRequest<T>(
   data?: unknown,
   params?: Record<string, string | number | boolean | undefined>
 ): Promise<T> {
-  const userId = getCurrentUserId();
   const url = buildUrl(endpoint, params);
 
   const program = Effect.gen(function* () {
@@ -186,7 +183,7 @@ export async function fortnoxRequest<T>(
     })
   );
 
-  return getRuntime().runPromise(program.pipe(Effect.provideService(CurrentUser, { userId })));
+  return getRuntime().runPromise(program);
 }
 
 /**

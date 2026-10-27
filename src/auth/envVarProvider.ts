@@ -46,7 +46,7 @@ export class EnvVarTokenProvider implements ITokenProvider {
     }
   }
 
-  async getAccessToken(_userId?: string): Promise<string> {
+  async getAccessToken(): Promise<string> {
     if (!this.tokens) {
       throw new AuthRequiredError();
     }
@@ -65,11 +65,11 @@ export class EnvVarTokenProvider implements ITokenProvider {
     return this.tokens.accessToken;
   }
 
-  isAuthenticated(_userId?: string): boolean {
+  isAuthenticated(): boolean {
     return this.tokens !== null && this.tokens.refreshToken !== "";
   }
 
-  getTokenInfo(_userId?: string): TokenInfo | null {
+  getTokenInfo(): TokenInfo | null {
     return this.tokens;
   }
 
