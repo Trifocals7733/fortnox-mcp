@@ -78,4 +78,4 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 - The Express app is bound over plain HTTP; TLS and access control belong to the reverse proxy (Tailscale/WireGuard in the intended setup), not to this code.
 - Fortnox refresh tokens are **single-use** — any code that refreshes must persist the new one (`persistTokens`) or the next run is broken. Both providers dedupe concurrent refreshes; keep that.
 - Secrets: never log tokens, never commit `.env` (gitignored). User tokens live outside the repo at `~/.fortnox-mcp/tokens.json` (0600).
-- `.agents/skills/mcp-builder/` holds MCP server design guidance (tool naming, error message quality, context budget). Read it when adding a new tool domain.
+- `.agents/skills/mcp-builder/` holds MCP server design guidance (tool naming, error message quality, context budget). Read it when adding a new tool domain. It is gitignored — local to this machine, so it may be absent in a fresh clone.
