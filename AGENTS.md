@@ -4,7 +4,7 @@ Guidance for agents working in this repo. Human-facing docs (install, OAuth setu
 
 ## What this is
 
-An MCP server exposing the Fortnox (Swedish accounting) REST API as 51 `fortnox_*` tools. TypeScript, ESM, Node 18+. Personal fork of `jakobwennberg/fortnox-mcp`; **not published anywhere** — no npm, no MCP Registry. Runs locally from `dist/index.js`, or self-hosted internally (planned: own VPS behind Tailscale). Three shapes from one tool registry:
+An MCP server exposing the Fortnox (Swedish accounting) REST API as 51 `fortnox_*` tools. TypeScript, ESM, Node 22+. Personal fork of `jakobwennberg/fortnox-mcp`; **not published anywhere** — no npm, no MCP Registry. Runs locally from `dist/index.js`, or self-hosted internally (planned: own VPS behind Tailscale). Three shapes from one tool registry:
 
 | Shape | Entry | Auth |
 |---|---|---|
@@ -18,7 +18,7 @@ Mode is selected by `AUTH_MODE` / `TRANSPORT` in `src/config.ts`.
 
 ```bash
 npm install          # required first; node_modules is not checked in
-npm run build        # tsc — this is the ONLY check. No tests, no linter, no formatter.
+npm run build        # tsc — compiles, nothing more. No lint, no formatter, no test suite.
 npm run dev          # tsx watch src/index.ts
 npm run clean
 npm run snapshot:tools # rewrite test/tools-baseline.json from the live server
@@ -78,10 +78,26 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 - ESM with `module: Node16`: **every relative import needs a `.js` extension** (`./services/api.js`), even in `.ts` files. CI-free repo, so a missing extension only shows up at runtime or on `tsc`.
 - TypeScript 7 (the native Go `tsc`) with no declaration emit; `engines` is `>=22`. `exactOptionalPropertyTypes` is still off — enabling it produces 10 errors, 4 of them at `StreamableHTTPServerTransport` call sites that the SDK v2 migration deletes.
 - zod v3 — `z.nativeEnum`, not v4 syntax. Schemas are `.strict()`, so new args must be added to the schema or calls fail.
-- Look up Fortnox endpoints/fields by grepping `fortnox_docs/fortnox_api.json` (OpenAPI: `paths`, `components.schemas`). It's ~1 MB; never load it whole.
+- Look up Fortnox endpoints/fields by grepping `fortnox_docs/openapi.json` (OpenAPI: `paths`, `components.schemas`). It's ~1.7 MB / 285 paths; never load it whole.
+- Fortnox has `-v2` variants of invoices, orders, offers and articles (plus assets, recurring-billing, bank-process areas this server does not cover). Every tool currently targets v1, and nothing in v1 is deprecated in the spec — so v1 is correct today and the v2 move is planned, not urgent.
 - Remote mode needs `SERVER_URL`, `JWT_SECRET`, `FORTNOX_CLIENT_ID`, `FORTNOX_CLIENT_SECRET`; Redis vars fall back to in-memory storage with a warning (loses tokens on restart).
 - Remote mode keeps OAuth client registrations, pending authorizations, issued codes and revocations **in memory** (`oauthProvider.ts`) — it assumes a single long-lived instance behind a reverse proxy. Clustering it would need external state; don't "just add replicas".
 - The Express app is bound over plain HTTP; TLS and access control belong to the reverse proxy (Tailscale/WireGuard in the intended setup), not to this code.
 - Fortnox refresh tokens are **single-use** — any code that refreshes must persist the new one (`persistTokens`) or the next run is broken. Both providers dedupe concurrent refreshes; keep that.
 - Secrets: never log tokens, never commit `.env` (gitignored). User tokens live outside the repo at `~/.fortnox-mcp/tokens.json` (0600).
 - `.agents/skills/mcp-builder/` holds MCP server design guidance (tool naming, error message quality, context budget). Read it when adding a new tool domain. It is gitignored — local to this machine, so it may be absent in a fresh clone.
+
+## Planned work (agreed — don't re-litigate without the user)
+
+A rewrite is in progress. Decisions already made, in execution order:
+
+1. ~~Shared registry + frozen `tools/list` baseline~~ — done.
+2. ~~TypeScript 7, no declaration emit, `engines >=22`~~ — done.
+3. **SDK v2 migration.** `@modelcontextprotocol/sdk` → `@modelcontextprotocol/server@2.4.0` + `@modelcontextprotocol/core` + `@modelcontextprotocol/express` (`@modelcontextprotocol/codemod` may help). Covers stdio *and* remote mode; the OAuth/bearer wiring is the least-explored part. Prerequisite for dropping zod, because v2 accepts `StandardSchemaWithJSON`.
+4. **Effect spine.** Effect 4 (`effect@^4`, LTS, zero deps): `effect/http` replaces axios, retry/backoff via `Schedule`, a `ManagedRuntime` built once, token provider behind a `Layer`, and the remote user id passed per request as a service (replacing `AsyncLocalStorage`). The 25 req/5 s limiter is **hand-built** — Effect 4 has no `RateLimiter` module.
+5. **Domain conversion, strangler.** One domain per commit, `Effect.gen` handlers, one Effect schema per tool as the output source of truth (markdown stays hand-written), `outputSchema` declared on all 51 via a small bridge. The bridge: Effect gives Standard Schema v1 `validate` but not `~standard.jsonSchema`, so wrap `JSONSchema.make` output in a `StandardSchemaWithJSON` object (~20 lines, may need `toDocumentDraft07`).
+6. **Fortnox v1 → v2 endpoints** for invoices/orders/offers/articles, after the spine settles.
+
+Open items deliberately not in that list: trimming tool descriptions (~28k chars ≈ 7k tokens on every connect — the biggest remaining agent-facing win); adding a test suite; migrating `scripts/get-token.ts` and `evaluations/`.
+
+Verification reality: no Fortnox credentials in this environment yet, so everything so far is checked by `npm run build` + `npm run check:tools` only. Live calls against a real account are the next thing that must happen before tool handlers are trusted.
