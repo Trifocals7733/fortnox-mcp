@@ -1,312 +1,424 @@
-import { z } from "zod";
-import { ResponseFormat } from "../constants.js";
-import { DatePeriodEnum } from "./invoices.js";
+import { Schema } from "effect";
+import { describe } from "../services/mcpSchema.js";
+import {
+  DATE_PERIODS,
+  DatePeriodSchema,
+  DateString,
+  NullableString,
+  ResponseFormatSchema,
+  ShortText,
+  optional,
+  optionalValue
+} from "./shared.js";
 
 /**
- * Group by enum for time-based grouping
+ * Input and output schemas for the business-intelligence tools.
+ *
+ * Inputs are fully modelled. Several of these tools return collections whose
+ * element shapes are built by aggregation helpers; those are declared as
+ * `Schema.Array(Schema.Unknown)` rather than guessed - a wrong element schema
+ * fails at runtime, and most of these tools have no data in the test company
+ * yet, so a guess would only look correct while the array is empty.
  */
-export const TimeGroupByEnum = z.enum(["week", "month", "quarter"]);
-export type TimeGroupBy = z.infer<typeof TimeGroupByEnum>;
 
-/**
- * Schema for Cash Flow Forecast tool
- */
-export const CashFlowForecastSchema = z.object({
-  horizon_days: z.number()
-    .int()
-    .min(1)
-    .max(365)
-    .default(90)
-    .describe("Number of days to forecast ahead (1-365, default: 90)"),
-  group_by: z.enum(["week", "month"])
-    .default("week")
-    .describe("How to group the forecast: 'week' or 'month'"),
-  include_overdue: z.boolean()
-    .default(true)
-    .describe("Include overdue receivables and payables in the forecast"),
-  starting_balance: z.number()
-    .optional()
-    .describe("Optional starting cash balance to use for projection"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+const Period = optional(
+  DatePeriodSchema.pipe(describe("Date period to analyze (e.g., 'this_month', 'last_quarter')"))
+);
+const FromDate = DateString("Start date for analysis (YYYY-MM-DD). Ignored if period is specified.");
+const ToDate = DateString("End date for analysis (YYYY-MM-DD). Ignored if period is specified.");
+const AccountRangeFrom = optional(
+  Schema.Int.pipe(describe("First account number in the range (defaults to the tool's own range)"))
+);
+const AccountRangeTo = optional(
+  Schema.Int.pipe(describe("Last account number in the range (defaults to the tool's own range)"))
+);
 
-export type CashFlowForecastInput = z.infer<typeof CashFlowForecastSchema>;
+const PeriodsAndRange = { period: Period, from_date: FromDate, to_date: ToDate };
 
-/**
- * Schema for Order Pipeline tool
- */
-export const OrderPipelineSchema = z.object({
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze (e.g., 'this_month', 'this_year')"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  group_by: z.enum(["customer", "month", "status"])
-    .default("status")
-    .describe("How to group order pipeline statistics"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const CashFlowForecastSchema = Schema.Struct({
+  horizon_days: optional(
+    Schema.Int.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(1)),
+      Schema.check(Schema.isLessThanOrEqualTo(365)),
+      describe("Number of days to forecast ahead (1-365, default: 90)")
+    )
+  ),
+  group_by: optional(
+    Schema.Literals(["week", "month"]).pipe(
+      describe("How to group the forecast: 'week' or 'month' (default 'week')")
+    )
+  ),
+  include_overdue: optional(
+    Schema.Boolean.pipe(
+      describe("Include overdue receivables and payables in the forecast (default true)")
+    )
+  ),
+  starting_balance: optional(
+    Schema.Finite.pipe(describe("Optional starting cash balance to use for projection"))
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type OrderPipelineInput = z.infer<typeof OrderPipelineSchema>;
+export type CashFlowForecastInput = typeof CashFlowForecastSchema.Type;
 
-/**
- * Schema for Sales Funnel tool
- */
-export const SalesFunnelSchema = z.object({
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze (e.g., 'this_quarter', 'this_year')"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const OrderPipelineSchema = Schema.Struct({
+  ...PeriodsAndRange,
+  group_by: optional(
+    Schema.Literals(["customer", "month", "status"]).pipe(
+      describe("Group pipeline statistics by this dimension")
+    )
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type SalesFunnelInput = z.infer<typeof SalesFunnelSchema>;
+export type OrderPipelineInput = typeof OrderPipelineSchema.Type;
 
-/**
- * Schema for Product Performance tool
- */
-export const ProductPerformanceSchema = z.object({
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze (e.g., 'this_year', 'last_quarter')"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  metric: z.enum(["revenue", "quantity", "invoice_count"])
-    .default("revenue")
-    .describe("Metric to rank products by: 'revenue', 'quantity', or 'invoice_count'"),
-  top_n: z.number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20)
-    .describe("Number of top products to return (1-100, default: 20)"),
-  include_trends: z.boolean()
-    .default(false)
-    .describe("Compare to previous period to show trends"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const SalesFunnelSchema = Schema.Struct({
+  ...PeriodsAndRange,
+  response_format: ResponseFormatSchema
+});
 
-export type ProductPerformanceInput = z.infer<typeof ProductPerformanceSchema>;
+export type SalesFunnelInput = typeof SalesFunnelSchema.Type;
 
-/**
- * Schema for Period Comparison tool
- */
-export const PeriodComparisonSchema = z.object({
-  current_period: DatePeriodEnum
-    .describe("Current period to analyze (e.g., 'this_month', 'this_quarter')"),
-  compare_to: DatePeriodEnum
-    .optional()
-    .describe("Period to compare against. If not specified, compares to the previous equivalent period."),
-  metrics: z.array(z.enum(["revenue", "invoice_count", "average_invoice", "new_customers"]))
-    .default(["revenue", "invoice_count", "average_invoice"])
-    .describe("Metrics to compare between periods"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const ProductPerformanceSchema = Schema.Struct({
+  ...PeriodsAndRange,
+  metric: optional(
+    Schema.Literals(["revenue", "quantity", "invoice_count"]).pipe(
+      describe("Metric to rank products by")
+    )
+  ),
+  top_n: optional(
+    Schema.Int.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(1)),
+      Schema.check(Schema.isLessThanOrEqualTo(100)),
+      describe("Number of top items to return (default 10)")
+    )
+  ),
+  include_trends: optional(
+    Schema.Boolean.pipe(describe("Include trend information (default false)"))
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type PeriodComparisonInput = z.infer<typeof PeriodComparisonSchema>;
+export type ProductPerformanceInput = typeof ProductPerformanceSchema.Type;
 
-/**
- * Schema for Customer Growth tool
- */
-export const CustomerGrowthSchema = z.object({
-  current_period: DatePeriodEnum
-    .describe("Current period to analyze (e.g., 'this_quarter', 'this_year')"),
-  compare_to: DatePeriodEnum
-    .optional()
-    .describe("Period to compare against. If not specified, compares to the previous equivalent period."),
-  min_revenue: z.number()
-    .min(0)
-    .optional()
-    .describe("Only include customers with at least this much revenue in either period"),
-  top_n: z.number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20)
-    .describe("Number of customers to return (1-100, default: 20)"),
-  show: z.enum(["growing", "declining", "all"])
-    .default("all")
-    .describe("Filter to show only growing, declining, or all customers"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const PeriodComparisonSchema = Schema.Struct({
+  current_period: optional(
+    DatePeriodSchema.pipe(describe("Current period to analyse (default 'this_month')"))
+  ),
+  compare_to: optional(
+    DatePeriodSchema.pipe(describe("Period to compare against (defaults to the previous one)"))
+  ),
+  metrics: optional(
+    Schema.Array(
+      Schema.Literals(["revenue", "invoice_count", "average_invoice", "new_customers"])
+    ).pipe(describe("Metrics to compare"))
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type CustomerGrowthInput = z.infer<typeof CustomerGrowthSchema>;
+export type PeriodComparisonInput = typeof PeriodComparisonSchema.Type;
 
-/**
- * Schema for Project Profitability tool
- */
-export const ProjectProfitabilitySchema = z.object({
-  project_number: z.string()
-    .optional()
-    .describe("Filter to a specific project number"),
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  include_details: z.boolean()
-    .default(false)
-    .describe("Include detailed breakdown of revenue and costs per project"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const CustomerGrowthSchema = Schema.Struct({
+  current_period: optional(
+    DatePeriodSchema.pipe(describe("Current period to analyse (default 'this_month')"))
+  ),
+  compare_to: optional(DatePeriodSchema.pipe(describe("Period to compare against"))),
+  min_revenue: optional(
+    Schema.Finite.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(0)),
+      describe("Only include customers above this revenue")
+    )
+  ),
+  top_n: optional(
+    Schema.Int.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(1)),
+      Schema.check(Schema.isLessThanOrEqualTo(100)),
+      describe("Number of customers to return (default 20)")
+    )
+  ),
+  show: optional(
+    Schema.Literals(["growing", "declining", "all"]).pipe(
+      describe("Which customers to show (default 'all')")
+    )
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type ProjectProfitabilityInput = z.infer<typeof ProjectProfitabilitySchema>;
+export type CustomerGrowthInput = typeof CustomerGrowthSchema.Type;
 
-/**
- * Schema for Cost Center Analysis tool
- */
-export const CostCenterAnalysisSchema = z.object({
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  cost_center: z.string()
-    .optional()
-    .describe("Filter to a specific cost center code"),
-  account_range_from: z.number()
-    .int()
-    .optional()
-    .describe("Start of account range to include (default: all accounts)"),
-  account_range_to: z.number()
-    .int()
-    .optional()
-    .describe("End of account range to include (default: all accounts)"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const ProjectProfitabilitySchema = Schema.Struct({
+  project_number: ShortText(50, "Limit to a single project number"),
+  ...PeriodsAndRange,
+  include_details: optional(
+    Schema.Boolean.pipe(describe("Include per-project detail (default true)"))
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type CostCenterAnalysisInput = z.infer<typeof CostCenterAnalysisSchema>;
+export type ProjectProfitabilityInput = typeof ProjectProfitabilitySchema.Type;
 
-/**
- * Schema for Expense Analysis tool
- */
-export const ExpenseAnalysisSchema = z.object({
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  account_range_from: z.number()
-    .int()
-    .default(4000)
-    .describe("Start of expense account range (default: 4000)"),
-  account_range_to: z.number()
-    .int()
-    .default(8999)
-    .describe("End of expense account range (default: 8999)"),
-  group_by: z.enum(["account", "account_class"])
-    .default("account_class")
-    .describe("Group expenses by individual account or account class (e.g., 4xxx, 5xxx)"),
-  compare_to: DatePeriodEnum
-    .optional()
-    .describe("Optional period to compare against"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const CostCenterAnalysisSchema = Schema.Struct({
+  ...PeriodsAndRange,
+  cost_center: ShortText(50, "Limit to a single cost center code"),
+  account_range_from: AccountRangeFrom,
+  account_range_to: AccountRangeTo,
+  response_format: ResponseFormatSchema
+});
 
-export type ExpenseAnalysisInput = z.infer<typeof ExpenseAnalysisSchema>;
+export type CostCenterAnalysisInput = typeof CostCenterAnalysisSchema.Type;
 
-/**
- * Schema for Yearly Comparison tool
- */
-export const YearlyComparisonSchema = z.object({
-  years: z.number()
-    .int()
-    .min(2)
-    .max(5)
-    .default(3)
-    .describe("Number of years to compare (2-5, default: 3)"),
-  metrics: z.array(z.enum(["revenue", "invoice_count", "average_invoice", "customer_count"]))
-    .default(["revenue", "invoice_count"])
-    .describe("Metrics to compare across years"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const ExpenseAnalysisSchema = Schema.Struct({
+  ...PeriodsAndRange,
+  account_range_from: AccountRangeFrom,
+  account_range_to: AccountRangeTo,
+  group_by: optional(
+    Schema.Literals(["account", "account_class"]).pipe(
+      describe("How to group expenses (default 'account_class')")
+    )
+  ),
+  compare_to: optional(DatePeriodSchema.pipe(describe("Optional period to compare against"))),
+  response_format: ResponseFormatSchema
+});
 
-export type YearlyComparisonInput = z.infer<typeof YearlyComparisonSchema>;
+export type ExpenseAnalysisInput = typeof ExpenseAnalysisSchema.Type;
 
-/**
- * Schema for Gross Margin Trend tool
- */
-export const GrossMarginTrendSchema = z.object({
-  period: DatePeriodEnum
-    .optional()
-    .describe("Date period to analyze (e.g., 'this_year', 'last_year')"),
-  from_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("Start date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  to_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .optional()
-    .describe("End date for analysis (YYYY-MM-DD). Ignored if period is specified."),
-  group_by: z.enum(["month", "quarter"])
-    .default("month")
-    .describe("How to group the margin trend: 'month' or 'quarter'"),
-  revenue_accounts: z.string()
-    .optional()
-    .describe("Revenue account range (e.g., '3000-3999'). Default: 3000-3999"),
-  cogs_accounts: z.string()
-    .optional()
-    .describe("Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999"),
-  response_format: z.nativeEnum(ResponseFormat)
-    .default(ResponseFormat.MARKDOWN)
-    .describe("Output format: 'markdown' or 'json'")
-}).strict();
+export const YearlyComparisonSchema = Schema.Struct({
+  years: optional(
+    Schema.Int.pipe(
+      Schema.check(Schema.isGreaterThanOrEqualTo(2)),
+      Schema.check(Schema.isLessThanOrEqualTo(5)),
+      describe("Number of years to compare (2-5, default: 3)")
+    )
+  ),
+  metrics: optional(
+    Schema.Array(
+      Schema.Literals(["revenue", "invoice_count", "average_invoice", "customer_count"])
+    ).pipe(describe("Metrics to compare across years (default ['revenue','invoice_count'])"))
+  ),
+  response_format: ResponseFormatSchema
+});
 
-export type GrossMarginTrendInput = z.infer<typeof GrossMarginTrendSchema>;
+export type YearlyComparisonInput = typeof YearlyComparisonSchema.Type;
+
+export const GrossMarginTrendSchema = Schema.Struct({
+  ...PeriodsAndRange,
+  group_by: optional(
+    Schema.Literals(["month", "quarter"]).pipe(
+      describe("How to group the margin trend: 'month' or 'quarter' (default 'month')")
+    )
+  ),
+  revenue_accounts: ShortText(20, "Revenue account range (e.g., '3000-3999'). Default: 3000-3999"),
+  cogs_accounts: ShortText(20, "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999"),
+  response_format: ResponseFormatSchema
+});
+
+export type GrossMarginTrendInput = typeof GrossMarginTrendSchema.Type;
+
+/* ------------------------------- outputs ------------------------------- */
+
+/** Collections whose element shapes come from aggregation helpers. */
+const OpaqueItems = Schema.Array(Schema.Unknown);
+
+const Truncation = {
+  truncated: Schema.Boolean,
+  truncation_reason: optionalValue(NullableString)
+};
+
+export const CashFlowForecastOutput = Schema.Struct({
+  forecast: Schema.Struct({
+    horizon_days: optionalValue(Schema.Finite),
+    group_by: optionalValue(Schema.String),
+    from_date: Schema.String,
+    to_date: Schema.String,
+    include_overdue: optionalValue(Schema.Boolean),
+    starting_balance: Schema.Finite
+  }),
+  summary: Schema.Struct({
+    total_receivables: Schema.Finite,
+    total_payables: Schema.Finite,
+    net_position: Schema.Finite,
+    receivables_count: Schema.Finite,
+    payables_count: Schema.Finite,
+    ending_balance: Schema.Finite
+  }),
+  periods: OpaqueItems,
+  ...Truncation,
+  warning: optionalValue(Schema.String)
+});
+
+export const OrderPipelineOutput = Schema.Struct({
+  period: NullableString,
+  date_range: NullableString,
+  group_by: optionalValue(Schema.String),
+  summary: Schema.Struct({
+    total_orders: Schema.Finite,
+    total_value: Schema.Finite,
+    pending_orders: Schema.Finite,
+    pending_value: Schema.Finite,
+    invoiced_orders: Schema.Finite,
+    invoiced_value: Schema.Finite,
+    cancelled_orders: Schema.Finite,
+    unique_customers: Schema.Finite
+  }),
+  groups: OpaqueItems,
+  ...Truncation
+});
+
+const FunnelStage = Schema.Struct({
+  count: Schema.Finite,
+  value: Schema.Finite
+});
+
+export const SalesFunnelOutput = Schema.Struct({
+  period: NullableString,
+  date_range: NullableString,
+  funnel: Schema.Struct({
+    offers: Schema.Struct({ ...FunnelStage.fields, converted: Schema.Finite, open: Schema.Finite }),
+    orders: Schema.Struct({ ...FunnelStage.fields, converted: Schema.Finite, open: Schema.Finite }),
+    invoices: FunnelStage
+  }),
+  conversion_rates: Schema.Struct({
+    offer_to_order: Schema.Finite,
+    order_to_invoice: Schema.Finite,
+    overall: Schema.Finite
+  }),
+  truncated: Schema.Boolean
+});
+
+export const ProductPerformanceOutput = Schema.Struct({
+  period: NullableString,
+  date_range: NullableString,
+  metric: optionalValue(Schema.String),
+  summary: Schema.Struct({
+    total_revenue: Schema.Finite,
+    total_invoices: Schema.Finite,
+    unique_customers: Schema.Finite
+  }),
+  top_performers: Schema.Array(
+    Schema.Struct({
+      rank: Schema.Finite,
+      identifier: NullableString,
+      name: NullableString,
+      revenue: Schema.Finite,
+      invoice_count: Schema.Finite
+    })
+  ),
+  note: Schema.String,
+  truncated: Schema.Boolean
+});
+
+const DateRange = Schema.Struct({
+  from_date: Schema.String,
+  to_date: Schema.String
+});
+
+const ComparedPeriod = Schema.Struct({
+  period: Schema.String,
+  description: Schema.String,
+  date_range: DateRange,
+  metrics: Schema.Unknown
+});
+
+/** comparison is keyed by metric name, not a list. */
+const GrowthResultSchema = Schema.Struct({
+  current: Schema.Finite,
+  previous: Schema.Finite,
+  change: Schema.Finite,
+  percentChange: Schema.Finite,
+  trend: Schema.Literals(["up", "down", "flat"])
+});
+
+export const PeriodComparisonOutput = Schema.Struct({
+  current_period: ComparedPeriod,
+  previous_period: ComparedPeriod,
+  comparison: Schema.Record(Schema.String, GrowthResultSchema),
+  truncated: Schema.Boolean
+});
+
+export const CustomerGrowthOutput = Schema.Struct({
+  current_period: Schema.Unknown,
+  previous_period: Schema.Unknown,
+  filter: optionalValue(Schema.String),
+  summary: Schema.Struct({
+    total_customers_analyzed: Schema.Finite,
+    growing_customers: Schema.Finite,
+    declining_customers: Schema.Finite,
+    flat_customers: Schema.Finite
+  }),
+  customers: OpaqueItems,
+  truncated: Schema.Boolean
+});
+
+/** Early return when the company has no projects (or the requested one). */
+const NoProjectsOutput = Schema.Struct({
+  message: Schema.String,
+  projects: OpaqueItems
+});
+
+export const ProjectProfitabilityOutput = Schema.Union([
+  Schema.Struct({
+    period: NullableString,
+    date_range: NullableString,
+    note: Schema.String,
+    projects: OpaqueItems,
+    truncated: Schema.Boolean
+  }),
+  NoProjectsOutput
+]);
+
+export const CostCenterAnalysisOutput = Schema.Struct({
+  period: NullableString,
+  date_range: NullableString,
+  account_range: Schema.NullOr(
+    Schema.Struct({
+      from: optionalValue(Schema.Finite),
+      to: optionalValue(Schema.Finite)
+    })
+  ),
+  note: Schema.String,
+  cost_centers: OpaqueItems,
+  truncated: Schema.Boolean
+});
+
+export const ExpenseAnalysisOutput = Schema.Struct({
+  period: NullableString,
+  date_range: NullableString,
+  account_range: Schema.Struct({
+    from: optionalValue(Schema.Finite),
+    to: optionalValue(Schema.Finite)
+  }),
+  group_by: optionalValue(Schema.String),
+  note: Schema.String,
+  expense_classes: OpaqueItems,
+  comparison_period: NullableString
+});
+
+export const YearlyComparisonOutput = Schema.Struct({
+  years_compared: optionalValue(Schema.Finite),
+  metrics: optionalValue(Schema.Array(Schema.String)),
+  years: OpaqueItems,
+  truncated: Schema.Boolean
+});
+
+export const GrossMarginTrendOutput = Schema.Struct({
+  period: NullableString,
+  date_range: NullableString,
+  group_by: optionalValue(Schema.String),
+  account_ranges: Schema.Struct({
+    revenue: Schema.String,
+    cogs: Schema.String
+  }),
+  note: Schema.String,
+  periods: Schema.Array(
+    Schema.Struct({
+      period: Schema.String,
+      revenue: Schema.Finite,
+      cogs: Schema.Finite,
+      gross_margin: Schema.Finite,
+      margin_percent: Schema.Finite
+    })
+  )
+});
+
+export { DATE_PERIODS };

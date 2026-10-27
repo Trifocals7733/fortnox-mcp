@@ -507,44 +507,161 @@
       "type": "object",
       "properties": {
         "horizon_days": {
-          "default": 90,
-          "description": "Number of days to forecast ahead (1-365, default: 90)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 365
+          "maximum": 365,
+          "description": "Number of days to forecast ahead (1-365, default: 90)"
         },
         "group_by": {
-          "default": "week",
-          "description": "How to group the forecast: 'week' or 'month'",
           "type": "string",
           "enum": [
             "week",
             "month"
-          ]
+          ],
+          "description": "How to group the forecast: 'week' or 'month' (default 'week')"
         },
         "include_overdue": {
-          "default": true,
-          "description": "Include overdue receivables and payables in the forecast",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Include overdue receivables and payables in the forecast (default true)"
         },
         "starting_balance": {
-          "description": "Optional starting cash balance to use for projection",
-          "type": "number"
+          "type": "number",
+          "description": "Optional starting cash balance to use for projection"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "forecast": {
+          "type": "object",
+          "properties": {
+            "horizon_days": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "group_by": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "from_date": {
+              "type": "string"
+            },
+            "to_date": {
+              "type": "string"
+            },
+            "include_overdue": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "starting_balance": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "from_date",
+            "to_date",
+            "starting_balance"
+          ],
+          "additionalProperties": true
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_receivables": {
+              "type": "number"
+            },
+            "total_payables": {
+              "type": "number"
+            },
+            "net_position": {
+              "type": "number"
+            },
+            "receivables_count": {
+              "type": "number"
+            },
+            "payables_count": {
+              "type": "number"
+            },
+            "ending_balance": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "total_receivables",
+            "total_payables",
+            "net_position",
+            "receivables_count",
+            "payables_count",
+            "ending_balance"
+          ],
+          "additionalProperties": true
+        },
+        "periods": {
+          "type": "array"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warning": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "required": [
+        "forecast",
+        "summary",
+        "periods",
+        "truncated"
+      ],
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -560,7 +677,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze",
           "type": "string",
           "enum": [
             "today",
@@ -573,48 +689,121 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "cost_center": {
-          "description": "Filter to a specific cost center code",
-          "type": "string"
+          "type": "string",
+          "maxLength": 50,
+          "description": "Limit to a single cost center code"
         },
         "account_range_from": {
-          "description": "Start of account range to include (default: all accounts)",
           "type": "integer",
           "minimum": -9007199254740991,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "First account number in the range (defaults to the tool's own range)"
         },
         "account_range_to": {
-          "description": "End of account range to include (default: all accounts)",
           "type": "integer",
           "minimum": -9007199254740991,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "Last account number in the range (defaults to the tool's own range)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "account_range": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "cost_centers": {
+          "type": "array"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "period",
+        "date_range",
+        "account_range",
+        "note",
+        "cost_centers",
+        "truncated"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -1436,10 +1625,9 @@
             "this_year",
             "last_year"
           ],
-          "description": "Current period to analyze (e.g., 'this_quarter', 'this_year')"
+          "description": "Current period to analyse (default 'this_month')"
         },
         "compare_to": {
-          "description": "Period to compare against. If not specified, compares to the previous equivalent period.",
           "type": "string",
           "enum": [
             "today",
@@ -1452,47 +1640,95 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Period to compare against"
         },
         "min_revenue": {
-          "description": "Only include customers with at least this much revenue in either period",
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Only include customers above this revenue"
         },
         "top_n": {
-          "default": 20,
-          "description": "Number of customers to return (1-100, default: 20)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "description": "Number of customers to return (default 20)"
         },
         "show": {
-          "default": "all",
-          "description": "Filter to show only growing, declining, or all customers",
           "type": "string",
           "enum": [
             "growing",
             "declining",
             "all"
-          ]
+          ],
+          "description": "Which customers to show (default 'all')"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "current_period": {},
+        "previous_period": {},
+        "filter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_customers_analyzed": {
+              "type": "number"
+            },
+            "growing_customers": {
+              "type": "number"
+            },
+            "declining_customers": {
+              "type": "number"
+            },
+            "flat_customers": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "total_customers_analyzed",
+            "growing_customers",
+            "declining_customers",
+            "flat_customers"
+          ],
+          "additionalProperties": true
+        },
+        "customers": {
+          "type": "array"
+        },
+        "truncated": {
+          "type": "boolean"
         }
       },
       "required": [
-        "current_period"
+        "current_period",
+        "previous_period",
+        "summary",
+        "customers",
+        "truncated"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -1638,7 +1874,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze",
           "type": "string",
           "enum": [
             "today",
@@ -1651,43 +1886,38 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "account_range_from": {
-          "default": 4000,
-          "description": "Start of expense account range (default: 4000)",
           "type": "integer",
           "minimum": -9007199254740991,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "First account number in the range (defaults to the tool's own range)"
         },
         "account_range_to": {
-          "default": 8999,
-          "description": "End of expense account range (default: 8999)",
           "type": "integer",
           "minimum": -9007199254740991,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "Last account number in the range (defaults to the tool's own range)"
         },
         "group_by": {
-          "default": "account_class",
-          "description": "Group expenses by individual account or account class (e.g., 4xxx, 5xxx)",
           "type": "string",
           "enum": [
             "account",
             "account_class"
-          ]
+          ],
+          "description": "How to group expenses (default 'account_class')"
         },
         "compare_to": {
-          "description": "Optional period to compare against",
           "type": "string",
           "enum": [
             "today",
@@ -1700,22 +1930,106 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Optional period to compare against"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "account_range": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "to": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "group_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "expense_classes": {
+          "type": "array"
+        },
+        "comparison_period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "required": [
+        "period",
+        "date_range",
+        "account_range",
+        "note",
+        "expense_classes",
+        "comparison_period"
+      ],
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -3088,7 +3402,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze (e.g., 'this_year', 'last_year')",
           "type": "string",
           "enum": [
             "today",
@@ -3101,49 +3414,139 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "group_by": {
-          "default": "month",
-          "description": "How to group the margin trend: 'month' or 'quarter'",
           "type": "string",
           "enum": [
             "month",
             "quarter"
-          ]
+          ],
+          "description": "How to group the margin trend: 'month' or 'quarter' (default 'month')"
         },
         "revenue_accounts": {
-          "description": "Revenue account range (e.g., '3000-3999'). Default: 3000-3999",
-          "type": "string"
+          "type": "string",
+          "maxLength": 20,
+          "description": "Revenue account range (e.g., '3000-3999'). Default: 3000-3999"
         },
         "cogs_accounts": {
-          "description": "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999",
-          "type": "string"
+          "type": "string",
+          "maxLength": 20,
+          "description": "Cost of goods sold account range (e.g., '4000-4999'). Default: 4000-4999"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "group_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "account_ranges": {
+          "type": "object",
+          "properties": {
+            "revenue": {
+              "type": "string"
+            },
+            "cogs": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "revenue",
+            "cogs"
+          ],
+          "additionalProperties": true
+        },
+        "note": {
+          "type": "string"
+        },
+        "periods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "period": {
+                "type": "string"
+              },
+              "revenue": {
+                "type": "number"
+              },
+              "cogs": {
+                "type": "number"
+              },
+              "gross_margin": {
+                "type": "number"
+              },
+              "margin_percent": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "period",
+              "revenue",
+              "cogs",
+              "gross_margin",
+              "margin_percent"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "period",
+        "date_range",
+        "account_ranges",
+        "note",
+        "periods"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -5591,7 +5994,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze (e.g., 'this_month', 'this_year')",
           "type": "string",
           "enum": [
             "today",
@@ -5604,42 +6006,139 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "group_by": {
-          "default": "status",
-          "description": "How to group order pipeline statistics",
           "type": "string",
           "enum": [
             "customer",
             "month",
             "status"
-          ]
+          ],
+          "description": "Group pipeline statistics by this dimension"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "group_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_orders": {
+              "type": "number"
+            },
+            "total_value": {
+              "type": "number"
+            },
+            "pending_orders": {
+              "type": "number"
+            },
+            "pending_value": {
+              "type": "number"
+            },
+            "invoiced_orders": {
+              "type": "number"
+            },
+            "invoiced_value": {
+              "type": "number"
+            },
+            "cancelled_orders": {
+              "type": "number"
+            },
+            "unique_customers": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "total_orders",
+            "total_value",
+            "pending_orders",
+            "pending_value",
+            "invoiced_orders",
+            "invoiced_value",
+            "cancelled_orders",
+            "unique_customers"
+          ],
+          "additionalProperties": true
+        },
+        "groups": {
+          "type": "array"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "required": [
+        "period",
+        "date_range",
+        "summary",
+        "groups",
+        "truncated"
+      ],
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -5915,10 +6414,9 @@
             "this_year",
             "last_year"
           ],
-          "description": "Current period to analyze (e.g., 'this_month', 'this_quarter')"
+          "description": "Current period to analyse (default 'this_month')"
         },
         "compare_to": {
-          "description": "Period to compare against. If not specified, compares to the previous equivalent period.",
           "type": "string",
           "enum": [
             "today",
@@ -5931,15 +6429,10 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Period to compare against (defaults to the previous one)"
         },
         "metrics": {
-          "default": [
-            "revenue",
-            "invoice_count",
-            "average_invoice"
-          ],
-          "description": "Metrics to compare between periods",
           "type": "array",
           "items": {
             "type": "string",
@@ -5949,25 +6442,141 @@
               "average_invoice",
               "new_customers"
             ]
-          }
+          },
+          "description": "Metrics to compare"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
+        }
+      },
+      "additionalProperties": true
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "current_period": {
+          "type": "object",
+          "properties": {
+            "period": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "date_range": {
+              "type": "object",
+              "properties": {
+                "from_date": {
+                  "type": "string"
+                },
+                "to_date": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from_date",
+                "to_date"
+              ],
+              "additionalProperties": true
+            },
+            "metrics": {}
+          },
+          "required": [
+            "period",
+            "description",
+            "date_range",
+            "metrics"
+          ],
+          "additionalProperties": true
+        },
+        "previous_period": {
+          "type": "object",
+          "properties": {
+            "period": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "date_range": {
+              "type": "object",
+              "properties": {
+                "from_date": {
+                  "type": "string"
+                },
+                "to_date": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from_date",
+                "to_date"
+              ],
+              "additionalProperties": true
+            },
+            "metrics": {}
+          },
+          "required": [
+            "period",
+            "description",
+            "date_range",
+            "metrics"
+          ],
+          "additionalProperties": true
+        },
+        "comparison": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "number"
+              },
+              "previous": {
+                "type": "number"
+              },
+              "change": {
+                "type": "number"
+              },
+              "percentChange": {
+                "type": "number"
+              },
+              "trend": {
+                "type": "string",
+                "enum": [
+                  "up",
+                  "down",
+                  "flat"
+                ]
+              }
+            },
+            "required": [
+              "current",
+              "previous",
+              "change",
+              "percentChange",
+              "trend"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "truncated": {
+          "type": "boolean"
         }
       },
       "required": [
-        "current_period"
+        "current_period",
+        "previous_period",
+        "comparison",
+        "truncated"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -5983,7 +6592,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze (e.g., 'this_year', 'last_quarter')",
           "type": "string",
           "enum": [
             "today",
@@ -5996,54 +6604,162 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "metric": {
-          "default": "revenue",
-          "description": "Metric to rank products by: 'revenue', 'quantity', or 'invoice_count'",
           "type": "string",
           "enum": [
             "revenue",
             "quantity",
             "invoice_count"
-          ]
+          ],
+          "description": "Metric to rank products by"
         },
         "top_n": {
-          "default": 20,
-          "description": "Number of top products to return (1-100, default: 20)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "description": "Number of top items to return (default 10)"
         },
         "include_trends": {
-          "default": false,
-          "description": "Compare to previous period to show trends",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Include trend information (default false)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_revenue": {
+              "type": "number"
+            },
+            "total_invoices": {
+              "type": "number"
+            },
+            "unique_customers": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "total_revenue",
+            "total_invoices",
+            "unique_customers"
+          ],
+          "additionalProperties": true
+        },
+        "top_performers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rank": {
+                "type": "number"
+              },
+              "identifier": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "revenue": {
+                "type": "number"
+              },
+              "invoice_count": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "rank",
+              "identifier",
+              "name",
+              "revenue",
+              "invoice_count"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "note": {
+          "type": "string"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "period",
+        "date_range",
+        "summary",
+        "top_performers",
+        "note",
+        "truncated"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -6059,11 +6775,11 @@
       "type": "object",
       "properties": {
         "project_number": {
-          "description": "Filter to a specific project number",
-          "type": "string"
+          "type": "string",
+          "maxLength": 50,
+          "description": "Limit to a single project number"
         },
         "period": {
-          "description": "Date period to analyze",
           "type": "string",
           "enum": [
             "today",
@@ -6076,37 +6792,95 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "include_details": {
-          "default": false,
-          "description": "Include detailed breakdown of revenue and costs per project",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Include per-project detail (default true)"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "period": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "date_range": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "note": {
+              "type": "string"
+            },
+            "projects": {
+              "type": "array"
+            },
+            "truncated": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "period",
+            "date_range",
+            "note",
+            "projects",
+            "truncated"
+          ],
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "projects": {
+              "type": "array"
+            }
+          },
+          "required": [
+            "message",
+            "projects"
+          ],
+          "additionalProperties": true
+        }
+      ]
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -6122,7 +6896,6 @@
       "type": "object",
       "properties": {
         "period": {
-          "description": "Date period to analyze (e.g., 'this_quarter', 'this_year')",
           "type": "string",
           "enum": [
             "today",
@@ -6135,32 +6908,159 @@
             "last_quarter",
             "this_year",
             "last_year"
-          ]
+          ],
+          "description": "Date period to analyze (e.g., 'this_month', 'last_quarter')"
         },
         "from_date": {
-          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "Start date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "to_date": {
-          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified.",
           "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          "description": "End date for analysis (YYYY-MM-DD). Ignored if period is specified."
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "funnel": {
+          "type": "object",
+          "properties": {
+            "offers": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "number"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "converted": {
+                  "type": "number"
+                },
+                "open": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "count",
+                "value",
+                "converted",
+                "open"
+              ],
+              "additionalProperties": true
+            },
+            "orders": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "number"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "converted": {
+                  "type": "number"
+                },
+                "open": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "count",
+                "value",
+                "converted",
+                "open"
+              ],
+              "additionalProperties": true
+            },
+            "invoices": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "number"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "count",
+                "value"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "offers",
+            "orders",
+            "invoices"
+          ],
+          "additionalProperties": true
+        },
+        "conversion_rates": {
+          "type": "object",
+          "properties": {
+            "offer_to_order": {
+              "type": "number"
+            },
+            "order_to_invoice": {
+              "type": "number"
+            },
+            "overall": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "offer_to_order",
+            "order_to_invoice",
+            "overall"
+          ],
+          "additionalProperties": true
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "period",
+        "date_range",
+        "funnel",
+        "conversion_rates",
+        "truncated"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -7374,18 +8274,12 @@
       "type": "object",
       "properties": {
         "years": {
-          "default": 3,
-          "description": "Number of years to compare (2-5, default: 3)",
           "type": "integer",
           "minimum": 2,
-          "maximum": 5
+          "maximum": 5,
+          "description": "Number of years to compare (2-5, default: 3)"
         },
         "metrics": {
-          "default": [
-            "revenue",
-            "invoice_count"
-          ],
-          "description": "Metrics to compare across years",
           "type": "array",
           "items": {
             "type": "string",
@@ -7395,22 +8289,59 @@
               "average_invoice",
               "customer_count"
             ]
-          }
+          },
+          "description": "Metrics to compare across years (default ['revenue','invoice_count'])"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "years_compared": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metrics": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "years": {
+          "type": "array"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "years",
+        "truncated"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fetchAllPages } from "../services/api.js";
 import { ResponseFormat } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -55,7 +56,18 @@ import {
   type CostCenterAnalysisInput,
   type ExpenseAnalysisInput,
   type YearlyComparisonInput,
-  type GrossMarginTrendInput
+  type GrossMarginTrendInput,
+  CashFlowForecastOutput,
+  OrderPipelineOutput,
+  SalesFunnelOutput,
+  ProductPerformanceOutput,
+  PeriodComparisonOutput,
+  CustomerGrowthOutput,
+  ProjectProfitabilityOutput,
+  CostCenterAnalysisOutput,
+  ExpenseAnalysisOutput,
+  YearlyComparisonOutput,
+  GrossMarginTrendOutput
 } from "../schemas/biAnalytics.js";
 
 // Shared type interfaces
@@ -229,7 +241,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     {
       title: "Cash Flow Forecast",
       description: `Generate cash flow forecast from unpaid receivables and payables. Shows expected inflows, outflows, net flow, and running balance grouped by week or month.`,
-      inputSchema: CashFlowForecastSchema,
+      inputSchema: mcpSchema(CashFlowForecastSchema),
+      outputSchema: mcpSchema(CashFlowForecastOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -240,7 +253,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     async (params: CashFlowForecastInput) => {
       try {
         const today = getTodayString();
-        const futureDate = getFutureDate(params.horizon_days);
+        const futureDate = getFutureDate(params.horizon_days ?? 90);
 
         // Fetch unpaid customer invoices (receivables)
         const receivablesResult = await fetchAllPages<FortnoxInvoiceListItem, InvoiceListResponse>(
@@ -274,7 +287,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         // Filter by due date range
         const filterByDueDate = (dueDate: string | undefined): boolean => {
           if (!dueDate) return false;
-          if (params.include_overdue && dueDate < today) return true;
+          if ((params.include_overdue ?? true) && dueDate < today) return true;
           return isDueDateInRange(dueDate, today, futureDate);
         };
 
@@ -282,18 +295,18 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         const payables = payablesResult.items.filter(inv => filterByDueDate(inv.DueDate));
 
         // Generate time buckets
-        const buckets = generateTimeBucketKeys(today, futureDate, params.group_by);
+        const buckets = generateTimeBucketKeys(today, futureDate, params.group_by ?? "week");
 
         // Group by time period
         const receivablesByPeriod = groupByTimePeriod(
           receivables,
           (inv) => inv.DueDate,
-          params.group_by
+          (params.group_by ?? "week")
         );
         const payablesByPeriod = groupByTimePeriod(
           payables,
           (inv) => inv.DueDate,
-          params.group_by
+          (params.group_by ?? "week")
         );
 
         // Handle overdue items - put them in the first bucket
@@ -353,11 +366,11 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
         const output: Record<string, unknown> = {
           forecast: {
-            horizon_days: params.horizon_days,
-            group_by: params.group_by,
+            horizon_days: params.horizon_days ?? 90,
+            group_by: params.group_by ?? "week",
             from_date: today,
             to_date: futureDate,
-            include_overdue: params.include_overdue,
+            include_overdue: params.include_overdue ?? true,
             starting_balance: params.starting_balance || 0
           },
           summary: {
@@ -392,8 +405,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           }
 
           lines.push(
-            `**Period**: ${today} to ${futureDate} (${params.horizon_days} days)`,
-            `**Grouped by**: ${params.group_by}`,
+            `**Period**: ${today} to ${futureDate} (${params.horizon_days ?? 90} days)`,
+            `**Grouped by**: ${params.group_by ?? "week"}`,
             params.starting_balance ? `**Starting Balance**: ${formatMoney(params.starting_balance)}` : "",
             "",
             "## Summary",
@@ -434,7 +447,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     {
       title: "Order Pipeline Analytics",
       description: `Analyze order pipeline and backlog. Shows pending vs invoiced orders grouped by status, customer, or month.`,
-      inputSchema: OrderPipelineSchema,
+      inputSchema: mcpSchema(OrderPipelineSchema),
+      outputSchema: mcpSchema(OrderPipelineOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -477,7 +491,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         // Group orders
         let groups: Map<string, FortnoxOrderListItem[]>;
 
-        switch (params.group_by) {
+        switch (params.group_by ?? "week") {
           case "customer":
             groups = aggregateByDimension(orders, o => o.CustomerName || o.CustomerNumber || "unknown");
             break;
@@ -508,7 +522,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
         const output = {
           period: params.period || null,
           date_range: dateRangeDescription || null,
-          group_by: params.group_by,
+          group_by: params.group_by ?? "week",
           summary: {
             total_orders: orders.length,
             total_value: sumBy(orders, o => o.Total || 0),
@@ -578,7 +592,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     {
       title: "Sales Funnel Analytics",
       description: `Analyze sales funnel from offers to orders to invoices. Shows counts, values, and conversion rates at each stage.`,
-      inputSchema: SalesFunnelSchema,
+      inputSchema: mcpSchema(SalesFunnelSchema),
+      outputSchema: mcpSchema(SalesFunnelOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -745,7 +760,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     {
       title: "Product Performance Analytics",
       description: `Analyze product/customer sales performance. Returns top performers ranked by revenue, quantity, or invoice count.`,
-      inputSchema: ProductPerformanceSchema,
+      inputSchema: mcpSchema(ProductPerformanceSchema),
+      outputSchema: mcpSchema(ProductPerformanceOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -818,7 +834,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
                 return b.revenue - a.revenue;
             }
           })
-          .slice(0, params.top_n);
+          .slice(0, params.top_n ?? 10);
 
         const output = {
           period: params.period || null,
@@ -864,7 +880,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           lines.push(`- **Unique Customers**: ${output.summary.unique_customers}`);
           lines.push("");
 
-          lines.push(`## Top ${params.top_n} by ${params.metric === "revenue" ? "Revenue" : "Invoice Count"}`);
+          lines.push(`## Top ${params.top_n ?? 10} by ${(params.metric ?? "revenue") === "revenue" ? "Revenue" : "Invoice Count"}`);
           lines.push("");
           lines.push("| Rank | Customer | Revenue | Invoices |");
           lines.push("|------|----------|---------|----------|");
@@ -893,7 +909,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     {
       title: "Period Comparison Analytics",
       description: `Compare business metrics (revenue, invoice count, etc.) between two time periods with percentage changes.`,
-      inputSchema: PeriodComparisonSchema,
+      inputSchema: mcpSchema(PeriodComparisonSchema),
+      outputSchema: mcpSchema(PeriodComparisonOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -903,7 +920,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     },
     async (params: PeriodComparisonInput) => {
       try {
-        const comparison = comparePeriods(params.current_period, params.compare_to);
+        const comparison = comparePeriods(params.current_period ?? "this_month", params.compare_to);
 
         // Fetch invoices for both periods
         const [currentResult, previousResult] = await Promise.all([
@@ -943,7 +960,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
 
         // Calculate changes
         const metricResults: Record<string, GrowthResult> = {};
-        for (const metric of params.metrics) {
+        for (const metric of params.metrics ?? ["revenue", "invoice_count"]) {
           metricResults[metric] = calculateGrowth(
             currentMetrics[metric as keyof typeof currentMetrics],
             previousMetrics[metric as keyof typeof previousMetrics]
@@ -989,7 +1006,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
             new_customers: "Customers"
           };
 
-          for (const metric of params.metrics) {
+          for (const metric of params.metrics ?? ["revenue", "invoice_count"]) {
             const isCount = metric === "invoice_count" || metric === "new_customers";
             lines.push(formatComparisonRow(
               metricLabels[metric] || metric,
@@ -1015,7 +1032,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     {
       title: "Customer Growth Analytics",
       description: `Identify growing and declining customers by comparing revenue across periods. Shows growth rates and trends.`,
-      inputSchema: CustomerGrowthSchema,
+      inputSchema: mcpSchema(CustomerGrowthSchema),
+      outputSchema: mcpSchema(CustomerGrowthOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1025,7 +1043,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
     },
     async (params: CustomerGrowthInput) => {
       try {
-        const comparison = comparePeriods(params.current_period, params.compare_to);
+        const comparison = comparePeriods(params.current_period ?? "this_month", params.compare_to);
 
         // Fetch invoices for both periods
         const [currentResult, previousResult] = await Promise.all([
@@ -1119,7 +1137,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
           return b.change - a.change; // Most positive first
         });
 
-        const topCustomers = filteredGrowth.slice(0, params.top_n);
+        const topCustomers = filteredGrowth.slice(0, params.top_n ?? 20);
 
         const output = {
           current_period: comparison.currentPeriod,
@@ -1153,7 +1171,7 @@ export function registerBIAnalyticsTools(server: McpServer): void {
             `- **Declining**: ${output.summary.declining_customers}`,
             `- **Flat**: ${output.summary.flat_customers}`,
             "",
-            `## Top ${params.top_n} ${filterLabel} Customers`,
+            `## Top ${params.top_n ?? 20} ${filterLabel} Customers`,
             "",
             "| Customer | Current | Previous | Change |",
             "|----------|---------|----------|--------|"
@@ -1181,7 +1199,8 @@ export function registerBIAnalyticsTools(server: McpServer): void {
       description: `[LIMITED] Analyze profitability by project. Returns project list only.
 
 For actual project financials, use fortnox_account_activity with project filtering on vouchers.`,
-      inputSchema: ProjectProfitabilitySchema,
+      inputSchema: mcpSchema(ProjectProfitabilitySchema),
+      outputSchema: mcpSchema(ProjectProfitabilityOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1302,7 +1321,8 @@ For actual project financials, use fortnox_account_activity with project filteri
       description: `[LIMITED] Analyze costs by cost center/department. Returns cost center list only.
 
 For actual cost center data, use fortnox_account_activity with cost center filtering on vouchers.`,
-      inputSchema: CostCenterAnalysisSchema,
+      inputSchema: mcpSchema(CostCenterAnalysisSchema),
+      outputSchema: mcpSchema(CostCenterAnalysisOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1402,7 +1422,8 @@ For actual cost center data, use fortnox_account_activity with cost center filte
       description: `[LIMITED] Analyze expenses by account class. Returns category structure only.
 
 For actual expense data, use fortnox_account_activity with account_range={from: 4000, to: 8999}.`,
-      inputSchema: ExpenseAnalysisSchema,
+      inputSchema: mcpSchema(ExpenseAnalysisSchema),
+      outputSchema: mcpSchema(ExpenseAnalysisOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1430,7 +1451,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
         ].filter(c => {
           const classStart = parseInt(c.class.replace("xxx", "000"));
           const classEnd = parseInt(c.class.replace("xxx", "999"));
-          return classStart <= params.account_range_to && classEnd >= params.account_range_from;
+          return classStart <= (params.account_range_to ?? 9999) && classEnd >= (params.account_range_from ?? 4000);
         });
 
         const output = {
@@ -1440,7 +1461,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
             from: params.account_range_from,
             to: params.account_range_to
           },
-          group_by: params.group_by,
+          group_by: params.group_by ?? "week",
           note: "Full expense breakdown requires voucher analysis. Showing account class structure.",
           expense_classes: expenseClasses,
           comparison_period: params.compare_to || null
@@ -1488,7 +1509,8 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
     {
       title: "Yearly Comparison Analytics",
       description: `Compare revenue and metrics across multiple years (2-5). Shows year-over-year growth trends.`,
-      inputSchema: YearlyComparisonSchema,
+      inputSchema: mcpSchema(YearlyComparisonSchema),
+      outputSchema: mcpSchema(YearlyComparisonOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1498,7 +1520,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
     },
     async (params: YearlyComparisonInput) => {
       try {
-        const yearRanges = getLastNYears(params.years);
+        const yearRanges = getLastNYears(params.years ?? 3);
 
         // Fetch invoices for each year
         const yearResults = await Promise.all(
@@ -1567,7 +1589,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           ];
 
           // Revenue table
-          if (params.metrics.includes("revenue")) {
+          if ((params.metrics ?? ["revenue", "invoice_count"]).includes("revenue")) {
             lines.push("### Revenue");
             lines.push("");
             lines.push("| Year | Revenue | YoY Change |");
@@ -1580,7 +1602,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           }
 
           // Invoice count table
-          if (params.metrics.includes("invoice_count")) {
+          if ((params.metrics ?? ["revenue", "invoice_count"]).includes("invoice_count")) {
             lines.push("### Invoice Count");
             lines.push("");
             lines.push("| Year | Invoices | YoY Change |");
@@ -1593,7 +1615,7 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
           }
 
           // Customer count table
-          if (params.metrics.includes("customer_count")) {
+          if ((params.metrics ?? ["revenue", "invoice_count"]).includes("customer_count")) {
             lines.push("### Unique Customers");
             lines.push("");
             lines.push("| Year | Customers | YoY Change |");
@@ -1624,7 +1646,8 @@ For actual expense data, use fortnox_account_activity with account_range={from: 
 For actual margin data, use fortnox_account_activity with:
 - Revenue: account_range={from: 3000, to: 3999}
 - COGS: account_range={from: 4000, to: 4999}`,
-      inputSchema: GrossMarginTrendSchema,
+      inputSchema: mcpSchema(GrossMarginTrendSchema),
+      outputSchema: mcpSchema(GrossMarginTrendOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1650,7 +1673,7 @@ For actual margin data, use fortnox_account_activity with:
         const output = {
           period: params.period || null,
           date_range: dateRangeDescription || null,
-          group_by: params.group_by,
+          group_by: params.group_by ?? "week",
           account_ranges: {
             revenue: revenueRange,
             cogs: cogsRange
@@ -1681,7 +1704,7 @@ For actual margin data, use fortnox_account_activity with:
           }
           lines.push(`**Revenue Accounts**: ${revenueRange}`);
           lines.push(`**COGS Accounts**: ${cogsRange}`);
-          lines.push(`**Grouped by**: ${params.group_by}`);
+          lines.push(`**Grouped by**: ${params.group_by ?? "week"}`);
           lines.push("");
 
           lines.push("## Formula");

@@ -1,8 +1,6 @@
-import { z } from "zod";
 import { Schema } from "effect";
 import { describe } from "../services/mcpSchema.js";
 import {
-  DATE_PERIODS,
   DatePeriodSchema,
   DateString,
   ListPaginationInput,
@@ -18,13 +16,6 @@ import {
 /**
  * Input and output schemas for the invoice tools.
  */
-
-/**
- * Still zod on purpose: analytics/biAnalytics keep importing it until those
- * domains convert. Delete once nothing imports it.
- */
-export const DatePeriodEnum = z.enum(DATE_PERIODS);
-export type DatePeriod = z.infer<typeof DatePeriodEnum>;
 
 export const InvoiceRowSchema = Schema.Struct({
   article_number: ShortText(50, "Article number from article register"),
