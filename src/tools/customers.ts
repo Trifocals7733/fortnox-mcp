@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { fortnoxRequest } from "../services/api.js";
-import { ResponseFormat } from "../constants.js";
+import { ResponseFormat, DEFAULT_PAGE_SIZE } from "../constants.js";
+import { mcpSchema } from "../services/mcpSchema.js";
 import {
   buildToolResponse,
   buildErrorResponse,
@@ -20,7 +21,10 @@ import {
   type GetCustomerInput,
   type CreateCustomerInput,
   type UpdateCustomerInput,
-  type DeleteCustomerInput
+  type DeleteCustomerInput,
+  ListCustomersOutput,
+  CustomerDetailSchema,
+  DeleteCustomerOutput
 } from "../schemas/customers.js";
 
 // API response types
@@ -94,7 +98,8 @@ Examples:
   - List all active customers: filter="active"
   - Search by name: search_name="Acme"
   - Get specific customer: customer_number="1001"`,
-      inputSchema: ListCustomersSchema,
+      inputSchema: mcpSchema(ListCustomersSchema),
+      outputSchema: mcpSchema(ListCustomersOutput),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -105,8 +110,8 @@ Examples:
     async (params: ListCustomersInput) => {
       try {
         const queryParams: Record<string, string | number | boolean | undefined> = {
-          limit: params.limit,
-          page: params.page
+          limit: params.limit ?? DEFAULT_PAGE_SIZE,
+          page: params.page ?? 1
         };
 
         if (params.filter) {
@@ -127,7 +132,7 @@ Examples:
         const total = response.MetaInformation?.["@TotalResources"] || customers.length;
 
         const output = {
-          ...buildPaginationMeta(total, params.page, params.limit, customers.length),
+          ...buildPaginationMeta(total, params.page ?? 1, params.limit ?? DEFAULT_PAGE_SIZE, customers.length),
           customers: customers.map((c) => ({
             customer_number: c.CustomerNumber,
             name: c.Name,
@@ -145,8 +150,8 @@ Examples:
             "Customers",
             customers,
             total,
-            params.page,
-            params.limit,
+            params.page ?? 1,
+            params.limit ?? DEFAULT_PAGE_SIZE,
             (c) => `## ${c.Name} (${c.CustomerNumber})\n` +
               (c.Email ? `- **Email**: ${c.Email}\n` : "") +
               (c.City ? `- **City**: ${c.City}\n` : "") +
@@ -174,7 +179,8 @@ Args:
 
 Returns:
   Complete customer details including contact info, addresses, payment terms, and VAT settings.`,
-      inputSchema: GetCustomerSchema,
+      inputSchema: mcpSchema(GetCustomerSchema),
+      outputSchema: mcpSchema(CustomerDetailSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -258,7 +264,8 @@ Args:
 
 Returns:
   The created customer with assigned customer number.`,
-      inputSchema: CreateCustomerSchema,
+      inputSchema: mcpSchema(CreateCustomerSchema),
+      outputSchema: mcpSchema(CustomerDetailSchema),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -333,7 +340,8 @@ Args:
 
 Returns:
   The updated customer details.`,
-      inputSchema: UpdateCustomerSchema,
+      inputSchema: mcpSchema(UpdateCustomerSchema),
+      outputSchema: mcpSchema(CustomerDetailSchema),
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -406,7 +414,8 @@ Args:
 
 Returns:
   Confirmation of deletion.`,
-      inputSchema: DeleteCustomerSchema,
+      inputSchema: mcpSchema(DeleteCustomerSchema),
+      outputSchema: mcpSchema(DeleteCustomerOutput),
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,

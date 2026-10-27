@@ -60,7 +60,20 @@ evaluations/              BI tool QA pairs (manual/XML, not run by any test runn
 
 ## Adding or changing a tool
 
-1. Schema in `src/schemas/<domain>.ts`: `z.object({...}).strict()` with `.describe()` on every field, snake_case names, and a `response_format` enum (`ResponseFormat.MARKDOWN` default). Export the inferred `type`.
+Domains are being converted from zod to Effect Schema one at a time (customers is done and is the reference). In a converted domain:
+
+1. Schema in `src/schemas/<domain>.ts` as an Effect `Schema.Struct`, snake_case field names, `describe("...")` on every field, plus an **output** schema per tool. Export `type X = typeof XSchema.Type`.
+2. In `src/tools/<domain>.ts`, pass `inputSchema: mcpSchema(XSchema)` and `outputSchema: mcpSchema(XOutput)`, and apply defaults in the handler (`params.limit ?? DEFAULT_PAGE_SIZE`) rather than in the schema.
+
+In an unconverted domain the old zod form still applies: `z.object({...}).strict()`, `.describe()` on every field, `z.nativeEnum(ResponseFormat)`.
+
+### Effect Schema gotchas (learned the hard way)
+
+- **Any pipeable annotation helper needs an explicit generic on the returned function.** `const describe = (t: string) => <S extends Schema.Top>(self: S): S["Rebuild"] => …`. Without it the generic is fixed at the outer call and every struct it touches silently widens to `{}` — handler arguments stop being typed and the compiler says nothing.
+- Use `Schema.Finite`, not `Schema.Number`, for counts and money in output schemas. `Number` admits `Infinity`/`NaN` and advertises `anyOf: [number, "Infinity"|"-Infinity"|"NaN"]`.
+- Optional-with-default combinators (`withDecodingDefault*`) render the field as `anyOf: [type, null]` and take an `Effect`, so defaults live in handlers instead.
+- Effect structs emit `additionalProperties: true`; zod's `.strict()` emitted `false`. That is a deliberate, documented relaxation: unknown arguments are ignored instead of rejected.
+- `npm run check:tools` is what catches mistakes here — the schema diff must show only the intended shape change, no lost properties and no lost descriptions.
 2. Handler in `src/tools/<domain>.ts` via `server.registerTool(name, { title, description, inputSchema, annotations }, handler)`.
    - Name: `fortnox_<verb>_<noun>`.
    - Description is a literal for the LLM, not JSDoc: `Args:` / `Returns:` / `Examples:` sections. Keep it tight — descriptions are optimized for connect time.

@@ -435,110 +435,273 @@
           "description": "Customer name (required)"
         },
         "customer_number": {
-          "description": "Customer number (auto-generated if not provided)",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Customer number (auto-generated if not provided)"
         },
         "organisation_number": {
-          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30
+          "maxLength": 30,
+          "description": "Organisation/company number"
         },
         "email": {
-          "description": "Primary email address",
           "type": "string",
-          "format": "email",
-          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          "description": "Primary email address"
         },
         "phone": {
-          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Primary phone number"
         },
         "address1": {
-          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 1"
         },
         "address2": {
-          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 2"
         },
         "zip_code": {
-          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10
+          "maxLength": 10,
+          "description": "Postal/ZIP code"
         },
         "city": {
-          "description": "City",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "City"
         },
         "country": {
-          "description": "Country name",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Country name"
         },
         "country_code": {
-          "description": "Two-letter country code (e.g., 'SE' for Sweden)",
           "type": "string",
-          "minLength": 2,
-          "maxLength": 2
+          "maxLength": 2,
+          "description": "Two-letter country code (e.g., 'SE' for Sweden)"
         },
         "currency": {
-          "description": "Currency code (e.g., 'SEK', 'EUR')",
           "type": "string",
-          "minLength": 3,
-          "maxLength": 3
+          "maxLength": 3,
+          "description": "Currency code (e.g., 'SEK', 'EUR')"
         },
         "vat_number": {
-          "description": "VAT registration number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "VAT registration number"
         },
         "vat_type": {
-          "description": "VAT type for the customer",
           "type": "string",
           "enum": [
             "SEVAT",
             "EUVAT",
             "EUREVERSEDVAT",
             "EXPORT"
-          ]
+          ],
+          "description": "VAT type for the customer"
         },
         "terms_of_payment": {
-          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Payment terms code"
         },
         "price_list": {
-          "description": "Price list code",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Price list code"
         },
         "comments": {
-          "description": "Internal comments about the customer",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Internal comments about the customer"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "name"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_number": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zip_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "organisation_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vat_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terms_of_payment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "customer_number",
+        "name",
+        "email",
+        "phone",
+        "address1",
+        "address2",
+        "zip_code",
+        "city",
+        "country",
+        "country_code",
+        "organisation_number",
+        "vat_number",
+        "currency",
+        "active",
+        "terms_of_payment",
+        "comments"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
@@ -1102,10 +1265,24 @@
       "required": [
         "customer_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_number": {
+          "type": "string"
+        },
+        "deleted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "customer_number",
+        "deleted"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": true,
@@ -1311,22 +1488,189 @@
           "description": "The customer number to retrieve"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "customer_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_number": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zip_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "organisation_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vat_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terms_of_payment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "customer_number",
+        "name",
+        "email",
+        "phone",
+        "address1",
+        "address2",
+        "zip_code",
+        "city",
+        "country",
+        "country_code",
+        "organisation_number",
+        "vat_number",
+        "currency",
+        "active",
+        "terms_of_payment",
+        "comments"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -1714,56 +2058,144 @@
       "type": "object",
       "properties": {
         "limit": {
-          "default": 20,
-          "description": "Maximum number of results to return (1-100)",
           "type": "integer",
           "minimum": 1,
-          "maximum": 100
+          "maximum": 100,
+          "description": "Maximum number of results to return (1-100, default 20)"
         },
         "page": {
-          "default": 1,
-          "description": "Page number for pagination",
           "type": "integer",
           "minimum": 1,
-          "maximum": 9007199254740991
+          "maximum": 9007199254740991,
+          "description": "Page number for pagination (starts at 1)"
         },
         "filter": {
-          "description": "Filter by customer status",
           "type": "string",
           "enum": [
             "active",
             "inactive"
-          ]
+          ],
+          "description": "Filter by customer status"
         },
         "search_name": {
-          "description": "Search customers by name (partial match)",
           "type": "string",
-          "maxLength": 100
+          "maxLength": 100,
+          "description": "Search customers by name (partial match)"
         },
         "customer_number": {
-          "description": "Filter by specific customer number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Filter by specific customer number"
         },
         "organisation_number": {
-          "description": "Filter by organisation number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Filter by organisation number"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "number",
+          "description": "Total matching records in Fortnox"
+        },
+        "page": {
+          "type": "number",
+          "description": "Current page"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Page size"
+        },
+        "count": {
+          "type": "number",
+          "description": "Records in this page"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "Whether more pages exist"
+        },
+        "total_pages": {
+          "type": "number",
+          "description": "Total number of pages"
+        },
+        "customers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "customer_number": {
+                "type": "string",
+                "description": "Fortnox customer number"
+              },
+              "name": {
+                "type": "string",
+                "description": "Customer name"
+              },
+              "email": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "city": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "organisation_number": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "customer_number",
+              "name",
+              "email",
+              "city",
+              "organisation_number"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "total",
+        "page",
+        "limit",
+        "count",
+        "has_more",
+        "total_pages",
+        "customers"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": true,
       "destructiveHint": false,
@@ -3151,100 +3583,263 @@
           "description": "Customer number to update (required)"
         },
         "name": {
-          "description": "Customer name",
           "type": "string",
           "minLength": 1,
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Customer name"
         },
         "organisation_number": {
-          "description": "Organisation/company number",
           "type": "string",
-          "maxLength": 30
+          "maxLength": 30,
+          "description": "Organisation/company number"
         },
         "email": {
-          "description": "Primary email address",
           "type": "string",
-          "format": "email",
-          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          "description": "Primary email address"
         },
         "phone": {
-          "description": "Primary phone number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Primary phone number"
         },
         "address1": {
-          "description": "Street address line 1",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 1"
         },
         "address2": {
-          "description": "Street address line 2",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Street address line 2"
         },
         "zip_code": {
-          "description": "Postal/ZIP code",
           "type": "string",
-          "maxLength": 10
+          "maxLength": 10,
+          "description": "Postal/ZIP code"
         },
         "city": {
-          "description": "City",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "City"
         },
         "country": {
-          "description": "Country name",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Country name"
         },
         "country_code": {
-          "description": "Two-letter country code",
           "type": "string",
-          "minLength": 2,
-          "maxLength": 2
+          "maxLength": 2,
+          "description": "Two-letter country code"
         },
         "currency": {
-          "description": "Currency code",
           "type": "string",
-          "minLength": 3,
-          "maxLength": 3
+          "maxLength": 3,
+          "description": "Currency code"
         },
         "vat_number": {
-          "description": "VAT registration number",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "VAT registration number"
         },
         "active": {
-          "description": "Whether the customer is active",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Whether the customer is active"
         },
         "terms_of_payment": {
-          "description": "Payment terms code",
           "type": "string",
-          "maxLength": 50
+          "maxLength": 50,
+          "description": "Payment terms code"
         },
         "comments": {
-          "description": "Internal comments",
           "type": "string",
-          "maxLength": 1024
+          "maxLength": 1024,
+          "description": "Internal comments"
         },
         "response_format": {
-          "default": "markdown",
-          "description": "Output format: 'markdown' or 'json'",
           "type": "string",
           "enum": [
             "markdown",
             "json"
-          ]
+          ],
+          "description": "Output format: 'markdown' for human-readable or 'json' for structured data"
         }
       },
       "required": [
         "customer_number"
       ],
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": false
+      "additionalProperties": true
     },
-    "outputSchema": null,
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "customer_number": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "address2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zip_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "organisation_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vat_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "active": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terms_of_payment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "customer_number",
+        "name",
+        "email",
+        "phone",
+        "address1",
+        "address2",
+        "zip_code",
+        "city",
+        "country",
+        "country_code",
+        "organisation_number",
+        "vat_number",
+        "currency",
+        "active",
+        "terms_of_payment",
+        "comments"
+      ],
+      "additionalProperties": true
+    },
     "annotations": {
       "readOnlyHint": false,
       "destructiveHint": false,
