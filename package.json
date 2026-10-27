@@ -20,10 +20,11 @@
     "clean": "rm -rf dist",
     "smoke": "tsx --env-file-if-exists=.env scripts/smoke.ts",
     "company": "tsx scripts/company.ts",
-    "lint": "biome check src scripts",
-    "format": "biome check --write src scripts",
-    "format:check": "biome format src scripts",
-    "check": "npm run build && npm run lint && npm run check:tools"
+    "lint": "biome check src scripts test",
+    "format": "biome check --write src scripts test",
+    "format:check": "biome format src scripts test",
+    "check": "npm run build && npm run lint && npm run test && npm run check:tools",
+    "test": "tsx --test test/*.test.ts"
   },
   "engines": {
     "node": ">=22"

@@ -30,7 +30,9 @@ npm run smoke          # live read-only calls against the real Fortnox account
 
 `smoke` needs credentials and is read-only on purpose (safe against production books); it prints tool names and counts, never account data or tokens, and exits 1 on any failure.
 
-There is no test suite. `npm run check` (build + lint + no tool-surface drift) is the bar for "it works"; say so rather than claiming more.
+`npm run check` = build + lint + tests + no tool-surface drift: the bar for "it works". Say so rather than claiming more.
+
+The suite (`test/mcp.test.ts`, `node:test` via tsx, no new dependencies) asserts what can be asserted without credentials: tools/list matches the frozen baseline, every tool has title/description/input+output schema/annotations, no tool advertises an empty argument object, the Effect→MCP bridge validates and advertises, list outputs accept both paged and fetch_all shapes, the rate limiter throttles at 25/window, and the requested OAuth scopes cover every API area the tools call. Anything that needs the Fortnox API belongs in `npm run smoke` instead.
 
 **Linting is Biome, not ESLint.** typescript-eslint requires `typescript <6.1` and this repo is on TypeScript 7, whose package has no programmatic compiler API — so type-aware rules are unavailable without downgrading the compiler. Biome parses TypeScript itself and covers format + lint in one dependency, but its rules are syntax-only: no `no-floating-promises`, no `no-unnecessary-condition`.
 
